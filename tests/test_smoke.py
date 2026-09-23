@@ -203,3 +203,31 @@ def test_hf_stats_collector_rejects_unbatched_static_mode() -> None:
     with patch("llmbench.smoke.fetch_text", return_value=stats):
         _, failures = collect("http://unused")
     assert failures == ["static mode never batched: [1, 1, 1]"]
+
+
+def _fake_vllm(tmp_path: Path, script: str) -> str:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    executable = bin_dir / "vllm"
+    executable.write_text(f"#!/bin/sh\n{script}\n")
+    executable.chmod(0o755)
+    return f"{bin_dir}:{__import__('os').environ['PATH']}"
+
+
+def test_flag_verification_uses_pinned_help(tmp_path: Path, monkeypatch) -> None:
+    from llmbench.smoke import verify_vllm_flags
+
+    help_text = "--served-model-name --host --port --no-enable-prefix-caching"
+    monkeypatch.setenv("PATH", _fake_vllm(tmp_path, f"echo '{help_text}'"))
+    args = ["--no-enable-prefix-caching", "--enforce-eager", "x"]
+    assert verify_vllm_flags(args, tmp_path / "out") == [
+        "flag not in pinned --help: --enforce-eager"
+    ]
+    assert help_text in (tmp_path / "out" / "vllm_serve_help.txt").read_text()
+
+
+def test_flag_verification_fails_when_help_fails(tmp_path: Path, monkeypatch) -> None:
+    from llmbench.smoke import verify_vllm_flags
+
+    monkeypatch.setenv("PATH", _fake_vllm(tmp_path, "echo boom >&2; exit 1"))
+    assert verify_vllm_flags([], tmp_path) == ["vllm serve --help=all exited 1"]

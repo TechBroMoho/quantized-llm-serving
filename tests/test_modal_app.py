@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from modal_app.checks import missing_flags
+from llmbench.smoke import missing_flags
 from modal_app.common import (
     DOWNLOAD_RESOURCES,
     HF_CHECK_RESOURCES,

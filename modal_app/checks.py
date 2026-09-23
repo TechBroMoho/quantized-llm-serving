@@ -47,17 +47,6 @@ def _flags(args: list[str]) -> list[str]:
     return [arg for arg in args if arg.startswith("--")]
 
 
-def missing_flags(flags: list[str], help_text: str) -> list[str]:
-    """Flags absent from help as whole tokens (so --seed never matches --seeds)."""
-    import re
-
-    return [
-        flag
-        for flag in flags
-        if not re.search(rf"(?<![\w-]){re.escape(flag)}(?![\w-])", help_text)
-    ]
-
-
 @app.function(
     image=VLLM_IMAGE,
     volumes={RESULTS_PATH: RESULTS},
@@ -67,7 +56,7 @@ def vllm_env_check(config: dict[str, Any], stamp: str) -> dict[str, Any]:
     import os
     from pathlib import Path
 
-    from llmbench.smoke import runtime_metadata, write_json
+    from llmbench.smoke import missing_flags, runtime_metadata, write_json
 
     out = Path(RESULTS_PATH) / "phase3" / f"vllm-env-{stamp}"
     out.mkdir(parents=True, exist_ok=True)
@@ -88,6 +77,9 @@ def vllm_env_check(config: dict[str, Any], stamp: str) -> dict[str, Any]:
     summary["help_returncode"] = help_run["returncode"]
     summary["flags_checked"] = required
     summary["flags_missing"] = missing_flags(required, help_text)
+    # vLLM 0.10.2 cannot build its parser without a GPU ("Failed to infer
+    # device type"); the GPU smoke verifies flags before starting the server.
+    summary["help_needs_gpu"] = "Failed to infer device type" in help_run["stderr"]
     write_json(out / "env_summary.json", summary)
     RESULTS.commit()
 
@@ -126,11 +118,10 @@ def vllm_env_check(config: dict[str, Any], stamp: str) -> dict[str, Any]:
                 "median_server_itl_s",
             )
         }
-    summary["passed"] = (
-        help_run["returncode"] == 0
-        and not summary["flags_missing"]
-        and validation["returncode"] == 0
+    help_ok = summary["help_needs_gpu"] or (
+        help_run["returncode"] == 0 and not summary["flags_missing"]
     )
+    summary["passed"] = help_ok and validation["returncode"] == 0
     write_json(out / "env_summary.json", summary)
     RESULTS.commit()
     if not summary["passed"]:

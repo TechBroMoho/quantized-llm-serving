@@ -93,6 +93,44 @@ class SmokeWorkload:
         return self.warmup_requests + self.measured_requests
 
 
+def missing_flags(flags: Sequence[str], help_text: str) -> list[str]:
+    """Flags absent from help as whole tokens (so --seed never matches --seeds)."""
+    return [
+        flag
+        for flag in flags
+        if not re.search(rf"(?<![\w-]){re.escape(flag)}(?![\w-])", help_text)
+    ]
+
+
+def verify_vllm_flags(
+    engine_args: Sequence[str], out_dir: Path, timeout_s: float = 180
+) -> list[str]:
+    """Check configured flags against the pinned server's own `--help=all`.
+
+    vLLM 0.10.2 builds its parser from config dataclasses that must infer a
+    device, so this only works on a GPU host. Returns failure messages.
+    """
+    flags = sorted(
+        {arg for arg in engine_args if arg.startswith("--")}
+        | {"--served-model-name", "--host", "--port"}
+    )
+    done = subprocess.run(
+        ["vllm", "serve", "--help=all"],
+        capture_output=True,
+        text=True,
+        timeout=timeout_s,
+        check=False,
+    )
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "vllm_serve_help.txt").write_text(done.stdout + done.stderr, "utf-8")
+    if done.returncode != 0:
+        return [f"vllm serve --help=all exited {done.returncode}"]
+    return [
+        f"flag not in pinned --help: {flag}"
+        for flag in missing_flags(flags, done.stdout)
+    ]
+
+
 def config_sha256(config: dict[str, Any]) -> str:
     return sha256(
         json.dumps(config, sort_keys=True, separators=(",", ":")).encode()

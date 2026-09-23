@@ -66,7 +66,9 @@ def vllm_smoke(run: dict[str, Any]) -> dict[str, Any]:
         SmokeWorkload,
         pool_for_model,
         run_server_smoke,
+        verify_vllm_flags,
         vllm_metrics_collector,
+        write_json,
     )
 
     config = run["config"]
@@ -89,6 +91,12 @@ def vllm_smoke(run: dict[str, Any]) -> dict[str, Any]:
     ]
     metadata = _metadata(run, VLLM_SMOKE_RESOURCES.as_dict())
     metadata["image"] = os.environ.get("LLMBENCH_VLLM_IMAGE")
+    flag_failures = verify_vllm_flags(config["vllm"]["engine_args"], out)
+    metadata["flag_check_failures"] = flag_failures
+    if flag_failures:
+        write_json(out / "smoke_summary.json", metadata | {"passed": False})
+        RESULTS.commit()
+        raise RuntimeError(f"engine flags failed verification: {flag_failures}")
     summary = asyncio.run(
         run_server_smoke(
             label="vllm",
