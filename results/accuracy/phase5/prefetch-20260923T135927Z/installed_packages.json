@@ -1,0 +1,1519 @@
+{
+  "all": [
+    [
+      "openai-harmony",
+      "0.0.4",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "msgpack",
+      "1.1.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "build",
+      "1.3.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "cloudpickle",
+      "3.1.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "watchfiles",
+      "1.1.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "aiofile",
+      "3.9.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "word2number",
+      "1.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pydantic-extra-types",
+      "2.10.5",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "timm",
+      "1.0.19",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "aiohappyeyeballs",
+      "2.6.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "jsonschema-specifications",
+      "2025.9.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cudnn-frontend",
+      "1.14.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "setuptools-scm",
+      "9.2.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "fsspec",
+      "2025.9.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "rich-toolkit",
+      "0.15.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pyzmq",
+      "27.1.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "h11",
+      "0.16.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "Jinja2",
+      "3.1.6",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "sentry-sdk",
+      "2.37.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "uvloop",
+      "0.21.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "boto3",
+      "1.40.30",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "sentencepiece",
+      "0.2.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "regex",
+      "2025.9.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "jsonlines",
+      "4.0.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "zstandard",
+      "0.25.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "infinistore",
+      "0.2.35",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "absl-py",
+      "2.5.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "DataProperty",
+      "1.1.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "setuptools",
+      "79.0.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "requests",
+      "2.32.5",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "vllm",
+      "0.10.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "httpx",
+      "0.28.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "sniffio",
+      "1.3.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "rignore",
+      "0.6.4",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "typepy",
+      "1.3.5",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cuda-cupti-cu12",
+      "12.8.90",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "accelerate",
+      "1.10.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-nvtx-cu12",
+      "12.8.90",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pycountry",
+      "24.6.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "transformers",
+      "4.56.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "hf-xet",
+      "1.1.10",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pyarrow",
+      "25.0.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "PyYAML",
+      "6.0.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "lxml",
+      "6.1.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pytablewriter",
+      "1.2.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cublas-cu12",
+      "12.8.4.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "cffi",
+      "2.0.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "cachetools",
+      "6.2.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "yarl",
+      "1.20.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cusparselt-cu12",
+      "0.7.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "fastapi-cli",
+      "0.0.11",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "psutil",
+      "7.0.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "outlines_core",
+      "0.2.11",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "ninja",
+      "1.13.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pytz",
+      "2026.3.post1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pydantic",
+      "2.11.9",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "xformers",
+      "0.0.32.post1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pydantic_core",
+      "2.33.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "narwhals",
+      "2.26.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "triton",
+      "3.4.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "cufile-python",
+      "0.1.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "Pygments",
+      "2.19.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pycparser",
+      "2.23",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "cupy-cuda12x",
+      "13.6.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "filelock",
+      "3.19.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cufft-cu12",
+      "11.3.3.83",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "torchvision",
+      "0.23.0+cu128",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "httptools",
+      "0.6.4",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "packaging",
+      "25.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "threadpoolctl",
+      "3.7.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "python-dotenv",
+      "1.1.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "blake3",
+      "1.0.5",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "sacrebleu",
+      "2.6.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "protobuf",
+      "6.32.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "caio",
+      "0.9.24",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pybind11",
+      "3.0.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "einops",
+      "0.8.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "rouge_score",
+      "0.1.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "uvicorn",
+      "0.35.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pip",
+      "25.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "gguf",
+      "0.17.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "llvmlite",
+      "0.44.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "networkx",
+      "3.5",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "typing_extensions",
+      "4.15.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "markdown-it-py",
+      "4.0.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "scikit-learn",
+      "1.9.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "six",
+      "1.17.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "httpcore",
+      "1.0.9",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "aiosignal",
+      "1.4.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "mbstrdecoder",
+      "1.1.5",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "multiprocess",
+      "0.70.16",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cuda-nvrtc-cu12",
+      "12.8.93",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "anyio",
+      "4.10.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "interegular",
+      "0.3.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "uv",
+      "0.8.17",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "runai-model-streamer-s3",
+      "0.14.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "python-json-logger",
+      "3.3.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pathvalidate",
+      "3.3.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "scipy",
+      "1.16.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "torch",
+      "2.8.0+cu128",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "lm_eval",
+      "0.4.11",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "s3transfer",
+      "0.14.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "click",
+      "8.2.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "llguidance",
+      "0.7.30",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "partial-json-parser",
+      "0.2.1.1.post6",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "starlette",
+      "0.47.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "openai",
+      "1.107.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "setproctitle",
+      "1.3.7",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "xxhash",
+      "4.0.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "hf_transfer",
+      "0.1.9",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nltk",
+      "3.10.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "propcache",
+      "0.3.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "chardet",
+      "6.0.0.post1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "cbor2",
+      "5.7.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "colorama",
+      "0.4.6",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-nccl-cu12",
+      "2.27.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "rpds-py",
+      "0.27.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cusolver-cu12",
+      "11.7.3.90",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "astor",
+      "0.8.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "soundfile",
+      "0.13.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "fastapi-cloud-cli",
+      "0.1.5",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-nvjitlink-cu12",
+      "12.8.93",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "email-validator",
+      "2.3.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "datasets",
+      "4.1.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "evaluate",
+      "0.4.6",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "runai-model-streamer",
+      "0.14.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-curand-cu12",
+      "10.3.9.90",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "redis",
+      "6.4.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "jmespath",
+      "1.0.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "flashinfer-python",
+      "0.3.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "fastrlock",
+      "0.8.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "python-dateutil",
+      "2.9.0.post0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "frozendict",
+      "2.4.6",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "deep_gemm",
+      "2.0.0+ea9c5d9",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "wheel",
+      "0.45.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "urllib3",
+      "2.5.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cusparse-cu12",
+      "12.5.8.93",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "depyf",
+      "0.19.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "soxr",
+      "1.0.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "compressed-tensors",
+      "0.11.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "torchaudio",
+      "2.8.0+cu128",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "aiofiles",
+      "24.1.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "distro",
+      "1.9.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "numba",
+      "0.61.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "frozenlist",
+      "1.7.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "mistral_common",
+      "1.8.5",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "py-cpuinfo",
+      "9.0.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "diskcache",
+      "5.6.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "shellingham",
+      "1.5.4",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "websockets",
+      "15.0.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "huggingface-hub",
+      "0.34.4",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-ml-py",
+      "13.580.82",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "jiter",
+      "0.10.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvtx",
+      "0.2.13",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "jsonschema",
+      "4.25.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "typer",
+      "0.17.4",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "prometheus_client",
+      "0.22.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "tiktoken",
+      "0.11.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "ray",
+      "2.49.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "bitsandbytes",
+      "0.47.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "tabulate",
+      "0.10.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "prometheus-fastapi-instrumentator",
+      "7.1.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pplx-kernels",
+      "0.0.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cuda-runtime-cu12",
+      "12.8.90",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "tabledata",
+      "1.3.5",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "charset-normalizer",
+      "3.4.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "sympy",
+      "1.14.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "cmake",
+      "4.1.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "dnspython",
+      "2.8.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "mpmath",
+      "1.3.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cudnn-cu12",
+      "9.10.2.21",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "lm-format-enforcer",
+      "0.11.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "mdurl",
+      "0.1.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pynvml",
+      "13.0.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "fastapi",
+      "0.116.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "nvidia-cufile-cu12",
+      "1.13.1.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "MarkupSafe",
+      "3.0.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "lark",
+      "1.2.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "dill",
+      "0.4.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "opencv-python-headless",
+      "4.12.0.88",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "modelscope",
+      "1.29.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "humanize",
+      "4.13.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "lmcache",
+      "0.3.5",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "portalocker",
+      "4.4.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "attrs",
+      "25.3.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pyproject_hooks",
+      "1.2.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "tcolorpy",
+      "0.1.7",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "awscrt",
+      "0.27.6",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "typing-inspection",
+      "0.4.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "referencing",
+      "0.36.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "certifi",
+      "2025.8.3",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "joblib",
+      "1.6.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "safetensors",
+      "0.6.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "defusedxml",
+      "0.7.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "tokenizers",
+      "0.22.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "xgrammar",
+      "0.1.23",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "aiohttp",
+      "3.12.15",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "rich",
+      "14.1.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "sqlitedict",
+      "2.1.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "annotated-types",
+      "0.7.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "botocore",
+      "1.40.30",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "meson",
+      "1.9.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pandas",
+      "3.0.6",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pybase64",
+      "1.4.2",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "sortedcontainers",
+      "2.4.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "tqdm",
+      "4.67.1",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "idna",
+      "3.10",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "numpy",
+      "2.2.6",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "multidict",
+      "6.6.4",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "msgspec",
+      "0.19.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "pillow",
+      "11.3.0",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "python-multipart",
+      "0.0.20",
+      "/usr/local/lib/python3.12/dist-packages"
+    ],
+    [
+      "deep_ep",
+      "1.1.0+e3908bf",
+      "/vllm-workspace/ep_kernels_workspace/DeepEP"
+    ],
+    [
+      "six",
+      "1.16.0",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "jeepney",
+      "0.7.1",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "dbus-python",
+      "1.2.18",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "launchpadlib",
+      "1.10.16",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "python-apt",
+      "2.4.0+ubuntu4",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "setuptools",
+      "59.6.0",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "distro",
+      "1.7.0",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "zipp",
+      "1.0.0",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "pyparsing",
+      "2.4.7",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "lazr.restfulclient",
+      "0.14.4",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "oauthlib",
+      "3.2.0",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "cryptography",
+      "3.4.8",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "PyJWT",
+      "2.3.0",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "httplib2",
+      "0.20.2",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "wadllib",
+      "1.3.6",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "keyring",
+      "23.5.0",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "lazr.uri",
+      "1.0.6",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "PyGObject",
+      "3.42.1",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "SecretStorage",
+      "3.3.1",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "more-itertools",
+      "8.10.0",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "wheel",
+      "0.37.1",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "blinker",
+      "1.4",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "importlib-metadata",
+      "4.6.4",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "distro-info",
+      "1.1+ubuntu0.2",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "unattended-upgrades",
+      "0.1",
+      "/usr/lib/python3/dist-packages"
+    ],
+    [
+      "hpack",
+      "4.1.0",
+      "/__modal/deps"
+    ],
+    [
+      "attrs",
+      "25.3.0",
+      "/__modal/deps"
+    ],
+    [
+      "grpclib",
+      "0.4.8",
+      "/__modal/deps"
+    ],
+    [
+      "cbor2",
+      "5.7.0",
+      "/__modal/deps"
+    ],
+    [
+      "aiohappyeyeballs",
+      "2.6.1",
+      "/__modal/deps"
+    ],
+    [
+      "yarl",
+      "1.20.0",
+      "/__modal/deps"
+    ],
+    [
+      "aiosignal",
+      "1.3.2",
+      "/__modal/deps"
+    ],
+    [
+      "protobuf",
+      "6.31.1",
+      "/__modal/deps"
+    ],
+    [
+      "multidict",
+      "6.4.4",
+      "/__modal/deps"
+    ],
+    [
+      "propcache",
+      "0.3.1",
+      "/__modal/deps"
+    ],
+    [
+      "idna",
+      "3.10",
+      "/__modal/deps"
+    ],
+    [
+      "certifi",
+      "2025.4.26",
+      "/__modal/deps"
+    ],
+    [
+      "h2",
+      "4.2.0",
+      "/__modal/deps"
+    ],
+    [
+      "aiohttp",
+      "3.12.7",
+      "/__modal/deps"
+    ],
+    [
+      "typing_extensions",
+      "4.13.2",
+      "/__modal/deps"
+    ],
+    [
+      "hyperframe",
+      "6.1.0",
+      "/__modal/deps"
+    ],
+    [
+      "frozenlist",
+      "1.6.0",
+      "/__modal/deps"
+    ]
+  ],
+  "effective": {
+    "DataProperty": "1.1.1",
+    "Jinja2": "3.1.6",
+    "MarkupSafe": "3.0.2",
+    "PyGObject": "3.42.1",
+    "PyJWT": "2.3.0",
+    "PyYAML": "6.0.2",
+    "Pygments": "2.19.2",
+    "SecretStorage": "3.3.1",
+    "absl-py": "2.5.0",
+    "accelerate": "1.10.1",
+    "aiofile": "3.9.0",
+    "aiofiles": "24.1.0",
+    "aiohappyeyeballs": "2.6.1",
+    "aiohttp": "3.12.15",
+    "aiosignal": "1.4.0",
+    "annotated-types": "0.7.0",
+    "anyio": "4.10.0",
+    "astor": "0.8.1",
+    "attrs": "25.3.0",
+    "awscrt": "0.27.6",
+    "bitsandbytes": "0.47.0",
+    "blake3": "1.0.5",
+    "blinker": "1.4",
+    "boto3": "1.40.30",
+    "botocore": "1.40.30",
+    "build": "1.3.0",
+    "cachetools": "6.2.0",
+    "caio": "0.9.24",
+    "cbor2": "5.7.0",
+    "certifi": "2025.8.3",
+    "cffi": "2.0.0",
+    "chardet": "6.0.0.post1",
+    "charset-normalizer": "3.4.3",
+    "click": "8.2.1",
+    "cloudpickle": "3.1.1",
+    "cmake": "4.1.0",
+    "colorama": "0.4.6",
+    "compressed-tensors": "0.11.0",
+    "cryptography": "3.4.8",
+    "cufile-python": "0.1.1",
+    "cupy-cuda12x": "13.6.0",
+    "datasets": "4.1.1",
+    "dbus-python": "1.2.18",
+    "deep_ep": "1.1.0+e3908bf",
+    "deep_gemm": "2.0.0+ea9c5d9",
+    "defusedxml": "0.7.1",
+    "depyf": "0.19.0",
+    "dill": "0.4.0",
+    "diskcache": "5.6.3",
+    "distro": "1.9.0",
+    "distro-info": "1.1+ubuntu0.2",
+    "dnspython": "2.8.0",
+    "einops": "0.8.1",
+    "email-validator": "2.3.0",
+    "evaluate": "0.4.6",
+    "fastapi": "0.116.1",
+    "fastapi-cli": "0.0.11",
+    "fastapi-cloud-cli": "0.1.5",
+    "fastrlock": "0.8.3",
+    "filelock": "3.19.1",
+    "flashinfer-python": "0.3.0",
+    "frozendict": "2.4.6",
+    "frozenlist": "1.7.0",
+    "fsspec": "2025.9.0",
+    "gguf": "0.17.1",
+    "grpclib": "0.4.8",
+    "h11": "0.16.0",
+    "h2": "4.2.0",
+    "hf-xet": "1.1.10",
+    "hf_transfer": "0.1.9",
+    "hpack": "4.1.0",
+    "httpcore": "1.0.9",
+    "httplib2": "0.20.2",
+    "httptools": "0.6.4",
+    "httpx": "0.28.1",
+    "huggingface-hub": "0.34.4",
+    "humanize": "4.13.0",
+    "hyperframe": "6.1.0",
+    "idna": "3.10",
+    "importlib-metadata": "4.6.4",
+    "infinistore": "0.2.35",
+    "interegular": "0.3.3",
+    "jeepney": "0.7.1",
+    "jiter": "0.10.0",
+    "jmespath": "1.0.1",
+    "joblib": "1.6.0",
+    "jsonlines": "4.0.0",
+    "jsonschema": "4.25.1",
+    "jsonschema-specifications": "2025.9.1",
+    "keyring": "23.5.0",
+    "lark": "1.2.2",
+    "launchpadlib": "1.10.16",
+    "lazr.restfulclient": "0.14.4",
+    "lazr.uri": "1.0.6",
+    "llguidance": "0.7.30",
+    "llvmlite": "0.44.0",
+    "lm-format-enforcer": "0.11.3",
+    "lm_eval": "0.4.11",
+    "lmcache": "0.3.5",
+    "lxml": "6.1.3",
+    "markdown-it-py": "4.0.0",
+    "mbstrdecoder": "1.1.5",
+    "mdurl": "0.1.2",
+    "meson": "1.9.0",
+    "mistral_common": "1.8.5",
+    "modelscope": "1.29.2",
+    "more-itertools": "8.10.0",
+    "mpmath": "1.3.0",
+    "msgpack": "1.1.1",
+    "msgspec": "0.19.0",
+    "multidict": "6.6.4",
+    "multiprocess": "0.70.16",
+    "narwhals": "2.26.0",
+    "networkx": "3.5",
+    "ninja": "1.13.0",
+    "nltk": "3.10.3",
+    "numba": "0.61.2",
+    "numpy": "2.2.6",
+    "nvidia-cublas-cu12": "12.8.4.1",
+    "nvidia-cuda-cupti-cu12": "12.8.90",
+    "nvidia-cuda-nvrtc-cu12": "12.8.93",
+    "nvidia-cuda-runtime-cu12": "12.8.90",
+    "nvidia-cudnn-cu12": "9.10.2.21",
+    "nvidia-cudnn-frontend": "1.14.1",
+    "nvidia-cufft-cu12": "11.3.3.83",
+    "nvidia-cufile-cu12": "1.13.1.3",
+    "nvidia-curand-cu12": "10.3.9.90",
+    "nvidia-cusolver-cu12": "11.7.3.90",
+    "nvidia-cusparse-cu12": "12.5.8.93",
+    "nvidia-cusparselt-cu12": "0.7.1",
+    "nvidia-ml-py": "13.580.82",
+    "nvidia-nccl-cu12": "2.27.3",
+    "nvidia-nvjitlink-cu12": "12.8.93",
+    "nvidia-nvtx-cu12": "12.8.90",
+    "nvtx": "0.2.13",
+    "oauthlib": "3.2.0",
+    "openai": "1.107.2",
+    "openai-harmony": "0.0.4",
+    "opencv-python-headless": "4.12.0.88",
+    "outlines_core": "0.2.11",
+    "packaging": "25.0",
+    "pandas": "3.0.6",
+    "partial-json-parser": "0.2.1.1.post6",
+    "pathvalidate": "3.3.1",
+    "pillow": "11.3.0",
+    "pip": "25.2",
+    "portalocker": "4.4.0",
+    "pplx-kernels": "0.0.1",
+    "prometheus-fastapi-instrumentator": "7.1.0",
+    "prometheus_client": "0.22.1",
+    "propcache": "0.3.2",
+    "protobuf": "6.32.1",
+    "psutil": "7.0.0",
+    "py-cpuinfo": "9.0.0",
+    "pyarrow": "25.0.1",
+    "pybase64": "1.4.2",
+    "pybind11": "3.0.1",
+    "pycountry": "24.6.1",
+    "pycparser": "2.23",
+    "pydantic": "2.11.9",
+    "pydantic-extra-types": "2.10.5",
+    "pydantic_core": "2.33.2",
+    "pynvml": "13.0.1",
+    "pyparsing": "2.4.7",
+    "pyproject_hooks": "1.2.0",
+    "pytablewriter": "1.2.1",
+    "python-apt": "2.4.0+ubuntu4",
+    "python-dateutil": "2.9.0.post0",
+    "python-dotenv": "1.1.1",
+    "python-json-logger": "3.3.0",
+    "python-multipart": "0.0.20",
+    "pytz": "2026.3.post1",
+    "pyzmq": "27.1.0",
+    "ray": "2.49.1",
+    "redis": "6.4.0",
+    "referencing": "0.36.2",
+    "regex": "2025.9.1",
+    "requests": "2.32.5",
+    "rich": "14.1.0",
+    "rich-toolkit": "0.15.1",
+    "rignore": "0.6.4",
+    "rouge_score": "0.1.2",
+    "rpds-py": "0.27.1",
+    "runai-model-streamer": "0.14.0",
+    "runai-model-streamer-s3": "0.14.0",
+    "s3transfer": "0.14.0",
+    "sacrebleu": "2.6.0",
+    "safetensors": "0.6.2",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.16.2",
+    "sentencepiece": "0.2.1",
+    "sentry-sdk": "2.37.1",
+    "setproctitle": "1.3.7",
+    "setuptools": "79.0.1",
+    "setuptools-scm": "9.2.0",
+    "shellingham": "1.5.4",
+    "six": "1.17.0",
+    "sniffio": "1.3.1",
+    "sortedcontainers": "2.4.0",
+    "soundfile": "0.13.1",
+    "soxr": "1.0.0",
+    "sqlitedict": "2.1.0",
+    "starlette": "0.47.3",
+    "sympy": "1.14.0",
+    "tabledata": "1.3.5",
+    "tabulate": "0.10.0",
+    "tcolorpy": "0.1.7",
+    "threadpoolctl": "3.7.0",
+    "tiktoken": "0.11.0",
+    "timm": "1.0.19",
+    "tokenizers": "0.22.0",
+    "torch": "2.8.0+cu128",
+    "torchaudio": "2.8.0+cu128",
+    "torchvision": "0.23.0+cu128",
+    "tqdm": "4.67.1",
+    "transformers": "4.56.1",
+    "triton": "3.4.0",
+    "typepy": "1.3.5",
+    "typer": "0.17.4",
+    "typing-inspection": "0.4.1",
+    "typing_extensions": "4.15.0",
+    "unattended-upgrades": "0.1",
+    "urllib3": "2.5.0",
+    "uv": "0.8.17",
+    "uvicorn": "0.35.0",
+    "uvloop": "0.21.0",
+    "vllm": "0.10.2",
+    "wadllib": "1.3.6",
+    "watchfiles": "1.1.0",
+    "websockets": "15.0.1",
+    "wheel": "0.45.1",
+    "word2number": "1.1",
+    "xformers": "0.0.32.post1",
+    "xgrammar": "0.1.23",
+    "xxhash": "4.0.1",
+    "yarl": "1.20.1",
+    "zipp": "1.0.0",
+    "zstandard": "0.25.0"
+  }
+}

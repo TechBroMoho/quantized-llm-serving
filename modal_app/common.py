@@ -143,9 +143,10 @@ SANITY_RESOURCES = Resources("L40S", 4, 32768, 1800, 300)
 EVAL_PREFETCH_RESOURCES = Resources(None, 2, 8192, 1800, 300)
 # Probe: one variant with --limit; bounded well below the planned envelope.
 EVAL_PROBE_RESOURCES = Resources("L40S", 4, 32768, 1200, 300)
-# Full run, three variants in one container. Provisional: the timeout is set
-# from the probe's measured rate before the full run is proposed.
-EVAL_FULL_RESOURCES = Resources("L40S", 4, 32768, 14400, 300)
+# Full run, three variants in one container. Probe-20260923T140749Z measured
+# 10,555 MMLU tokens/s on BF16, i.e. ~66 min per variant, ~3.3 h in total;
+# the timeout allows ~25% more. Host RSS peaked at 13.0 GiB in the probe.
+EVAL_FULL_RESOURCES = Resources("L40S", 4, 32768, 15000, 300)
 
 
 def load_config(name: str) -> tuple[dict[str, Any], str]:

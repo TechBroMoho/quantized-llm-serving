@@ -36,7 +36,7 @@ def test_every_function_is_bounded_and_gpus_are_only_on_smokes() -> None:
         SANITY_RESOURCES: ("L40S", 1800),
         EVAL_PREFETCH_RESOURCES: (None, 1800),
         EVAL_PROBE_RESOURCES: ("L40S", 1200),
-        EVAL_FULL_RESOURCES: ("L40S", 14400),
+        EVAL_FULL_RESOURCES: ("L40S", 15000),
     }
     for resources, (gpu, timeout) in expected.items():
         kwargs = resources.function_kwargs()

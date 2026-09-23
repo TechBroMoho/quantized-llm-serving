@@ -563,7 +563,8 @@ zero points; see ADR-016).
   `--tasks wikitext` (zero-shot, task default).
 - *Settings* (`configs/phase5_accuracy.yaml`, identical for all variants,
   only `pretrained` differs): `dtype=bfloat16`, `max_model_len=4096`,
-  `gpu_memory_utilization=0.80`, `enable_prefix_caching=false`,
+  `gpu_memory_utilization=0.75` (0.80 in the probe; see below),
+  `enable_prefix_caching=false`,
   `enforce_eager=true`, `seed=1234`, `--batch_size 1024`,
   `--seed 0,1234,1234,1234`, no `--apply_chat_template`, `--log_samples`.
   Every variant uses the BF16 checkpoint's tokenizer files.
@@ -623,3 +624,12 @@ code with lm-eval's hf backend on tiny random Qwen3s) → CPU prefetch
 per subject = 2,280 requests / 1,382,712 tokens; WikiText first 5 documents =
 8 windows / 27,069 tokens) → a measured full-run estimate → full run, each
 step with its own estimate and approval.
+
+**Probe outcome and one change (2026-09-23).** The BF16 probe at 0.80 scored
+10,555 MMLU tokens/s and passed every check, but `nvidia-smi` peaked at
+45,233 of 46,068 MiB: the prompt-logprob logits for a 4,095-token window
+exceed my ~3.7 GB estimate once allocator caching is included. Full runs use
+**0.75** for all three variants (~3 GiB headroom). This bounds memory only:
+the KV cache (~125k tokens) still far exceeds the 8,192 tokens scheduled per
+step, and no score depends on it. The probe is a timing measurement, not a
+result.

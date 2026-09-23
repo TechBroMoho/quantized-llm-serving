@@ -1,0 +1,773 @@
+{
+  "failures": [],
+  "gpu_memory_samples": 128,
+  "gpu_peak_mib_nvidia_smi": 45233,
+  "limited": true,
+  "limits": {
+    "mmlu": 10,
+    "wikitext": 5
+  },
+  "mmlu": {
+    "acc": 0.7789473684210526,
+    "acc_macro": 0.7789473684210526,
+    "acc_stderr": 0.016786783736148916,
+    "categories": {
+      "humanities": 0.823076923076923,
+      "other": 0.7538461538461538,
+      "social_sciences": 0.8166666666666667,
+      "stem": 0.7421052631578947
+    },
+    "questions": 570,
+    "subjects": {
+      "abstract_algebra": {
+        "acc": 0.4,
+        "acc_stderr": 0.16329931618554522,
+        "n": 10
+      },
+      "anatomy": {
+        "acc": 0.6,
+        "acc_stderr": 0.16329931618554522,
+        "n": 10
+      },
+      "astronomy": {
+        "acc": 1.0,
+        "acc_stderr": 0.0,
+        "n": 10
+      },
+      "business_ethics": {
+        "acc": 0.7,
+        "acc_stderr": 0.15275252316519466,
+        "n": 10
+      },
+      "clinical_knowledge": {
+        "acc": 0.7,
+        "acc_stderr": 0.15275252316519466,
+        "n": 10
+      },
+      "college_biology": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "college_chemistry": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "college_computer_science": {
+        "acc": 0.6,
+        "acc_stderr": 0.16329931618554522,
+        "n": 10
+      },
+      "college_mathematics": {
+        "acc": 0.5,
+        "acc_stderr": 0.16666666666666666,
+        "n": 10
+      },
+      "college_medicine": {
+        "acc": 1.0,
+        "acc_stderr": 0.0,
+        "n": 10
+      },
+      "college_physics": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "computer_security": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "conceptual_physics": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "econometrics": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "electrical_engineering": {
+        "acc": 0.7,
+        "acc_stderr": 0.15275252316519466,
+        "n": 10
+      },
+      "elementary_mathematics": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "formal_logic": {
+        "acc": 0.6,
+        "acc_stderr": 0.16329931618554522,
+        "n": 10
+      },
+      "global_facts": {
+        "acc": 0.5,
+        "acc_stderr": 0.16666666666666666,
+        "n": 10
+      },
+      "high_school_biology": {
+        "acc": 1.0,
+        "acc_stderr": 0.0,
+        "n": 10
+      },
+      "high_school_chemistry": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "high_school_computer_science": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "high_school_european_history": {
+        "acc": 1.0,
+        "acc_stderr": 0.0,
+        "n": 10
+      },
+      "high_school_geography": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "high_school_government_and_politics": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "high_school_macroeconomics": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "high_school_mathematics": {
+        "acc": 0.4,
+        "acc_stderr": 0.16329931618554522,
+        "n": 10
+      },
+      "high_school_microeconomics": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "high_school_physics": {
+        "acc": 0.5,
+        "acc_stderr": 0.16666666666666666,
+        "n": 10
+      },
+      "high_school_psychology": {
+        "acc": 1.0,
+        "acc_stderr": 0.0,
+        "n": 10
+      },
+      "high_school_statistics": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "high_school_us_history": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "high_school_world_history": {
+        "acc": 1.0,
+        "acc_stderr": 0.0,
+        "n": 10
+      },
+      "human_aging": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "human_sexuality": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "international_law": {
+        "acc": 1.0,
+        "acc_stderr": 0.0,
+        "n": 10
+      },
+      "jurisprudence": {
+        "acc": 0.7,
+        "acc_stderr": 0.15275252316519466,
+        "n": 10
+      },
+      "logical_fallacies": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "machine_learning": {
+        "acc": 0.7,
+        "acc_stderr": 0.15275252316519466,
+        "n": 10
+      },
+      "management": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "marketing": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "medical_genetics": {
+        "acc": 1.0,
+        "acc_stderr": 0.0,
+        "n": 10
+      },
+      "miscellaneous": {
+        "acc": 0.6,
+        "acc_stderr": 0.16329931618554522,
+        "n": 10
+      },
+      "moral_disputes": {
+        "acc": 0.5,
+        "acc_stderr": 0.16666666666666666,
+        "n": 10
+      },
+      "moral_scenarios": {
+        "acc": 0.6,
+        "acc_stderr": 0.16329931618554522,
+        "n": 10
+      },
+      "nutrition": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "philosophy": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "prehistory": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "professional_accounting": {
+        "acc": 0.5,
+        "acc_stderr": 0.16666666666666666,
+        "n": 10
+      },
+      "professional_law": {
+        "acc": 0.7,
+        "acc_stderr": 0.15275252316519466,
+        "n": 10
+      },
+      "professional_medicine": {
+        "acc": 0.8,
+        "acc_stderr": 0.13333333333333333,
+        "n": 10
+      },
+      "professional_psychology": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "public_relations": {
+        "acc": 0.6,
+        "acc_stderr": 0.16329931618554522,
+        "n": 10
+      },
+      "security_studies": {
+        "acc": 0.7,
+        "acc_stderr": 0.15275252316519466,
+        "n": 10
+      },
+      "sociology": {
+        "acc": 0.7,
+        "acc_stderr": 0.15275252316519466,
+        "n": 10
+      },
+      "us_foreign_policy": {
+        "acc": 0.9,
+        "acc_stderr": 0.09999999999999999,
+        "n": 10
+      },
+      "virology": {
+        "acc": 0.7,
+        "acc_stderr": 0.15275252316519466,
+        "n": 10
+      },
+      "world_religions": {
+        "acc": 1.0,
+        "acc_stderr": 0.0,
+        "n": 10
+      }
+    }
+  },
+  "model_args": {
+    "dtype": "bfloat16",
+    "enable_prefix_caching": false,
+    "enforce_eager": true,
+    "gpu_memory_utilization": 0.8,
+    "max_model_len": 4096,
+    "pretrained": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+    "seed": 1234,
+    "tokenizer": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218"
+  },
+  "passed": true,
+  "samples": {
+    "mmlu": {
+      "mmlu_abstract_algebra": {
+        "correct": "0110001010",
+        "n": 10,
+        "prompt_digest": "100d4d414db1605b9346b795999e749d9daaff6f970dbfdf601331af5821115c"
+      },
+      "mmlu_anatomy": {
+        "correct": "1110100101",
+        "n": 10,
+        "prompt_digest": "c1b8018ac54766cb2f179cceaeaec38967dc63ec9a6ee786f19fca75e818d561"
+      },
+      "mmlu_astronomy": {
+        "correct": "1111111111",
+        "n": 10,
+        "prompt_digest": "e47b987ca3d6a698265069e8cd552c16967ca1a900f2d8591403488dfbd638f2"
+      },
+      "mmlu_business_ethics": {
+        "correct": "0111111100",
+        "n": 10,
+        "prompt_digest": "ba7fd2c6a49a5a8b66309fe19a33b9b0ed34e79e9b001adf309bef52a0a0ef48"
+      },
+      "mmlu_clinical_knowledge": {
+        "correct": "1111000111",
+        "n": 10,
+        "prompt_digest": "a23c245ed53551d11b045e92fa23799d9629afad142c34a3077826869b9d4665"
+      },
+      "mmlu_college_biology": {
+        "correct": "0111011111",
+        "n": 10,
+        "prompt_digest": "1c6b2efbb83a1f1a19eca07234cfef350c3143f8eb52669156f6fd36ac7f379d"
+      },
+      "mmlu_college_chemistry": {
+        "correct": "1101111101",
+        "n": 10,
+        "prompt_digest": "c8f3bc4420756607c6d56212f4dbb2b2ec48a8b7c0999570d3a36495c1b9488f"
+      },
+      "mmlu_college_computer_science": {
+        "correct": "1011101001",
+        "n": 10,
+        "prompt_digest": "bfb5515a359f7c9834b41695a5ae86cce5ddd6d02f9013fc806df0fba40be796"
+      },
+      "mmlu_college_mathematics": {
+        "correct": "1010001011",
+        "n": 10,
+        "prompt_digest": "6e8d64e68b383df84b5ae4bed5fbabfee797951a248e776c7aca46263ca7973b"
+      },
+      "mmlu_college_medicine": {
+        "correct": "1111111111",
+        "n": 10,
+        "prompt_digest": "6a49b3fe4c49f6f68dff58c623b107c6bec15106c167d7a3574f190027de3811"
+      },
+      "mmlu_college_physics": {
+        "correct": "1111111011",
+        "n": 10,
+        "prompt_digest": "9221d3964e6744aeb6d08658ea4c654e3561c6a224a763f0abea9689b7cdca9b"
+      },
+      "mmlu_computer_security": {
+        "correct": "1011011111",
+        "n": 10,
+        "prompt_digest": "15d5decfabe68e6407d60f6d4cdf75b21b6391ebbb94927815031bbdb9100c22"
+      },
+      "mmlu_conceptual_physics": {
+        "correct": "1110111111",
+        "n": 10,
+        "prompt_digest": "c010b68929dbef1e0af8efa0362b25f8fc6f63f7b6aa1c52bfeefead14e99594"
+      },
+      "mmlu_econometrics": {
+        "correct": "1111110011",
+        "n": 10,
+        "prompt_digest": "b623e9d871d5fa00b99edcf20f6a56392f1cfb3e81e230286ce3ad218f033354"
+      },
+      "mmlu_electrical_engineering": {
+        "correct": "1110111100",
+        "n": 10,
+        "prompt_digest": "a5fc6620965169ff5e26bcf8e05ab0f6f40bd4934ef09dfb87b5974146ce6c68"
+      },
+      "mmlu_elementary_mathematics": {
+        "correct": "1110111111",
+        "n": 10,
+        "prompt_digest": "e3e5198cd39d6d92f8d4972025aea087720f909d4bcbc970dbaa30d96e7acaff"
+      },
+      "mmlu_formal_logic": {
+        "correct": "1100010111",
+        "n": 10,
+        "prompt_digest": "a21ade1522b67fac2a0f1f73e75e7c3a9fa4841ee207fd4dfeba5e195a58e3cf"
+      },
+      "mmlu_global_facts": {
+        "correct": "1011010100",
+        "n": 10,
+        "prompt_digest": "686a2e2798df8a984ade992e078fa27858f1054701135e5bb7d81e1a875efeeb"
+      },
+      "mmlu_high_school_biology": {
+        "correct": "1111111111",
+        "n": 10,
+        "prompt_digest": "e46a0208ae1b05f1f3299a8bf096a30239caf9a3c68af2c83d97b3bb2512f15c"
+      },
+      "mmlu_high_school_chemistry": {
+        "correct": "1011111110",
+        "n": 10,
+        "prompt_digest": "14d95b85fa805edf954b2095a58e8d2f74cfc7c504635722c72f350bcacc61bd"
+      },
+      "mmlu_high_school_computer_science": {
+        "correct": "1111110111",
+        "n": 10,
+        "prompt_digest": "3961264323216c3257d29f7c6cddd7dc965a1a3345efb415969c33ae7946bae2"
+      },
+      "mmlu_high_school_european_history": {
+        "correct": "1111111111",
+        "n": 10,
+        "prompt_digest": "4b41c4add17cb75c4db3dbffb888729eb2592453cdcba1e4d71a5b956e604364"
+      },
+      "mmlu_high_school_geography": {
+        "correct": "1110011111",
+        "n": 10,
+        "prompt_digest": "960994983ace2bc3328bbec1b4ec09fa8a000f36a03fa0122a735c258228ff6e"
+      },
+      "mmlu_high_school_government_and_politics": {
+        "correct": "1111111101",
+        "n": 10,
+        "prompt_digest": "a2b735323019dd380c97baf66c75c727bd0ab6c6b9fef2af4913f011054e7201"
+      },
+      "mmlu_high_school_macroeconomics": {
+        "correct": "1001111111",
+        "n": 10,
+        "prompt_digest": "0c75af166eb6888a537c95a1fca32dd21b4ea01dc1b74c15c0b7847c789ce81e"
+      },
+      "mmlu_high_school_mathematics": {
+        "correct": "1111000000",
+        "n": 10,
+        "prompt_digest": "b8c574df15fa397a67f10a9a4af963f4274e07dc4f71c102c2557eb8c6b7d908"
+      },
+      "mmlu_high_school_microeconomics": {
+        "correct": "1011110111",
+        "n": 10,
+        "prompt_digest": "a75c5dbd29baf317fd12be0a21c5c58a61733a23366d807708d6828bcbe7f38a"
+      },
+      "mmlu_high_school_physics": {
+        "correct": "1010010110",
+        "n": 10,
+        "prompt_digest": "9bcd10f7d3e2bdd3c7c2930c50e76131a0cf4917bab4f050ad6a09e40978c044"
+      },
+      "mmlu_high_school_psychology": {
+        "correct": "1111111111",
+        "n": 10,
+        "prompt_digest": "248f9958c97b63f0e189d3bf08ad3befd4d36e266af961d0ba6984655dd01983"
+      },
+      "mmlu_high_school_statistics": {
+        "correct": "1011111111",
+        "n": 10,
+        "prompt_digest": "07d1b6bae18a5450d332c0a352d94d2811abf97342bfca8ec76b85f01444a7cc"
+      },
+      "mmlu_high_school_us_history": {
+        "correct": "1111110111",
+        "n": 10,
+        "prompt_digest": "e4aec8990f8885afc11c249e3da09e58a14f8b5b0c2c64aad7b64ba0896e4197"
+      },
+      "mmlu_high_school_world_history": {
+        "correct": "1111111111",
+        "n": 10,
+        "prompt_digest": "8ff1088578b89e61a44e034758c926adccb8a323f7e9ac8b46e2bfd70171c1cc"
+      },
+      "mmlu_human_aging": {
+        "correct": "1101110111",
+        "n": 10,
+        "prompt_digest": "2cbd9a17a1edaae04a52ca5122cbc390716b3362526bc108b3a2dbc4c8db501a"
+      },
+      "mmlu_human_sexuality": {
+        "correct": "1011111111",
+        "n": 10,
+        "prompt_digest": "f8f85a6d369fb9d273b5da8c8aa5902124784888af53e4c37988675adbf34f42"
+      },
+      "mmlu_international_law": {
+        "correct": "1111111111",
+        "n": 10,
+        "prompt_digest": "fa3b78d393ec652a41f3ae3c7735f89aa1a64d88b2c83f4d0103b98bf473b650"
+      },
+      "mmlu_jurisprudence": {
+        "correct": "0011011111",
+        "n": 10,
+        "prompt_digest": "da035f8b627c9044b30f3d25b3472aa3f2f735fa5b48af394e9bccd22c92aeb4"
+      },
+      "mmlu_logical_fallacies": {
+        "correct": "1011111111",
+        "n": 10,
+        "prompt_digest": "922ac06434bc73e8b44b43df3d72670bda8f1171b82563ed52c5ca4a6588b675"
+      },
+      "mmlu_machine_learning": {
+        "correct": "1111101001",
+        "n": 10,
+        "prompt_digest": "1ff86e4dcf286d39ec2a189a2638fcc369c88cec673882671a255c26dd7c25f1"
+      },
+      "mmlu_management": {
+        "correct": "1111011110",
+        "n": 10,
+        "prompt_digest": "46d01eee278f2797b7b3a70fcf68af0bbf7f2ede5a76430f77c0067f2f9c0252"
+      },
+      "mmlu_marketing": {
+        "correct": "1010111111",
+        "n": 10,
+        "prompt_digest": "b42762fb7ff490881b22b54ccb7be5e404cc751f09b555f9a05cd15bad260c82"
+      },
+      "mmlu_medical_genetics": {
+        "correct": "1111111111",
+        "n": 10,
+        "prompt_digest": "b613001c8b22e9b6e1a1aa809fccb432e7e39a2c8c757baa8f6d0929c7d11b08"
+      },
+      "mmlu_miscellaneous": {
+        "correct": "1010111010",
+        "n": 10,
+        "prompt_digest": "e2a102241372eb0427063122eeffb93611ce81bda7fed6c0f3d01e1c3ce49c4b"
+      },
+      "mmlu_moral_disputes": {
+        "correct": "1110010100",
+        "n": 10,
+        "prompt_digest": "16b67a21a297bb21682b955e44d43cc820420736eb57ef645c4fd323f98ea48f"
+      },
+      "mmlu_moral_scenarios": {
+        "correct": "1010111010",
+        "n": 10,
+        "prompt_digest": "d6378259c3bb2a32975293b2f7c27c4e5c20c0d3b0c0deca8381bd07aa1fbe4f"
+      },
+      "mmlu_nutrition": {
+        "correct": "1111111110",
+        "n": 10,
+        "prompt_digest": "80cfed38406f3a589103a37687f5bfb05d5347cd4035397612334e9a4ee12349"
+      },
+      "mmlu_philosophy": {
+        "correct": "0111111111",
+        "n": 10,
+        "prompt_digest": "be5c755417a996d4cf571bf8ebff60b3d147c2064d628804eddd4ff1e8faa180"
+      },
+      "mmlu_prehistory": {
+        "correct": "0111111111",
+        "n": 10,
+        "prompt_digest": "d4b4ef82e21cd8ca7c86b9acf76b2f102d058fc822603b675bb589179a5faaf9"
+      },
+      "mmlu_professional_accounting": {
+        "correct": "1010100110",
+        "n": 10,
+        "prompt_digest": "cf9a1f70b9069c652e0febdc78c78af4a3d25ad1291763e8688c606ab843126b"
+      },
+      "mmlu_professional_law": {
+        "correct": "1011011110",
+        "n": 10,
+        "prompt_digest": "e881f05092ea9f98176d41a5991102b454462692e9cf92768c8ea4bb6b78d332"
+      },
+      "mmlu_professional_medicine": {
+        "correct": "1110111110",
+        "n": 10,
+        "prompt_digest": "e5cef95b144f920d7c6841bf8573847087e74338c10f4105a826a4605837a4a7"
+      },
+      "mmlu_professional_psychology": {
+        "correct": "1111111101",
+        "n": 10,
+        "prompt_digest": "589af68e342e33594a117f2ef9fa3106961a26ff355d657901d4619efb817053"
+      },
+      "mmlu_public_relations": {
+        "correct": "1111100100",
+        "n": 10,
+        "prompt_digest": "568a31c448aa7e4eb32608268e7b5f2656a70578b740d7a6184ca36d74cd7403"
+      },
+      "mmlu_security_studies": {
+        "correct": "1111001011",
+        "n": 10,
+        "prompt_digest": "a6496e52d6d0e84c630f45f8007c3ac888435d32d312fc80584ab202efc099ea"
+      },
+      "mmlu_sociology": {
+        "correct": "1111110100",
+        "n": 10,
+        "prompt_digest": "0542997dce897e329e62fc76abae688e1ea07cc8b3fac0857d3fd399d64cf963"
+      },
+      "mmlu_us_foreign_policy": {
+        "correct": "1111011111",
+        "n": 10,
+        "prompt_digest": "655d2e15ec4395af5824a835a36b0291be087820f8c6feae74c270a5b7ca877c"
+      },
+      "mmlu_virology": {
+        "correct": "0101111110",
+        "n": 10,
+        "prompt_digest": "6e16227084d16ef4073aafcaa8c3a2c140baae4e4930da756586c5e0a8e36006"
+      },
+      "mmlu_world_religions": {
+        "correct": "1111111111",
+        "n": 10,
+        "prompt_digest": "8bc81a7598d5b97cf32a715d08abb776716d4139705c3557022c661bc3c6dfb4"
+      }
+    },
+    "wikitext": {
+      "wikitext": {
+        "n": 5,
+        "prompt_digest": "40f19bed593fca8d0033a52b1c5087da0dfee770923202fad97eb83a150444e2"
+      }
+    }
+  },
+  "state": "finished",
+  "tasks": {
+    "mmlu": {
+      "children_max_rss": 13584376,
+      "command": [
+        "lm-eval",
+        "run",
+        "--model",
+        "vllm",
+        "--model_args",
+        "pretrained=/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218,tokenizer=/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218,dtype=bfloat16,max_model_len=4096,gpu_memory_utilization=0.8,enable_prefix_caching=false,enforce_eager=true,seed=1234",
+        "--tasks",
+        "mmlu",
+        "--batch_size",
+        "1024",
+        "--seed",
+        "0,1234,1234,1234",
+        "--output_path",
+        "/results/phase5/probe-20260923T140749Z/bf16/mmlu/lm_eval_output",
+        "--num_fewshot",
+        "5",
+        "--log_samples",
+        "--limit",
+        "10"
+      ],
+      "elapsed_s": 205.52436876296997,
+      "lm_eval_version": "0.4.11",
+      "log_lines": [
+        "2026-09-23:07:08:49 INFO     [evaluator:236] Initializing vllm model, with arguments: {'pretrained': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', 'tokenizer': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', 'dtype': 'bfloat16', 'max_model_len': 4096, 'gpu_memory_utilization': 0.8, 'enable_prefix_caching': False, 'enforce_eager': True, 'seed': 1234}",
+        "INFO 09-23 07:09:03 [utils.py:328] non-default args: {'tokenizer': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', 'dtype': 'bfloat16', 'seed': 1234, 'max_model_len': 4096, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.8, 'disable_log_stats': True, 'enforce_eager': True, 'model': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218'}",
+        "INFO 09-23 07:09:17 [scheduler.py:222] Chunked prefill is enabled with max_num_batched_tokens=8192.",
+        "INFO 09-23 07:09:17 [__init__.py:3400] Cudagraph is disabled under eager mode",
+        "\u001b[1;36m(EngineCore_DP0 pid=78)\u001b[0;0m INFO 09-23 07:09:19 [core.py:76] Initializing a V1 LLM engine (v0.10.2) with config: model='/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', speculative_config=None, tokenizer='/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, disable_custom_all_reduce=False, quantization=None, enforce_eager=True, kv_cache_dtype=auto, device_config=cuda, decoding_config=DecodingConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_backend=''), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None), seed=1234, served_model_name=/",
+        "\u001b[1;36m(EngineCore_DP0 pid=78)\u001b[0;0m INFO 09-23 07:09:23 [cuda.py:362] Using Flash Attention backend on V1 engine.",
+        "\u001b[1;36m(EngineCore_DP0 pid=78)\u001b[0;0m INFO 09-23 07:09:35 [gpu_model_runner.py:2392] Model loading took 15.2683 GiB and 11.086583 seconds",
+        "\u001b[1;36m(EngineCore_DP0 pid=78)\u001b[0;0m INFO 09-23 07:09:37 [kv_cache_utils.py:864] GPU KV cache size: 141,328 tokens",
+        "\u001b[1;36m(EngineCore_DP0 pid=78)\u001b[0;0m INFO 09-23 07:09:37 [kv_cache_utils.py:868] Maximum concurrency for 4,096 tokens per request: 34.50x",
+        "\u001b[1;36m(EngineCore_DP0 pid=78)\u001b[0;0m INFO 09-23 07:09:37 [core.py:218] init engine (profile, create kv cache, warmup model) took 2.39 seconds",
+        "\u001b[1;36m(EngineCore_DP0 pid=78)\u001b[0;0m INFO 09-23 07:09:38 [__init__.py:3400] Cudagraph is disabled under eager mode",
+        "2026-09-23:07:09:40 INFO     [api.task:311] Building contexts for mmlu_abstract_algebra on rank 0...",
+        "2026-09-23:07:09:40 INFO     [api.task:311] Building contexts for mmlu_anatomy on rank 0...",
+        "2026-09-23:07:09:40 INFO     [api.task:311] Building contexts for mmlu_astronomy on rank 0...",
+        "2026-09-23:07:09:40 INFO     [api.task:311] Building contexts for mmlu_college_biology on rank 0...",
+        "2026-09-23:07:09:40 INFO     [api.task:311] Building contexts for mmlu_college_chemistry on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_college_computer_science on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_college_mathematics on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_college_physics on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_computer_security on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_conceptual_physics on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_electrical_engineering on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_elementary_mathematics on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_high_school_biology on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_high_school_chemistry on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_high_school_computer_science on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_high_school_mathematics on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_high_school_physics on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_high_school_statistics on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_machine_learning on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_business_ethics on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_clinical_knowledge on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_college_medicine on rank 0...",
+        "2026-09-23:07:09:41 INFO     [api.task:311] Building contexts for mmlu_global_facts on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_human_aging on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_management on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_marketing on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_medical_genetics on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_miscellaneous on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_nutrition on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_professional_accounting on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_professional_medicine on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_virology on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_econometrics on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_high_school_geography on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_high_school_government_and_politics on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_high_school_macroeconomics on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_high_school_microeconomics on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_high_school_psychology on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_human_sexuality on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_professional_psychology on rank 0...",
+        "2026-09-23:07:09:42 INFO     [api.task:311] Building contexts for mmlu_public_relations on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_security_studies on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_sociology on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_us_foreign_policy on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_formal_logic on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_high_school_european_history on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_high_school_us_history on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_high_school_world_history on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_international_law on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_jurisprudence on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_logical_fallacies on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_moral_disputes on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_moral_scenarios on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_philosophy on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_prehistory on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_professional_law on rank 0...",
+        "2026-09-23:07:09:43 INFO     [api.task:311] Building contexts for mmlu_world_religions on rank 0...",
+        "vllm ({'pretrained': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', 'tokenizer': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', 'dtype': 'bfloat16', 'max_model_len': 4096, 'gpu_memory_utilization': 0.8, 'enable_prefix_caching': False, 'enforce_eager': True, 'seed': 1234}), gen_kwargs: ({}), limit: 10.0, num_fewshot: 5, batch_size: 1024"
+      ],
+      "loglikelihood_progress": "Running loglikelihood requests: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 2280/2280 [02:11<00:00, 17.40it/s]",
+      "results_file": "mmlu/lm_eval_output/__weights__Qwen__Qwen3-8B__b968826d9c46dd6066d109eabc6255188de91218/results_2026-09-23T07-12-01.433501.json",
+      "returncode": 0,
+      "total_evaluation_time_seconds": "201.116400283",
+      "transformers_version": "4.56.1",
+      "truncation_warnings": 0
+    },
+    "wikitext": {
+      "children_max_rss": 13584376,
+      "command": [
+        "lm-eval",
+        "run",
+        "--model",
+        "vllm",
+        "--model_args",
+        "pretrained=/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218,tokenizer=/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218,dtype=bfloat16,max_model_len=4096,gpu_memory_utilization=0.8,enable_prefix_caching=false,enforce_eager=true,seed=1234",
+        "--tasks",
+        "wikitext",
+        "--batch_size",
+        "1024",
+        "--seed",
+        "0,1234,1234,1234",
+        "--output_path",
+        "/results/phase5/probe-20260923T140749Z/bf16/wikitext/lm_eval_output",
+        "--log_samples",
+        "--limit",
+        "5"
+      ],
+      "elapsed_s": 46.38224005699158,
+      "lm_eval_version": "0.4.11",
+      "log_lines": [
+        "2026-09-23:07:12:15 INFO     [evaluator:236] Initializing vllm model, with arguments: {'pretrained': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', 'tokenizer': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', 'dtype': 'bfloat16', 'max_model_len': 4096, 'gpu_memory_utilization': 0.8, 'enable_prefix_caching': False, 'enforce_eager': True, 'seed': 1234}",
+        "INFO 09-23 07:12:21 [utils.py:328] non-default args: {'tokenizer': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', 'dtype': 'bfloat16', 'seed': 1234, 'max_model_len': 4096, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.8, 'disable_log_stats': True, 'enforce_eager': True, 'model': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218'}",
+        "INFO 09-23 07:12:33 [scheduler.py:222] Chunked prefill is enabled with max_num_batched_tokens=8192.",
+        "INFO 09-23 07:12:33 [__init__.py:3400] Cudagraph is disabled under eager mode",
+        "\u001b[1;36m(EngineCore_DP0 pid=571)\u001b[0;0m INFO 09-23 07:12:34 [core.py:76] Initializing a V1 LLM engine (v0.10.2) with config: model='/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', speculative_config=None, tokenizer='/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, disable_custom_all_reduce=False, quantization=None, enforce_eager=True, kv_cache_dtype=auto, device_config=cuda, decoding_config=DecodingConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_backend=''), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None), seed=1234, served_model_name=",
+        "\u001b[1;36m(EngineCore_DP0 pid=571)\u001b[0;0m INFO 09-23 07:12:37 [cuda.py:362] Using Flash Attention backend on V1 engine.",
+        "\u001b[1;36m(EngineCore_DP0 pid=571)\u001b[0;0m INFO 09-23 07:12:40 [gpu_model_runner.py:2392] Model loading took 15.2683 GiB and 2.609779 seconds",
+        "\u001b[1;36m(EngineCore_DP0 pid=571)\u001b[0;0m INFO 09-23 07:12:43 [kv_cache_utils.py:864] GPU KV cache size: 141,328 tokens",
+        "\u001b[1;36m(EngineCore_DP0 pid=571)\u001b[0;0m INFO 09-23 07:12:43 [kv_cache_utils.py:868] Maximum concurrency for 4,096 tokens per request: 34.50x",
+        "\u001b[1;36m(EngineCore_DP0 pid=571)\u001b[0;0m INFO 09-23 07:12:43 [core.py:218] init engine (profile, create kv cache, warmup model) took 2.35 seconds",
+        "\u001b[1;36m(EngineCore_DP0 pid=571)\u001b[0;0m INFO 09-23 07:12:44 [__init__.py:3400] Cudagraph is disabled under eager mode",
+        "2026-09-23:07:12:45 INFO     [api.task:311] Building contexts for wikitext on rank 0...",
+        "vllm ({'pretrained': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', 'tokenizer': '/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218', 'dtype': 'bfloat16', 'max_model_len': 4096, 'gpu_memory_utilization': 0.8, 'enable_prefix_caching': False, 'enforce_eager': True, 'seed': 1234}), gen_kwargs: ({}), limit: 5.0, num_fewshot: None, batch_size: 1024"
+      ],
+      "loglikelihood_progress": "Running loglikelihood requests: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 8/8 [00:03<00:00,  2.13it/s]",
+      "results_file": "wikitext/lm_eval_output/__weights__Qwen__Qwen3-8B__b968826d9c46dd6066d109eabc6255188de91218/results_2026-09-23T07-12-50.935130.json",
+      "returncode": 0,
+      "total_evaluation_time_seconds": "43.30655861699998",
+      "transformers_version": "4.56.1",
+      "truncation_warnings": 0
+    }
+  },
+  "variant": "bf16",
+  "wikitext": {
+    "bits_per_byte": 0.6940955439535645,
+    "byte_perplexity": 1.617869838259215,
+    "documents": 5,
+    "word_perplexity": 11.74305350019789
+  }
+}

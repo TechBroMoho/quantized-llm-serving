@@ -2,13 +2,12 @@
 
 ## Status
 
-Phase 5 in progress (2026-09-23). The accuracy pipeline (lm-eval 0.4.11 on
-the vLLM 0.10.2 image, ADR-017) is built and rehearsed on CPU; the 5-shot
-MMLU prompts fit max-model-len 4096 (longest 3,097 tokens). No Phase 5 Modal
-run yet; the CPU prefetch and the timed BF16 probe await approval.
-Cumulative spend **$1.3646** (dashboard). Before Phase 6 (approved, not yet
-built): a multi-process load tester revalidated in Modal (ADR-013), and
-`skip_special_tokens=false` with a chunk-count check (ADR-014).
+Phase 5 in progress (2026-09-23). Pipeline built (lm-eval 0.4.11 on the vLLM
+0.10.2 image, ADR-017), prefetch passed, and the timed BF16 probe passed on
+L40S (10,555 MMLU tokens/s). The full runs (BF16, AWQ, GPTQ; ~3.3 h, ~$7.94)
+await approval. Cumulative spend **$1.6182** (dashboard). Before Phase 6
+(approved, not yet built): a multi-process load tester revalidated in Modal
+(ADR-013), and `skip_special_tokens=false` with a chunk-count check (ADR-014).
 
 ## Phase log
 
@@ -214,7 +213,7 @@ built): a multi-process load tester revalidated in Modal (ADR-013), and
     runs cleared pytest's record. Watch for it.
 
 - **Phase 5, prefetch 1 (2026-09-23, run `prefetch-20260923T134506Z`,
-  $0.0176): gate failed, probe not started.** Inside the eval image:
+  $0.0225 settled; first read $0.0176): gate failed, probe not started.** Inside the eval image:
   lm-eval 0.4.11, vLLM 0.10.2, torch 2.8.0+cu128, transformers 4.56.1,
   datasets 4.1.1. Datasets downloaded through lm-eval's task loading (121 s,
   58,394,847 bytes; 57 MMLU subjects at Hub commit `c30699e8`, WikiText at
@@ -228,6 +227,28 @@ built): a multi-process load tester revalidated in Modal (ADR-013), and
   Python imports. Fixed: packages are listed in a subprocess with lm-eval's
   environment, the first copy wins, and shadowed copies are recorded.
   Evidence: `results/accuracy/phase5/prefetch-20260923T134506Z/`.
+
+- **Phase 5, prefetch 2 (run `prefetch-20260923T135927Z`, $0.0203):
+  passed.** No package drift; 17 shadowed duplicate distributions recorded
+  (Modal client and Ubuntu system copies, never the imported ones). Same
+  58,394,847-byte dataset cache; the length audits matched again. The
+  eval-cache manifest was written.
+- **Phase 5, timed probe (run `probe-20260923T140749Z`, $0.2108): passed.**
+  NVIDIA L40S (driver 580.95.05), BF16, `gpu_memory_utilization` 0.80.
+  - MMLU `--limit 10` (570 questions, 2,280 requests, 1,382,712 tokens):
+    scoring 131 s (lm-eval bar `2280/2280 [02:11]`) = **10,555 tokens/s**;
+    the process took 205.5 s (74.5 s engine start, 11.1 s model load, context
+    building). WikiText `--limit 5` (8 windows, 27,069 tokens): 3 s scoring,
+    46.4 s process. 0 truncation warnings; all checks passed.
+  - vLLM: `max_num_batched_tokens=8192`, eager, Flash Attention, "Model
+    loading took 15.2683 GiB", KV cache 141,328 tokens. Peak GPU memory
+    **45,233 of 46,068 MiB** by nvidia-smi: prompt-logprob logits sit
+    outside vLLM's 36 GiB budget. Full runs therefore use 0.75 (ADR-017).
+    Host peak RSS 13.0 GiB.
+  - The probe's accuracies (MMLU 77.89% on 570 questions, word perplexity
+    11.743 on 5 documents) are timing by-products on a subset, not results.
+  - Full-run estimate from this rate: ~66 min per variant, ~3.3 h and ~$7.94
+    for all three (timeout 15,000 s, envelope $9.98).
 
 ## Spend log
 
@@ -249,7 +270,9 @@ built): a multi-process load tester revalidated in Modal (ADR-013), and
 | 2026-09-23 | 4 | AWQ W4A16_ASYM quantization, passed (`ap-bi7KgCITqb40g0uoaypiVe`) | L40S | 538 function | $0.385489 | $0.507144 |
 | 2026-09-23 | 4 | GPTQ W4A16 quantization, passed (`ap-PA7aqlQxiqweqcBW0wJNKj`) | L40S | 973 function | $0.726136 | $1.233280 |
 | 2026-09-23 | 4 | vLLM sanity, BF16 + AWQ + GPTQ, passed (`ap-rbKztZzbSRbnw9hvYsp33H`) | L40S | n/a | $0.131285 | $1.364565 |
-| 2026-09-23 | 5 | Eval prefetch, CPU, includes eval image build; gate failed on a false package-drift check (`ap-88OReY3mpGKjX70ev99mWR`) | None | n/a | $0.017580 | $1.382145 |
+| 2026-09-23 | 5 | Eval prefetch, CPU, includes eval image build; gate failed on a false package-drift check (`ap-88OReY3mpGKjX70ev99mWR`) | None | n/a | $0.022514 | $1.387079 |
+| 2026-09-23 | 5 | Eval prefetch rerun with the fixed check, passed (`ap-BH19KuquiKpyE9PMWKPgEt`) | None | n/a | $0.020285 | $1.407364 |
+| 2026-09-23 | 5 | Timed probe, BF16, MMLU `--limit 10` + WikiText `--limit 5`, passed (`ap-BDLHfeHEYkcp93cPSBkH2Y`) | L40S | ≈317 | $0.210801 | $1.618165 |
 
 Phase 3 amounts are **actual** per-app costs from `modal billing report --for
 today --json` (saved in `results/validation/phase3/modal_billing_2026-09-23.json`),
