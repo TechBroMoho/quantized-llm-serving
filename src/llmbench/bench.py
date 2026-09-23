@@ -700,3 +700,52 @@ def verify_checkpoint(root: Path, expected: Sequence[dict[str, Any]]) -> dict[st
         "seconds": time.perf_counter() - started,
         "passed": not mismatches,
     }
+
+
+def static_points_from_probe(
+    points: Sequence[BenchPoint], probe: dict[str, Any], margin: float = 1.25
+) -> tuple[list[BenchPoint], list[dict[str, Any]]]:
+    """HF static timings from the OOM probe's measured batch times (ADR-020).
+
+    A batch of up to B requests takes T(n) seconds, taken from the smallest
+    probed batch size >= n. With c users and batch size B, a request waits
+    for ceil(c / B) batches, so E2E ~= ceil(c / B) * T(min(c, B)). Warmup is
+    ramp + `margin` x E2E (rounded up to 5 s). The window covers at least
+    three batch periods, so each half holds more than one complete batch.
+    """
+    import math
+
+    fitted = sorted(probe["fitted"], key=lambda r: r["batch_size"])
+    batch_size = int(probe["chosen_batch_size"])
+
+    def batch_seconds(n: int) -> float:
+        for row in fitted:
+            if row["batch_size"] >= n:
+                return float(row["seconds"])
+        return float(fitted[-1]["seconds"])
+
+    planned, plan = [], []
+    for point in points:
+        in_batch = min(point.concurrency, batch_size)
+        period = batch_seconds(in_batch)
+        e2e = math.ceil(point.concurrency / batch_size) * period
+        warmup = max(point.warmup_s, 5 * math.ceil((point.ramp_s + margin * e2e) / 5))
+        window = max(point.window_s, 5 * math.ceil(3 * period / 5))
+        timeout = max(point.timeout_s, 3 * e2e)
+        planned.append(
+            BenchPoint(
+                point.label, point.concurrency, point.ramp_s, warmup, window, timeout
+            )
+        )
+        plan.append(
+            {
+                "label": point.label,
+                "concurrency": point.concurrency,
+                "batch_rows": in_batch,
+                "batch_seconds": period,
+                "expected_e2e_s": e2e,
+                "warmup_s": warmup,
+                "window_s": window,
+            }
+        )
+    return planned, plan

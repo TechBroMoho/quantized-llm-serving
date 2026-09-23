@@ -324,3 +324,30 @@ def test_points_fail_when_client_headroom_is_below_3x(tmp_path: Path) -> None:
     assert any("headroom" in f and "< 3x" in f for f in summary["failures"])
     saved = json.loads((tmp_path / "out" / "c2" / "summary.json").read_text())
     assert saved["client_capacity_headroom"] < 3  # data kept, point not accepted
+
+
+def test_static_points_follow_the_measured_batch_time() -> None:
+    from llmbench.bench import static_points_from_probe
+
+    probe = {
+        "chosen_batch_size": 64,
+        "fitted": [
+            {"batch_size": 8, "seconds": 10.0},
+            {"batch_size": 16, "seconds": 12.0},
+            {"batch_size": 64, "seconds": 40.0},
+        ],
+    }
+    base = [
+        BenchPoint("c4", 4, ramp_s=5, warmup_s=20, window_s=120, timeout_s=600),
+        BenchPoint("hf-c2B", 128, ramp_s=20, warmup_s=90, window_s=180, timeout_s=900),
+    ]
+    points, plan = static_points_from_probe(base, probe)
+    c4, c2b = points
+    assert plan[0]["batch_seconds"] == 10.0 and plan[0]["expected_e2e_s"] == 10.0
+    assert c4.warmup_s == 20 and c4.window_s == 120  # config already long enough
+    # 2B users wait for two 40 s batches: E2E 80 s -> warmup 20 + 1.25 * 80 = 120.
+    assert plan[1]["expected_e2e_s"] == 80.0 and c2b.warmup_s == 120
+    assert c2b.window_s == 180 and c2b.timeout_s == 900
+    slow = probe | {"fitted": [{"batch_size": 64, "seconds": 90.0}]}
+    (_, slow_c2b), _ = static_points_from_probe(base, slow)
+    assert slow_c2b.window_s == 270 and slow_c2b.warmup_s == 245

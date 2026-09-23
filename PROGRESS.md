@@ -417,6 +417,23 @@ each needing Mohammed's yes.
     `--max-num-seqs 16` point (warmup 120 s), and HF naive c4/c16 warmups
     40/125 s, per ADR-020's rule (warmup ≥ ramp + one expected E2E).
 
+- **Phase 6 run plan (approved by Mohammed, 2026-09-23).** Back to back:
+  AWQ → BF16 → GPTQ → max-batch → HF, under a $10 Phase 6 cap. Before each
+  launch: Phase 6 actual spend + that run's timeout envelope ≤ $10. Stop and
+  ask if a run fails, a point fails its checks (including the 3× headroom
+  rule), or the next run could exceed the cap.
+  - **HF static timings** come from the OOM probe inside the HF run, by the
+    ADR-020 rule (`llmbench.bench.static_points_from_probe`).
+    - T(n) is the measured `generate()` time for the smallest probed batch
+      size ≥ n; B is the largest batch that fit.
+    - At concurrency c, E2E ≈ ⌈c/B⌉ · T(min(c, B)).
+    - warmup = ramp + 1.25 · E2E (rounded up to 5 s, never below the
+      config).
+    - window = max(config window, 3 · T), so each half holds more than one
+      whole batch.
+  - The HF function writes `static_plan.json` and stops before starting the
+    static server if the plan cannot finish in the time left in the function.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |

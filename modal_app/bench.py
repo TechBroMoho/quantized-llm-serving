@@ -383,9 +383,13 @@ def maxbatch_fn(run: dict[str, Any]) -> Any:
 def hf_fn(run: dict[str, Any]) -> Any:
     import asyncio
     import sys
+    import time
 
-    from llmbench.bench import resolve_points, run_lifetime
+    from llmbench.bench import resolve_points, run_lifetime, static_points_from_probe
     from llmbench.prompts import NpyPromptPayloads
+    from llmbench.smoke import write_json
+
+    function_started = time.monotonic()
 
     config = run["config"]
     workload = config["workload"]
@@ -413,6 +417,12 @@ def hf_fn(run: dict[str, Any]) -> Any:
             str(PORT),
         ]
         batch_size = None
+        static_plan = None
+        points = (
+            resolve_points(config["points"], spec["points"])
+            if spec["mode"] != "static"
+            else []
+        )
         if spec["mode"] == "static":
             probe_out = out / "oom_probe.json"
             done = subprocess.run(
@@ -442,7 +452,31 @@ def hf_fn(run: dict[str, Any]) -> Any:
             RESULTS.commit()
             if done.returncode != 0:
                 raise RuntimeError(f"OOM probe failed: {done.stderr[-2000:]}")
-            batch_size = int(json.loads(probe_out.read_text())["chosen_batch_size"])
+            probe = json.loads(probe_out.read_text())
+            batch_size = int(probe["chosen_batch_size"])
+            points, static_plan = static_points_from_probe(
+                resolve_points(config["points"], spec["points"], batch_size), probe
+            )
+            # Server start (~150 s measured) + each point + idle waits/stop.
+            needed = 150 + sum(p.warmup_s + p.window_s + 10 for p in points) + 120
+            remaining = BENCH_HF_RESOURCES.timeout_s - (
+                time.monotonic() - function_started
+            )
+            write_json(
+                out / "static_plan.json",
+                {
+                    "batch_size": batch_size,
+                    "points": static_plan,
+                    "needed_s": needed,
+                    "remaining_s": remaining,
+                },
+            )
+            RESULTS.commit()
+            if needed > remaining:
+                raise RuntimeError(
+                    f"HF static plan needs {needed:.0f} s, only {remaining:.0f} s "
+                    "remain in this function: stopping to ask (see static_plan.json)"
+                )
             command += [
                 "--batch-size",
                 str(batch_size),
@@ -461,7 +495,7 @@ def hf_fn(run: dict[str, Any]) -> Any:
                     seed=int(workload["seed"]),
                     model="qwen3-8b-bf16-hf",
                 ),
-                points=resolve_points(config["points"], spec["points"], batch_size),
+                points=points,
                 processes=int(workload["client_processes"]),
                 out_dir=out,
                 input_tokens=int(workload["input_tokens"]),
@@ -478,6 +512,7 @@ def hf_fn(run: dict[str, Any]) -> Any:
                     "variant": "bf16",
                     "engine": "hf",
                     "static_batch_size": batch_size,
+                    "static_plan": static_plan,
                     "checkpoint": path,
                 },
             )
