@@ -1,0 +1,49 @@
+INFO 09-23 15:40:31 [__init__.py:216] Automatically detected platform cuda.
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x2a5ec4a1d9e0>, seed=0, num_prompts=2048, dataset_name='random', no_stream=False, dataset_path=None, no_oversample=False, custom_output_len=256, custom_skip_chat_template=False, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, blazedit_min_distance=0.0, blazedit_max_distance=1.0, random_input_len=512, random_output_len=256, random_range_ratio=0.0, random_prefix_len=0, random_batch_size=1, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 0}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, endpoint_type='openai', label=None, backend='vllm', base_url='http://127.0.0.1:8000', host='127.0.0.1', port=8000, endpoint='/v1/completions', max_concurrency=256, model='qwen3-8b-awq', tokenizer='/weights/quantized/Qwen3-8B-awq-b968826d', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, trust_remote_code=False, disable_tqdm=True, profile=False, save_result=True, save_detailed=False, append_result=False, metadata=None, result_dir='/results/phase6/awq-20260923T220125Z/vllm_bench_serve', result_filename='vllm_bench_serve_c256.json', ignore_eos=True, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,99', goodput=None, request_id_prefix='benchmark-serving', top_p=None, top_k=None, min_p=None, temperature=None, tokenizer_mode='auto', served_model_name=None, lora_modules=None, ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=600)
+INFO 09-23 15:40:36 [datasets.py:517] Sampling input_len from [512, 512] and output_len from [256, 256]
+Starting initial single prompt test run...
+Waiting for endpoint to become up in 600 seconds
+Initial test run completed. Starting main benchmark run...
+Traffic request rate: inf
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: 256
+============ Serving Benchmark Result ============
+Successful requests:                     2048      
+Maximum request concurrency:             256       
+Benchmark duration (s):                  230.24    
+Total input tokens:                      1046043   
+Total generated tokens:                  524288    
+Request throughput (req/s):              8.89      
+Output token throughput (tok/s):         2277.11   
+Total Token throughput (tok/s):          6820.32   
+---------------Time to First Token----------------
+Mean TTFT (ms):                          1335.24   
+Median TTFT (ms):                        519.70    
+P50 TTFT (ms):                           519.70    
+P90 TTFT (ms):                           2436.89   
+P99 TTFT (ms):                           12053.04  
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          107.07    
+Median TPOT (ms):                        111.27    
+P50 TPOT (ms):                           111.27    
+P90 TPOT (ms):                           112.92    
+P99 TPOT (ms):                           113.74    
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           107.07    
+Median ITL (ms):                         63.28     
+P50 ITL (ms):                            63.28     
+P90 ITL (ms):                            242.72    
+P99 ITL (ms):                            264.48    
+----------------End-to-end Latency----------------
+Mean E2EL (ms):                          28637.97  
+Median E2EL (ms):                        28908.39  
+P50 E2EL (ms):                           28908.39  
+P90 E2EL (ms):                           29794.11  
+P99 E2EL (ms):                           39296.24  
+==================================================
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+
+ |          | 00:00 elapsed, ? remaining
+ |          | 00:00 elapsed, 00:03 remaining
+ |          | 00:02 elapsed, 156:49:08 remaining

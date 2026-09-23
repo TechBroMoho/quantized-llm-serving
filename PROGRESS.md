@@ -2,14 +2,14 @@
 
 ## Status
 
-Phase 6 in progress (2026-09-23). The CPU prepare step passed: all three
-checkpoints match Phase 4's sha256 values, and the 50,000-prompt WikiText-103
-pool was built. The AWQ probe on L40S passed: at c=1, 105.8 output tokens/s
-(TPOT p50 9.34 ms); at c=256, 1,944.0 tokens/s (7.28 req/s), GPU-bound (96%
-utilization), with the client using 0.037 cores per process and headroom
-4.69× (≥ 3×). Cumulative spend **$12.3854** (Phase 6 so far $0.3204);
-nothing running. Point timings are revised from the probe. Next: sweeps,
-each needing Mohammed's yes.
+Phase 6 paused for a decision (2026-09-23). The AWQ sweep ran
+(`awq-20260923T220125Z`, $1.8688). **4 of its 10 points failed the 5%
+steady-state check** (c=1 once; all three c=256 runs). BF16, GPTQ,
+max-batch and HF were not launched, per the stop rule. The c=256 failures
+come from a two-wave oscillation (period ≈ one E2E), not drift. AWQ peaks at
+c=128 (2,196.8 tokens/s), not c=256. `vllm bench serve` agrees within
+~3% at c=1 and c=64 but reports 23% more throughput at c=256. Cumulative
+spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
 
 ## Phase log
 
@@ -434,6 +434,31 @@ each needing Mohammed's yes.
   - The HF function writes `static_plan.json` and stops before starting the
     static server if the plan cannot finish in the time left in the function.
 
+- **Phase 6, AWQ sweep (run `awq-20260923T220125Z`, L40S, $1.868826, 2,557 s
+  server lifetime): 6 of 10 points passed; stopped before BF16 as the rule
+  requires.** Table: `results/perf/phase6/results_table.md`.
+  - Passed: c4 352.7, c16 1,094.8, c64 1,997.5, c128 **2,196.8** output
+    tokens/s; c1-r2 100.2 and c1-r3 102.2 (TPOT p50 9.7 ms). Headroom
+    4.2–92×; client ≤ 0.19 cores per process; 0 errors, prefix-cache hits
+    0, preemptions 0.
+  - **c1 failed** (halves 7.53%): a transient ~10 s slowdown 13–24 s into
+    the window (two requests at TPOT 17.0 / 14.1 ms, stalls up to 74 ms;
+    steady 9.5–9.8 ms otherwise). The client was at 0.03 cores. Cause not
+    identified.
+  - **c256, c256-r2, c256-r3 failed** (halves 7.17 / 7.24 / 6.07%). Their
+    18 s token bins alternate high/low (~29k / ~37k tokens): the users form
+    two waves with a period ≈ E2E (35.3–35.8 s). The 180 s window holds 5
+    periods, so each half holds 2.5 and the halves differ by about one bin.
+    This is periodic, not a trend. The 30 s ramp was shorter than one E2E.
+    Throughput 1,831.7–1,860.5 tokens/s, below c128.
+  - **Cross-check (`vllm bench serve`, random 512/256 prompts):** c1 101.1
+    vs ours 99.0 tokens/s (+2.1%), TPOT +0.9%; c64 1,996.4 vs 1,997.5
+    (−0.1%), TPOT −3.3%; **c256 2,277.1 vs 1,850.8 (+23.0%)**, TPOT 111.3 vs
+    137.2 ms. Our TTFT is lower at c64 (82.8 vs 336.0 ms): bench serve starts
+    all users at once. At c256 its duration includes the synchronized start
+    and the ramp-down tail, while our window is a staggered steady state
+    with prefill mixed into decode steps. Not yet confirmed.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -462,6 +487,7 @@ each needing Mohammed's yes.
 | 2026-09-23 | 6 | In-Modal load tester check, passed, includes vLLM image rebuild (`ap-alL2wtq71x0HiFGB2iF5IT`) | None | ≈240 | $0.028004 | $12.093013 |
 | 2026-09-23 | 6 | Prepare: checkpoint sha256 check + WikiText-103 prompt pool, passed (`ap-3es0914tudLlXFvC62Qz7f`) | None | n/a | $0.010784 | $12.103797 |
 | 2026-09-23 | 6 | AWQ probe, c=1 and c=256, passed (`ap-RyihFdSLFZprP7tolBMi7H`) | L40S | ≈392 | $0.281566 | $12.385363 |
+| 2026-09-23 | 6 | AWQ sweep + repeats + cross-check; 4 points failed the steady-state check (`ap-wlDNh5vqN7p0fgg6ncYgEb`) | L40S | ≈2,600 | $1.868826 | $14.254189 |
 
 **Phase 5 actual: $10.7004** against its $11.63 cap ($6 plus Phase 4's
 unused $4.73 and Phase 3's unused $0.90, both reallocated by Mohammed;
