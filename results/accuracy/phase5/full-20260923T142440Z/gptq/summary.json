@@ -1,0 +1,45 @@
+{
+  "failures": [],
+  "limited": false,
+  "limits": {
+    "mmlu": null,
+    "wikitext": null
+  },
+  "model_args": {
+    "dtype": "bfloat16",
+    "enable_prefix_caching": false,
+    "enforce_eager": true,
+    "gpu_memory_utilization": 0.75,
+    "max_model_len": 4096,
+    "pretrained": "/weights/quantized/Qwen3-8B-gptq-b968826d",
+    "seed": 1234,
+    "tokenizer": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218"
+  },
+  "passed": false,
+  "samples": {},
+  "state": "running mmlu",
+  "tasks": {
+    "mmlu": {
+      "command": [
+        "lm-eval",
+        "run",
+        "--model",
+        "vllm",
+        "--model_args",
+        "pretrained=/weights/quantized/Qwen3-8B-gptq-b968826d,tokenizer=/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218,dtype=bfloat16,max_model_len=4096,gpu_memory_utilization=0.75,enable_prefix_caching=false,enforce_eager=true,seed=1234",
+        "--tasks",
+        "mmlu",
+        "--batch_size",
+        "1024",
+        "--seed",
+        "0,1234,1234,1234",
+        "--output_path",
+        "/results/phase5/full-20260923T142440Z/gptq/mmlu/lm_eval_output",
+        "--num_fewshot",
+        "5",
+        "--log_samples"
+      ]
+    }
+  },
+  "variant": "gptq"
+}

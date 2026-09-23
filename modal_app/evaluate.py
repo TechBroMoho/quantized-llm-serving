@@ -23,6 +23,7 @@ import modal
 from modal_app.common import (
     EVAL_FULL_RESOURCES,
     EVAL_IMAGE,
+    EVAL_ONE_RESOURCES,
     EVAL_PREFETCH_RESOURCES,
     EVAL_PROBE_RESOURCES,
     HF_SECRET,
@@ -403,6 +404,20 @@ def eval_full(run: dict[str, Any], variants: list[str]) -> dict[str, Any]:
     )
 
 
+@app.function(
+    image=EVAL_IMAGE,
+    env=OFFLINE_ENV,
+    volumes={WEIGHTS_PATH: WEIGHTS, RESULTS_PATH: RESULTS},
+    **EVAL_ONE_RESOURCES.function_kwargs(),
+)
+def eval_one(run: dict[str, Any], variant: str) -> dict[str, Any]:
+    """The full evaluation for a single variant, with a one-variant timeout."""
+    limits: dict[str, int | None] = {task: None for task in TASKS}
+    return _evaluate(
+        run, [variant], limits, "full", EVAL_ONE_RESOURCES, FULL_TASK_TIMEOUT_S
+    )
+
+
 def _read(path: str) -> bytes | None:
     try:
         return b"".join(WEIGHTS.read_file(path))
@@ -468,4 +483,14 @@ def full(variants: str = "bf16,awq,gptq") -> None:
     unknown = set(names) - set(run["config"]["variants"])
     if unknown:
         raise SystemExit(f"unknown variants {sorted(unknown)}")
-    print(json.dumps(eval_full.remote(run, names), indent=2))
+    # spawn, not remote: the job must not depend on this laptop's client. A
+    # full run was cancelled when the Mac went to clamshell sleep while the
+    # entrypoint waited on .remote() (PROGRESS, "Things that went wrong").
+    # Progress and results are read from the results Volume.
+    if len(names) == 1:
+        call = eval_one.spawn(run, names[0])
+    else:
+        call = eval_full.spawn(run, names)
+    print(
+        f"spawned {call.object_id} for {names}; results in phase5/full-{run['stamp']}"
+    )

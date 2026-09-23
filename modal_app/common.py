@@ -147,6 +147,9 @@ EVAL_PROBE_RESOURCES = Resources("L40S", 4, 32768, 1200, 300)
 # 10,555 MMLU tokens/s on BF16, i.e. ~66 min per variant, ~3.3 h in total;
 # the timeout allows ~25% more. Host RSS peaked at 13.0 GiB in the probe.
 EVAL_FULL_RESOURCES = Resources("L40S", 4, 32768, 15000, 300)
+# One variant (e.g. rerunning GPTQ). full-20260923T142440Z: BF16 took 4,256 s,
+# AWQ 4,342 s (MMLU + WikiText), so 5,400 s leaves ~24%.
+EVAL_ONE_RESOURCES = Resources("L40S", 4, 32768, 5400, 300)
 
 
 def load_config(name: str) -> tuple[dict[str, Any], str]:

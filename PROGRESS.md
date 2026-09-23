@@ -2,12 +2,13 @@
 
 ## Status
 
-Phase 5 in progress (2026-09-23). Pipeline built (lm-eval 0.4.11 on the vLLM
-0.10.2 image, ADR-017), prefetch passed, and the timed BF16 probe passed on
-L40S (10,555 MMLU tokens/s). The full runs (BF16, AWQ, GPTQ; ~3.3 h, ~$7.94)
-await approval. Cumulative spend **$1.6182** (dashboard). Before Phase 6
-(approved, not yet built): a multi-process load tester revalidated in Modal
-(ADR-013), and `skip_special_tokens=false` with a chunk-count check (ADR-014).
+Phase 5 in progress (2026-09-23). BF16 (MMLU 74.88%, word perplexity 12.742)
+and AWQ (73.93%, 13.282) are complete. GPTQ was cancelled mid-run when the
+Mac slept; the entrypoint now spawns the job so it runs independently of the
+laptop. The GPTQ-only rerun awaits approval. Cumulative spend **$9.0154**
+(dashboard). Before Phase 6 (approved, not yet built): a multi-process load
+tester revalidated in Modal (ADR-013), and `skip_special_tokens=false` with a
+chunk-count check (ADR-014).
 
 ## Phase log
 
@@ -250,6 +251,25 @@ await approval. Cumulative spend **$1.6182** (dashboard). Before Phase 6
   - Full-run estimate from this rate: ~66 min per variant, ~3.3 h and ~$7.94
     for all three (timeout 15,000 s, envelope $9.98).
 
+- **Phase 5, full run 1 (run `full-20260923T142440Z`, $7.3972): BF16 and
+  AWQ complete; GPTQ cancelled.** L40S, `gpu_memory_utilization` 0.75.
+  - **BF16:** MMLU 5-shot **74.88% ± 0.35** (all 14,042 questions; macro
+    76.83%), WikiText-2 word perplexity **12.742** (62 documents). MMLU
+    scoring 64.0 min (10,200 tokens/s), process 4,170 s; WikiText 86 s. GPU
+    peak 42,929 MiB (~3.1 GiB headroom); host RSS 13.0 GiB. 0 truncations.
+  - **AWQ:** MMLU **73.93% ± 0.35** (macro 75.92%), WikiText-2 **13.282**.
+    MMLU scoring 66.2 min (3.5% slower than BF16), process 4,252 s.
+    Prompt fingerprints identical to BF16's. 617 questions lost and 483
+    gained (net 134 = 0.95 pp); McNemar χ² 16.08, p ≈ 6e-5.
+  - **GPTQ:** the input was cancelled at 10:29:45, ~42 min into MMLU, with no
+    error in the job. The Mac entered clamshell sleep at 10:28:05 (`pmset`
+    log); the local entrypoint was blocked on `.remote()`, and Modal stopped
+    the app about 100 s after its client went silent. lm-eval writes results
+    only at the end, so GPTQ's partial MMLU is lost (the partial `summary.json`
+    stays as evidence). Fix: `full` now `.spawn()`s the job and returns, so it
+    no longer depends on the laptop; a single variant runs as `eval_one`
+    with a 5,400 s timeout.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -273,6 +293,7 @@ await approval. Cumulative spend **$1.6182** (dashboard). Before Phase 6
 | 2026-09-23 | 5 | Eval prefetch, CPU, includes eval image build; gate failed on a false package-drift check (`ap-88OReY3mpGKjX70ev99mWR`) | None | n/a | $0.022514 | $1.387079 |
 | 2026-09-23 | 5 | Eval prefetch rerun with the fixed check, passed (`ap-BH19KuquiKpyE9PMWKPgEt`) | None | n/a | $0.020285 | $1.407364 |
 | 2026-09-23 | 5 | Timed probe, BF16, MMLU `--limit 10` + WikiText `--limit 5`, passed (`ap-BDLHfeHEYkcp93cPSBkH2Y`) | L40S | ≈317 | $0.210801 | $1.618165 |
+| 2026-09-23 | 5 | Full run 1: BF16 + AWQ complete; GPTQ cancelled ~42 min into MMLU when the Mac slept (`ap-upiufFw2kJEquSk8ZS6hmT`); cost may still settle | L40S | ≈11,380 | $7.397234 | $9.015399 |
 
 Phase 3 amounts are **actual** per-app costs from `modal billing report --for
 today --json` (saved in `results/validation/phase3/modal_billing_2026-09-23.json`),
@@ -336,3 +357,13 @@ the 1 TiB/month included.
   system dist-packages (six, setuptools, wheel, distro). The check kept the
   last copy of each name, not the one Python imports. Cost $0.0176; the probe
   was not started because the gate had failed.
+- Phase 5: the full run lost GPTQ ~42 min into MMLU (about $1.65 of GPU
+  time). The Mac went to clamshell sleep while `modal run --detach` waited on
+  `.remote()`, and Modal cancelled the input ~100 s later. `--detach` did not
+  protect a blocked client that went silent. The entrypoint now spawns the
+  job and exits. BF16 and AWQ, already saved, were unaffected.
+- Phase 5: `tests/test_timing_accuracy.py::test_mock_timing_accuracy` fails
+  intermittently (2 of 25 full-suite runs, 0 of 6 alone): a few per-request
+  gaps exceed ±5% (~1 ms at 20 ms ITL) under suite load, while the medians are
+  within 0.5%. The test and gate are unchanged; a separate investigation is
+  proposed.

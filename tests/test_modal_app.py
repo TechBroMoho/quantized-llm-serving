@@ -7,6 +7,7 @@ from modal_app.common import (
     DOWNLOAD_LARGE_RESOURCES,
     DOWNLOAD_RESOURCES,
     EVAL_FULL_RESOURCES,
+    EVAL_ONE_RESOURCES,
     EVAL_PREFETCH_RESOURCES,
     EVAL_PROBE_RESOURCES,
     HF_CHECK_RESOURCES,
@@ -37,6 +38,7 @@ def test_every_function_is_bounded_and_gpus_are_only_on_smokes() -> None:
         EVAL_PREFETCH_RESOURCES: (None, 1800),
         EVAL_PROBE_RESOURCES: ("L40S", 1200),
         EVAL_FULL_RESOURCES: ("L40S", 15000),
+        EVAL_ONE_RESOURCES: ("L40S", 5400),
     }
     for resources, (gpu, timeout) in expected.items():
         kwargs = resources.function_kwargs()

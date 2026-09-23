@@ -594,9 +594,27 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--variants", default="bf16,awq,gptq")
+    parser.add_argument(
+        "--variant-dir",
+        action="append",
+        default=[],
+        metavar="NAME=RUN_DIR",
+        help="read one variant from another run (same config required)",
+    )
     args = parser.parse_args()
     names = [name.strip() for name in args.variants.split(",") if name.strip()]
-    summaries = load_summaries(args.run_dir, names)
+    sources = {name: args.run_dir for name in names}
+    sources |= {
+        name: Path(path)
+        for name, path in (item.split("=", 1) for item in args.variant_dir)
+    }
+    summaries = {name: load_summaries(sources[name], [name])[name] for name in names}
+    configs = {
+        json.loads((sources[name] / "run.json").read_text())["run"]["config_sha256"]
+        for name in names
+    }
+    if len(configs) != 1:
+        raise SystemExit(f"variants come from runs with different configs: {configs}")
     for name, summary in summaries.items():
         if not summary.get("passed"):
             raise SystemExit(
@@ -608,6 +626,8 @@ def main() -> None:
         "awq": "AWQ W4A16-asym (pile-val calib.)",
         "gptq": "GPTQ W4A16-sym (ultrachat calib.)",
     }
+    comparison["sources"] = {name: str(path) for name, path in sources.items()}
+    comparison["config_sha256"] = configs.pop()
     (args.run_dir / "comparison.json").write_text(
         json.dumps(comparison, indent=2) + "\n", encoding="utf-8"
     )
