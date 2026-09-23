@@ -411,7 +411,7 @@ async def run_server_smoke(
             base_url, process, health_timeout_s
         )
         write_json(out_dir / "smoke_summary.json", summary | {"state": "healthy"})
-        checkpoint()
+        await asyncio.to_thread(checkpoint)
         load, records = await run_workload(
             f"{base_url}/v1/completions", model_name, pool, workload
         )
@@ -442,7 +442,7 @@ async def run_server_smoke(
             evidence, extra_failures = collect(base_url)
             summary["collected"] = evidence
             failures.extend(extra_failures)
-        checkpoint()
+        await asyncio.to_thread(checkpoint)
     except Exception as exc:  # recorded, then re-raised by the caller's check
         failures.append(f"{type(exc).__name__}: {exc}")
         summary["server_log_tail"] = log_tail(log_path)
@@ -454,7 +454,7 @@ async def run_server_smoke(
         summary["passed"] = not failures
         summary["state"] = "finished"
         write_json(out_dir / "smoke_summary.json", summary)
-        checkpoint()
+        await asyncio.to_thread(checkpoint)
     return summary
 
 
