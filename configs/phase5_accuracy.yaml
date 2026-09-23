@@ -1,0 +1,46 @@
+# Phase 5: accuracy of BF16, AWQ and GPTQ Qwen3-8B with lm-eval's vLLM backend.
+# Every variant gets exactly these settings; only `pretrained` changes (ADR-017).
+name: phase5-accuracy
+gpu: L40S
+checkpoints: phase4_quantize.yaml  # model id/revision and quantized paths
+variants: [bf16, awq, gptq]
+stack:
+  image: vllm/vllm-openai:v0.10.2 (docker/Dockerfile) + requirements/eval-linux.txt
+  lm_eval: "0.4.11"  # newest release supporting vLLM < 0.18
+lm_eval:
+  model: vllm
+  # Every variant is tokenized with the BF16 checkpoint's tokenizer files.
+  tokenizer: bf16
+  model_args:
+    dtype: bfloat16  # activations stay 16-bit for W4A16
+    max_model_len: 4096  # longest 5-shot MMLU request is 3,097 tokens (audit)
+    # Prompt-logprob logits (up to ~3.7 GB for a 4,095-token window) are
+    # allocated outside vLLM's memory profile, so leave extra headroom.
+    gpu_memory_utilization: 0.80
+    # vLLM 0.10.2 skips the prefix cache for prompt-logprob requests anyway;
+    # set it off explicitly, as in the performance runs.
+    enable_prefix_caching: false
+    # Log-likelihood requests are prefill-only (max_tokens=1), so CUDA graphs
+    # (decode-only) would add startup time without changing any result.
+    enforce_eager: true
+    seed: 1234
+  # A fixed batch bounds host memory: `auto` sends all 56,168 MMLU requests to
+  # one generate() call and keeps ~39M per-position logprob dicts alive.
+  batch_size: 1024
+  seed: "0,1234,1234,1234"  # lm-eval's default python/numpy/torch/fewshot seeds
+  apply_chat_template: false  # base-style prompts, identical for all variants
+  log_samples: true
+  tasks:
+    mmlu:
+      num_fewshot: 5
+      expected_samples: 14042
+      subtasks: 57
+    wikitext:
+      num_fewshot: null  # zero-shot rolling log-likelihood (task default)
+      expected_samples: 62
+probe:
+  # One variant, first N documents per (sub)task, to time the full run.
+  variant: bf16
+  limit:
+    mmlu: 10
+    wikitext: 5

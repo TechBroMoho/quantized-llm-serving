@@ -37,6 +37,7 @@ from modal_app.common import (
     load_config,
     manifest_path,
     model_dir,
+    quantized_dir,
     run_stamp,
 )
 
@@ -49,13 +50,6 @@ def calibration_dir(config: dict[str, Any], variant: str) -> str:
     return (
         f"{WEIGHTS_PATH}/calibration/{variant}-{config['model']['revision'][:8]}"
         f"-{calibration['revision'][:8]}"
-    )
-
-
-def quantized_dir(config: dict[str, Any], variant: str) -> str:
-    name = config["model"]["id"].split("/")[-1]
-    return (
-        f"{WEIGHTS_PATH}/quantized/{name}-{variant}-{config['model']['revision'][:8]}"
     )
 
 

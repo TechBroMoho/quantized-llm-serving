@@ -2,14 +2,13 @@
 
 ## Status
 
-Phase 4 complete (2026-09-23). Three servable variants of Qwen3-8B (BF16, AWQ
-W4A16-asym, GPTQ W4A16) each loaded in vLLM 0.10.2 on L40S and completed the
-5 fixed prompts. Phase 4 actual spend was **$1.2671** of its $6 cap;
-cumulative **$1.3646** (dashboard). `modal app list` shows nothing running.
-Before Phase 6 (approved, not yet built): a multi-process load tester
-revalidated in Modal (ADR-013), and `skip_special_tokens=false` with a
-chunk-count check (ADR-014). The next GPU work (Phase 5) needs an estimate and
-a yes.
+Phase 5 in progress (2026-09-23). The accuracy pipeline (lm-eval 0.4.11 on
+the vLLM 0.10.2 image, ADR-017) is built and rehearsed on CPU; the 5-shot
+MMLU prompts fit max-model-len 4096 (longest 3,097 tokens). No Phase 5 Modal
+run yet; the CPU prefetch and the timed BF16 probe await approval.
+Cumulative spend **$1.3646** (dashboard). Before Phase 6 (approved, not yet
+built): a multi-process load tester revalidated in Modal (ADR-013), and
+`skip_special_tokens=false` with a chunk-count check (ADR-014).
 
 ## Phase log
 
@@ -183,6 +182,36 @@ a yes.
   - Reproduce: `uv run modal run --detach -m modal_app.quantize::{prepare,awq,gptq,sanity}`
     (billable; `configs/phase4_quantize.yaml`). Raw files are in
     `results/quantization/phase4/`.
+
+- **Phase 5, preparation (2026-09-23, $0):** ADR-017.
+  - Stack: lm-eval **0.4.11** (0.4.12+ require vLLM ≥0.18), datasets 4.1.1,
+    evaluate 0.4.6 on top of the Dockerfile image. Resolved against the
+    image's own Phase 3 freeze as constraints: 33 packages added, 0 changed.
+    Every vLLM call in 0.4.11's backend exists in v0.10.2 (checked in source).
+    The CLI is `lm-eval run` (read from the pinned `--help`); MMLU (5-shot)
+    and WikiText (0-shot) run as two processes with identical `--model_args`.
+  - Prompt-length audit (`make eval-audit`, lm-eval's own request
+    construction, pinned Qwen3-8B tokenizer): MMLU 5-shot 56,168 requests,
+    39,160,912 tokens, longest **3,097** (high_school_european_history);
+    WikiText-2 104 windows, 347,162 tokens, longest 4,095. The truncation
+    limit at max-model-len 4096 is 4,095, so nothing is truncated
+    (`results/accuracy/phase5/prompt_lengths_local.json`). The probe
+    (`--limit` 10 / 5) is 2,280 requests / 1,382,712 tokens plus 8 windows /
+    27,069 tokens.
+  - vLLM 0.10.2 skips the prefix cache for prompt-logprob requests, so each
+    variant prefills all ~39.2M MMLU tokens; this drives the cost.
+  - CPU rehearsal (`make eval-rehearsal`): the exact `run_variant` →
+    checks → `compare` path with lm-eval's hf backend on two tiny random
+    Qwen3s, `--limit 2`/`1`. Both passed, 114 questions each, 0 truncation
+    warnings, identical prompt fingerprints, and net flipped questions (33
+    gained − 29 lost) reproduce the −3.51 pp delta
+    (`results/validation/phase5/rehearsal/`). A first attempt was SIGKILLed:
+    the hf backend with the vLLM chunk size 1024 ran the laptop out of
+    memory; the rehearsal now uses batch 8.
+  - `make check`: Ruff, strict mypy (16 files), 78 tests, instruction-file
+    comparison. One `make check` run during a concurrent rehearsal had one
+    failing test that I could not identify; 8 reruns passed and later passing
+    runs cleared pytest's record. Watch for it.
 
 ## Spend log
 

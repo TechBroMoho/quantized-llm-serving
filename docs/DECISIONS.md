@@ -528,3 +528,98 @@ BF16 original. On-disk safetensors shrank 62.77% (AWQ) and 62.94% (GPTQ);
 vLLM's model-loading memory shrank 62.61% and 62.78%. These are consistent
 with the ADR-001 analytical estimate and below the 68% placeholder. Details
 are in PROGRESS; the final claims wording is Phase 7/8 work.
+
+## ADR-017 — Phase 5 accuracy stack and protocol (2026-09-23)
+
+**Context.** SPEC Phase 5 asks for MMLU 5-shot and WikiText-2 word perplexity
+for BF16, AWQ and GPTQ with lm-eval's vLLM backend, identical settings, no
+chat template, and a context limit verified against the longest 5-shot prompt
+(ADR-008). The serving image pins vLLM 0.10.2.
+
+**Options.** lm-eval 0.4.13 (newest, 2026-08-31) and 0.4.12 declare
+`vllm>=0.18` for their vLLM extra. 0.4.11 (2026-02-13) is the newest release
+that still accepts older vLLM. The alternatives would be upgrading vLLM for
+evaluation only (a different engine from the one we serve) or lm-eval's HF
+backend (not the SPEC's backend, and transformers cannot decompress the AWQ
+zero points; see ADR-016).
+
+**Decision.**
+- *Stack.* `lm-eval==0.4.11`, `datasets==4.1.1` (the newest release whose
+  fsspec ≤2025.9.0 and dill <0.4.1 bounds admit the image's packages) and
+  `evaluate==0.4.6`, installed on top of the Dockerfile image
+  (`EVAL_IMAGE`). The resolved set (`requirements/eval-linux.txt`) was
+  compiled with the image's own Phase 3 `pip freeze` as constraints
+  (`requirements/vllm-image-constraints.txt`): it **adds 33 packages and
+  changes none**. The prefetch step re-checks this inside the built image.
+  Every vLLM call in 0.4.11's backend was checked against the v0.10.2 source:
+  `resolve_hf_chat_template(..., model_config=)`, the fallback imports
+  `vllm.transformers_utils.tokenizer.get_tokenizer` and `vllm.utils.get_open_port`,
+  `TokensPrompt`, `LLM(swap_space=...)`; `ray` (imported at module load) ships
+  with the CUDA image.
+- *CLI.* 0.4.11 uses the `lm-eval run` subcommand (bare `lm-eval --model ...`
+  still works); flags were read from its `--help`. `--num_fewshot` applies
+  to every task in one call, so each variant runs two processes with
+  identical `--model_args`: `--tasks mmlu --num_fewshot 5` and
+  `--tasks wikitext` (zero-shot, task default).
+- *Settings* (`configs/phase5_accuracy.yaml`, identical for all variants,
+  only `pretrained` differs): `dtype=bfloat16`, `max_model_len=4096`,
+  `gpu_memory_utilization=0.80`, `enable_prefix_caching=false`,
+  `enforce_eager=true`, `seed=1234`, `--batch_size 1024`,
+  `--seed 0,1234,1234,1234`, no `--apply_chat_template`, `--log_samples`.
+  Every variant uses the BF16 checkpoint's tokenizer files.
+- *Context limit.* A stub model fed through lm-eval's own `simple_evaluate`
+  (`llmbench.eval_audit`) recorded the token length of every request exactly
+  as the vLLM backend tokenizes it. MMLU 5-shot: 56,168 requests (14,042 ×
+  4 choices), 39,160,912 tokens, mean 697, **longest 3,097**
+  (`high_school_european_history`); WikiText-2: 104 rolling windows,
+  347,162 tokens, longest 4,095. The backend left-truncates above
+  `max_length − 1 = 4,095`, so **no request is truncated at 4096**. Any
+  "Truncating context" warning in a run log fails that run.
+- *No prefix-cache shortcut.* vLLM 0.10.2 skips the prefix cache for any
+  request with `prompt_logprobs` (`vllm/v1/core/kv_cache_manager.py`), and
+  lm-eval sends each of the four choices as a separate request, so all ~39.2M
+  MMLU tokens are prefilled per variant. Caching is still set off explicitly.
+- *Memory.* `--batch_size auto` would pass all 56,168 requests to one
+  `generate()` call and keep every prompt position's logprob dict (~39M
+  Python dicts, ~20 GB) alive at once, so requests go in fixed chunks of
+  1,024. On vLLM this only groups requests into `generate()` calls; the engine
+  still schedules its own token batches. Prompt-logprob logits (up to ~3.7 GB
+  for a 4,095-token window) are allocated outside vLLM's memory profile, hence
+  0.80 GPU memory utilization. Log-likelihood requests are prefill-only
+  (`max_tokens=1`), so CUDA graphs (decode-only) are skipped with
+  `enforce_eager`.
+- *Data.* A CPU-only prefetch downloads both datasets through lm-eval's own
+  task loading into the weights Volume (`eval-cache/hf-home`), recording the
+  Hub commit in each cache folder name, and reloads them offline. GPU runs
+  copy that cache to local disk and run with `HF_HUB_OFFLINE`/
+  `HF_DATASETS_OFFLINE`, so all variants read byte-identical data. The
+  MMLU few-shot examples are the first five `dev` questions of each subject
+  (lm-eval's `first_n` sampler), so the prompts are deterministic. Each run
+  stores a SHA-256 fingerprint of lm-eval's per-question `prompt_hash` values;
+  the comparison requires equal fingerprints across variants.
+- *Metrics.* The MMLU headline is lm-eval's `mmlu` group accuracy, weighted by
+  subject size (all 14,042 questions); the macro mean over 57 subjects is
+  secondary. **Accuracy delta = BF16 − quantized, in absolute percentage
+  points**; a relative drop is shown only as a labelled secondary number. The
+  per-subject extremes list each subject's question count (small subjects are
+  noisy: in a 100-question subject, 1 question = 1 pp), and paired
+  per-question flips (lost/gained vs BF16) are reported. WikiText-2 reports
+  `word_perplexity` over the 62 test documents, with lm-eval's disjoint
+  rolling windows of `max_length − 2 = 4,094` tokens; perplexity depends on
+  that window, so it is fixed for every variant.
+- *Calibration caveat.* AWQ was calibrated on pile-val (256 × 512 tokens) and
+  GPTQ on UltraChat (512 × 2,048), each following its official example
+  (ADR-016). An AWQ-vs-GPTQ difference therefore mixes method and calibration
+  data and must be reported that way.
+- *Base-style prompts.* Qwen3-8B is the post-trained (hybrid thinking) model.
+  Scoring it with plain 5-shot prompts and no chat template is standard
+  log-likelihood MMLU and is the same for every variant. The absolute numbers
+  are not directly comparable to Qwen's published figures, which use their
+  own harness.
+
+**Procedure.** CPU rehearsal (`make eval-rehearsal`: the same `run_variant`
+code with lm-eval's hf backend on tiny random Qwen3s) → CPU prefetch
+(BILLABLE, tiny) → timed probe on BF16 with `--limit` (MMLU first 10 questions
+per subject = 2,280 requests / 1,382,712 tokens; WikiText first 5 documents =
+8 windows / 27,069 tokens) → a measured full-run estimate → full run, each
+step with its own estimate and approval.

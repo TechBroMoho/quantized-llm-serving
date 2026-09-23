@@ -6,6 +6,9 @@ from llmbench.smoke import missing_flags
 from modal_app.common import (
     DOWNLOAD_LARGE_RESOURCES,
     DOWNLOAD_RESOURCES,
+    EVAL_FULL_RESOURCES,
+    EVAL_PREFETCH_RESOURCES,
+    EVAL_PROBE_RESOURCES,
     HF_CHECK_RESOURCES,
     HF_SMOKE_RESOURCES,
     QUANT_PREP_RESOURCES,
@@ -31,6 +34,9 @@ def test_every_function_is_bounded_and_gpus_are_only_on_smokes() -> None:
         QUANTIZE_AWQ_RESOURCES: ("L40S", 3600),
         QUANTIZE_GPTQ_RESOURCES: ("L40S", 4500),
         SANITY_RESOURCES: ("L40S", 1800),
+        EVAL_PREFETCH_RESOURCES: (None, 1800),
+        EVAL_PROBE_RESOURCES: ("L40S", 1200),
+        EVAL_FULL_RESOURCES: ("L40S", 14400),
     }
     for resources, (gpu, timeout) in expected.items():
         kwargs = resources.function_kwargs()

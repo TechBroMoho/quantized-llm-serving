@@ -37,9 +37,10 @@ python_version = "3.12"
 strict = true
 mypy_path = "src"
 
-# The quantization stack lives in its own pinned env (requirements/quantize.in).
+# The quantization and eval stacks live in their own pinned envs
+# (requirements/quantize.in, requirements/eval.in).
 [[tool.mypy.overrides]]
-module = ["llmcompressor", "llmcompressor.*", "datasets"]
+module = ["llmcompressor", "llmcompressor.*", "datasets", "lm_eval", "lm_eval.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

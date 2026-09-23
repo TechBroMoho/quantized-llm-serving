@@ -1,0 +1,8 @@
+# Phase 5 accuracy stack, installed on top of vllm/vllm-openai:v0.10.2.
+# lm-eval 0.4.11 is the newest release whose vLLM backend still supports
+# vLLM < 0.18 (0.4.12+ require vllm>=0.18; ADR-017). datasets 4.1.1 is the
+# newest release whose fsspec/dill bounds match the packages already in the
+# image, so nothing vLLM depends on is upgraded.
+lm-eval==0.4.11
+datasets==4.1.1
+evaluate==0.4.6

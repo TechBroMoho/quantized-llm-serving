@@ -20,3 +20,6 @@ htmlcov/
 models/
 checkpoints/
 sparse_logs/
+
+# lm-eval per-sample outputs stay on the Modal Volume (see scripts/sync_accuracy.py)
+results/**/samples_*.jsonl

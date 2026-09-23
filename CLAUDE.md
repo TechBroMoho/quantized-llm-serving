@@ -45,7 +45,13 @@ make docker-check                          # hadolint + docker compose config, $
 make modal-download / modal-checks         # Modal CPU-only download + image checks (BILLABLE, tiny)
 make smoke (smoke-vllm / smoke-hf)         # Modal L4 smoke tests, detached (BILLABLE, small)
 make sync-results                          # copy phase3 results from the Modal Volume, $0
-make quantize / eval / bench CONFIG=...    # Modal GPU jobs (BILLABLE, ask first; Phase 4+, not yet implemented)
+make quantize-rehearsal                    # CPU rehearsal of the Phase 4 quantization code, $0
+uv run modal run --detach -m modal_app.quantize::{prepare,awq,gptq,sanity}  # Phase 4 (BILLABLE, ask first)
+make eval-rehearsal / eval-audit           # CPU rehearsal + prompt-length audit of the eval code, $0
+make eval-prefetch                         # Modal CPU: eval image check + datasets (BILLABLE, tiny)
+make eval-probe / eval-full                # Modal L40S accuracy runs, detached (BILLABLE, ask first)
+make sync-accuracy / accuracy-table RUN_DIR=...  # copy Phase 5 results, build the table, $0
+make bench CONFIG=...                      # Phase 6 GPU benchmarks (BILLABLE; not yet implemented)
 make plots / report                        # regenerate charts + RESULTS.md from results/, $0 (Phase 7)
 ```
 

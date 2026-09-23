@@ -1,0 +1,45 @@
+{
+  "tokenizer": ".cache/hf-eval/hub/models--Qwen--Qwen3-8B/snapshots/b968826d9c46dd6066d109eabc6255188de91218",
+  "max_length": 4096,
+  "limits": {},
+  "lm_eval_version": "0.4.11",
+  "tasks": {
+    "mmlu_5shot": {
+      "requests": 56168,
+      "requests_by_type": {
+        "loglikelihood": 56168
+      },
+      "total_tokens": 39160912,
+      "mean_tokens": 697.21036889332,
+      "max_tokens": 3097,
+      "longest_task": "mmlu_high_school_european_history",
+      "longest_tasks": {
+        "mmlu_high_school_european_history": 3097,
+        "mmlu_high_school_us_history": 2430,
+        "mmlu_professional_law": 2159,
+        "mmlu_high_school_world_history": 1832,
+        "mmlu_security_studies": 1399
+      },
+      "truncation_limit": 4095,
+      "requests_over_limit": 0,
+      "fits": true
+    },
+    "wikitext": {
+      "requests": 104,
+      "requests_by_type": {
+        "rolling_window": 104
+      },
+      "total_tokens": 347162,
+      "mean_tokens": 3338.096153846154,
+      "max_tokens": 4095,
+      "longest_task": "wikitext",
+      "longest_tasks": {
+        "wikitext": 4095
+      },
+      "truncation_limit": 4095,
+      "requests_over_limit": 0,
+      "fits": true
+    }
+  },
+  "fits": true
+}

@@ -39,9 +39,31 @@ OFFLINE_ENV = {
 
 # Built from our Dockerfile; the inherited api_server ENTRYPOINT must be
 # cleared so Modal can start its own container entrypoint.
-VLLM_IMAGE = (
-    modal.Image.from_dockerfile(REPO / "docker" / "Dockerfile", context_dir=REPO)
-    .entrypoint([])
+_VLLM_BASE = modal.Image.from_dockerfile(
+    REPO / "docker" / "Dockerfile", context_dir=REPO
+).entrypoint([])
+VLLM_IMAGE = _VLLM_BASE.add_local_python_source("modal_app")
+
+# Phase 5: the same serving image plus lm-eval. The resolved set only adds
+# packages; the image's own freeze is a pip constraint, so vLLM, torch and
+# transformers cannot move (checked again inside the image by eval_env).
+_EVAL_REQ = "/opt/llmbench/requirements"
+EVAL_IMAGE = (
+    _VLLM_BASE.add_local_file(
+        REPO / "requirements" / "eval-linux.txt",
+        f"{_EVAL_REQ}/eval-linux.txt",
+        copy=True,
+    )
+    .add_local_file(
+        REPO / "requirements" / "vllm-image-constraints.txt",
+        f"{_EVAL_REQ}/vllm-image-constraints.txt",
+        copy=True,
+    )
+    .run_commands(
+        "python3 -m pip install --no-cache-dir"
+        f" -r {_EVAL_REQ}/eval-linux.txt -c {_EVAL_REQ}/vllm-image-constraints.txt"
+    )
+    # llmbench itself is already on PYTHONPATH from the Dockerfile's COPY.
     .add_local_python_source("modal_app")
 )
 
@@ -117,6 +139,13 @@ QUANT_PREP_RESOURCES = Resources(None, 2, 8192, 1500, 300)
 QUANTIZE_AWQ_RESOURCES = Resources("L40S", 4, 49152, 3600, 300)
 QUANTIZE_GPTQ_RESOURCES = Resources("L40S", 4, 65536, 4500, 300)
 SANITY_RESOURCES = Resources("L40S", 4, 32768, 1800, 300)
+# Phase 5. The prefetch downloads the two datasets and runs the length audit.
+EVAL_PREFETCH_RESOURCES = Resources(None, 2, 8192, 1800, 300)
+# Probe: one variant with --limit; bounded well below the planned envelope.
+EVAL_PROBE_RESOURCES = Resources("L40S", 4, 32768, 1200, 300)
+# Full run, three variants in one container. Provisional: the timeout is set
+# from the probe's measured rate before the full run is proposed.
+EVAL_FULL_RESOURCES = Resources("L40S", 4, 32768, 14400, 300)
 
 
 def load_config(name: str) -> tuple[dict[str, Any], str]:
@@ -129,6 +158,14 @@ def load_config(name: str) -> tuple[dict[str, Any], str]:
 
 def model_dir(model_id: str, revision: str) -> str:
     return f"{WEIGHTS_PATH}/{model_id}/{revision}"
+
+
+def quantized_dir(config: dict[str, Any], variant: str) -> str:
+    """Where Phase 4 wrote a verified quantized checkpoint on the weights Volume."""
+    name = config["model"]["id"].split("/")[-1]
+    return (
+        f"{WEIGHTS_PATH}/quantized/{name}-{variant}-{config['model']['revision'][:8]}"
+    )
 
 
 def manifest_path(model_id: str, revision: str) -> str:
