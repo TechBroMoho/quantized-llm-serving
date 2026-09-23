@@ -54,7 +54,7 @@ make sync-accuracy / accuracy-table RUN_DIR=...  # copy Phase 5 results, build t
 make modal-loadtest-check                  # Modal CPU: ADR-013 load tester gates in the vLLM image (BILLABLE, tiny)
 make bench-prompts-rehearsal               # $0: Phase 6 prompt build on WikiText-103 validation
 make bench-prepare                         # Modal CPU: checkpoint sha256 check + prompt pool (BILLABLE, tiny)
-make bench LIFETIME=probe|bf16|awq|gptq|maxbatch|hf  # Phase 6 L40S lifetimes, spawned (BILLABLE, ask first)
+make bench LIFETIME=<name in phase6_bench.yaml> [DROP=c256]  # Phase 6 L40S lifetimes, spawned (BILLABLE, ask first)
 make sync-loadtest-check / sync-bench      # copy Phase 6 check / benchmark results, $0
 make plots / report                        # regenerate charts + RESULTS.md from results/, $0 (Phase 7)
 ```

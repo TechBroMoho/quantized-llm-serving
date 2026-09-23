@@ -22,11 +22,14 @@ from typing import Any
 import modal
 
 from modal_app.common import (
+    BENCH_AWQ_FOLLOWUP_RESOURCES,
     BENCH_AWQ_RESOURCES,
     BENCH_BF16_RESOURCES,
     BENCH_GPTQ_RESOURCES,
-    BENCH_HF_RESOURCES,
-    BENCH_MAXBATCH_RESOURCES,
+    BENCH_HF_NAIVE_RESOURCES,
+    BENCH_HF_STATIC_RESOURCES,
+    BENCH_MAXBATCH16_RESOURCES,
+    BENCH_MAXBATCH64_RESOURCES,
     BENCH_PREPARE_RESOURCES,
     BENCH_PROBE_RESOURCES,
     EVAL_IMAGE,
@@ -291,7 +294,11 @@ def _vllm_lifetimes(run: dict[str, Any], names: list[str], resources: Resources)
                     seed=int(workload["seed"]),
                     model=served,
                 ),
-                points=resolve_points(config["points"], spec["points"]),
+                points=[
+                    p
+                    for p in resolve_points(config["points"], spec["points"])
+                    if p.label not in run.get("drop", [])
+                ],
                 processes=int(workload["client_processes"]),
                 out_dir=out,
                 input_tokens=int(workload["input_tokens"]),
@@ -301,9 +308,18 @@ def _vllm_lifetimes(run: dict[str, Any], names: list[str], resources: Resources)
                 validated_chunks_per_s=float(workload["validated_client_chunks_per_s"]),
                 env=OFFLINE_ENV,
                 checkpoint=RESULTS.commit,
+                e2e_seeds={
+                    int(k): float(v) for k, v in spec.get("e2e_seeds", {}).items()
+                },
+                repeat_best=int(spec.get("repeat_best", 0)),
                 metadata=_metadata(run, resources)
                 | prepared
-                | {"lifetime": name, "variant": variant, "checkpoint": path},
+                | {
+                    "lifetime": name,
+                    "variant": variant,
+                    "checkpoint": path,
+                    "dropped_points": run.get("drop", []),
+                },
                 after_points=(
                     _cross_check(run | {"lifetime": name}, served, path)
                     if spec.get("cross_check")
@@ -366,21 +382,35 @@ def gptq_fn(run: dict[str, Any]) -> Any:
     image=VLLM_IMAGE,
     env=OFFLINE_ENV,
     volumes=_VLLM_VOLUMES,
-    **BENCH_MAXBATCH_RESOURCES.function_kwargs(),
+    **BENCH_AWQ_FOLLOWUP_RESOURCES.function_kwargs(),
 )
-def maxbatch_fn(run: dict[str, Any]) -> Any:
-    return _vllm_lifetimes(
-        run, ["maxbatch-16", "maxbatch-64"], BENCH_MAXBATCH_RESOURCES
-    )
+def awq_followup_fn(run: dict[str, Any]) -> Any:
+    return _vllm_lifetimes(run, ["awq-followup"], BENCH_AWQ_FOLLOWUP_RESOURCES)
 
 
 @app.function(
-    image=HF_IMAGE,
+    image=VLLM_IMAGE,
     env=OFFLINE_ENV,
-    volumes={WEIGHTS_PATH: WEIGHTS, RESULTS_PATH: RESULTS},
-    **BENCH_HF_RESOURCES.function_kwargs(),
+    volumes=_VLLM_VOLUMES,
+    **BENCH_MAXBATCH16_RESOURCES.function_kwargs(),
 )
-def hf_fn(run: dict[str, Any]) -> Any:
+def maxbatch16_fn(run: dict[str, Any]) -> Any:
+    return _vllm_lifetimes(run, ["maxbatch-16"], BENCH_MAXBATCH16_RESOURCES)
+
+
+@app.function(
+    image=VLLM_IMAGE,
+    env=OFFLINE_ENV,
+    volumes=_VLLM_VOLUMES,
+    **BENCH_MAXBATCH64_RESOURCES.function_kwargs(),
+)
+def maxbatch64_fn(run: dict[str, Any]) -> Any:
+    return _vllm_lifetimes(run, ["maxbatch-64"], BENCH_MAXBATCH64_RESOURCES)
+
+
+def _hf_lifetime(run: dict[str, Any], name: str, resources: Resources) -> Any:
+    """One HF baseline lifetime. Static mode first runs the OOM probe, then
+    derives its point timings from the measured batch times (ADR-020/022)."""
     import asyncio
     import sys
     import time
@@ -390,134 +420,158 @@ def hf_fn(run: dict[str, Any]) -> Any:
     from llmbench.smoke import write_json
 
     function_started = time.monotonic()
-
     config = run["config"]
     workload = config["workload"]
     hf = config["hf"]
     prepared = _require_prepared(run, "bf16")
     path = checkpoint_path(run, "bf16")
-    summaries = {}
-    for name in ("hf-naive", "hf-static"):
-        spec = config["lifetimes"][name]
-        out = Path(RESULTS_PATH) / "phase6" / f"{name}-{run['stamp']}"
-        out.mkdir(parents=True, exist_ok=True)
-        command = [
-            sys.executable,
-            "-m",
-            "llmbench.baseline.hf_server",
-            "--model",
-            path,
-            "--mode",
-            spec["mode"],
-            "--dtype",
-            hf["dtype"],
-            "--host",
-            "127.0.0.1",
-            "--port",
-            str(PORT),
+    spec = config["lifetimes"][name]
+    repeat_best = int(spec.get("repeat_best", 0))
+    out = Path(RESULTS_PATH) / "phase6" / f"{name}-{run['stamp']}"
+    out.mkdir(parents=True, exist_ok=True)
+    command = [
+        sys.executable,
+        "-m",
+        "llmbench.baseline.hf_server",
+        "--model",
+        path,
+        "--mode",
+        spec["mode"],
+        "--dtype",
+        hf["dtype"],
+        "--host",
+        "127.0.0.1",
+        "--port",
+        str(PORT),
+    ]
+    batch_size = None
+    static_plan = None
+    points = resolve_points(config["points"], spec["points"])
+    if spec["mode"] == "static":
+        probe_out = out / "oom_probe.json"
+        done = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "llmbench.baseline.oom_probe",
+                "--model",
+                path,
+                "--prompts",
+                prompt_pool_path(config),
+                "--output-tokens",
+                str(workload["output_tokens"]),
+                "--candidates",
+                ",".join(str(c) for c in hf["oom_candidates"]),
+                "--dtype",
+                hf["dtype"],
+                "--out",
+                str(probe_out),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=1200,
+            check=False,
+        )
+        (out / "oom_probe.log").write_text(done.stdout + done.stderr)
+        RESULTS.commit()
+        if done.returncode != 0:
+            raise RuntimeError(f"OOM probe failed: {done.stderr[-2000:]}")
+        probe = json.loads(probe_out.read_text())
+        batch_size = int(probe["chosen_batch_size"])
+        points, static_plan = static_points_from_probe(
+            resolve_points(config["points"], spec["points"], batch_size), probe
+        )
+        # Server start (~150 s) + points + idle waits/stop; repeats of the best
+        # point are budgeted at the longest point. Trim repeats to fit.
+        remaining = resources.timeout_s - (time.monotonic() - function_started)
+        base_needed = 150 + sum(p.warmup_s + p.window_s + 10 for p in points) + 120
+        longest = max(p.warmup_s + p.window_s + 10 for p in points)
+        while repeat_best and base_needed + repeat_best * longest > remaining:
+            repeat_best -= 1
+        needed = base_needed + repeat_best * longest
+        write_json(
+            out / "static_plan.json",
+            {
+                "batch_size": batch_size,
+                "points": static_plan,
+                "needed_s": needed,
+                "remaining_s": remaining,
+                "repeat_best_configured": int(spec.get("repeat_best", 0)),
+                "repeat_best_used": repeat_best,
+            },
+        )
+        RESULTS.commit()
+        if needed > remaining:
+            raise RuntimeError(
+                f"HF static plan needs {needed:.0f} s, only {remaining:.0f} s "
+                "remain even without repeats (see static_plan.json)"
+            )
+        command += [
+            "--batch-size",
+            str(batch_size),
+            "--batch-wait-ms",
+            str(hf["batch_wait_ms"]),
         ]
-        batch_size = None
-        static_plan = None
-        points = (
-            resolve_points(config["points"], spec["points"])
-            if spec["mode"] != "static"
-            else []
-        )
-        if spec["mode"] == "static":
-            probe_out = out / "oom_probe.json"
-            done = subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "llmbench.baseline.oom_probe",
-                    "--model",
-                    path,
-                    "--prompts",
-                    prompt_pool_path(config),
-                    "--output-tokens",
-                    str(workload["output_tokens"]),
-                    "--candidates",
-                    ",".join(str(c) for c in hf["oom_candidates"]),
-                    "--dtype",
-                    hf["dtype"],
-                    "--out",
-                    str(probe_out),
-                ],
-                capture_output=True,
-                text=True,
-                timeout=1200,
-                check=False,
-            )
-            (out / "oom_probe.log").write_text(done.stdout + done.stderr)
-            RESULTS.commit()
-            if done.returncode != 0:
-                raise RuntimeError(f"OOM probe failed: {done.stderr[-2000:]}")
-            probe = json.loads(probe_out.read_text())
-            batch_size = int(probe["chosen_batch_size"])
-            points, static_plan = static_points_from_probe(
-                resolve_points(config["points"], spec["points"], batch_size), probe
-            )
-            # Server start (~150 s measured) + each point + idle waits/stop.
-            needed = 150 + sum(p.warmup_s + p.window_s + 10 for p in points) + 120
-            remaining = BENCH_HF_RESOURCES.timeout_s - (
-                time.monotonic() - function_started
-            )
-            write_json(
-                out / "static_plan.json",
-                {
-                    "batch_size": batch_size,
-                    "points": static_plan,
-                    "needed_s": needed,
-                    "remaining_s": remaining,
-                },
-            )
-            RESULTS.commit()
-            if needed > remaining:
-                raise RuntimeError(
-                    f"HF static plan needs {needed:.0f} s, only {remaining:.0f} s "
-                    "remain in this function: stopping to ask (see static_plan.json)"
-                )
-            command += [
-                "--batch-size",
-                str(batch_size),
-                "--batch-wait-ms",
-                str(hf["batch_wait_ms"]),
-            ]
-        summaries[name] = asyncio.run(
-            run_lifetime(
-                label=name,
-                command=command,
-                base_url=f"http://127.0.0.1:{PORT}",
-                kind="hf",
-                payloads=NpyPromptPayloads(
-                    prompt_pool_path(config),
-                    output_tokens=int(workload["output_tokens"]),
-                    seed=int(workload["seed"]),
-                    model="qwen3-8b-bf16-hf",
-                ),
-                points=points,
-                processes=int(workload["client_processes"]),
-                out_dir=out,
-                input_tokens=int(workload["input_tokens"]),
+    return asyncio.run(
+        run_lifetime(
+            label=name,
+            command=command,
+            base_url=f"http://127.0.0.1:{PORT}",
+            kind="hf",
+            payloads=NpyPromptPayloads(
+                prompt_pool_path(config),
                 output_tokens=int(workload["output_tokens"]),
-                health_timeout_s=float(hf["health_timeout_s"]),
-                idle_timeout_s=float(workload["idle_timeout_s"]),
-                validated_chunks_per_s=float(workload["validated_client_chunks_per_s"]),
-                env=OFFLINE_ENV,
-                checkpoint=RESULTS.commit,
-                metadata=_metadata(run, BENCH_HF_RESOURCES)
-                | prepared
-                | {
-                    "lifetime": name,
-                    "variant": "bf16",
-                    "engine": "hf",
-                    "static_batch_size": batch_size,
-                    "static_plan": static_plan,
-                    "checkpoint": path,
-                },
-            )
+                seed=int(workload["seed"]),
+                model="qwen3-8b-bf16-hf",
+            ),
+            points=[p for p in points if p.label not in run.get("drop", [])],
+            processes=int(workload["client_processes"]),
+            out_dir=out,
+            input_tokens=int(workload["input_tokens"]),
+            output_tokens=int(workload["output_tokens"]),
+            health_timeout_s=float(hf["health_timeout_s"]),
+            idle_timeout_s=float(workload["idle_timeout_s"]),
+            validated_chunks_per_s=float(workload["validated_client_chunks_per_s"]),
+            repeat_best=repeat_best,
+            env=OFFLINE_ENV,
+            checkpoint=RESULTS.commit,
+            metadata=_metadata(run, resources)
+            | prepared
+            | {
+                "lifetime": name,
+                "variant": "bf16",
+                "engine": "hf",
+                "static_batch_size": batch_size,
+                "static_plan": static_plan,
+                "repeat_best_used": repeat_best,
+                "checkpoint": path,
+                "dropped_points": run.get("drop", []),
+            },
         )
-    return summaries
+    )
+
+
+_HF_VOLUMES = {WEIGHTS_PATH: WEIGHTS, RESULTS_PATH: RESULTS}
+
+
+@app.function(
+    image=HF_IMAGE,
+    env=OFFLINE_ENV,
+    volumes=_HF_VOLUMES,
+    **BENCH_HF_NAIVE_RESOURCES.function_kwargs(),
+)
+def hf_naive_fn(run: dict[str, Any]) -> Any:
+    return _hf_lifetime(run, "hf-naive", BENCH_HF_NAIVE_RESOURCES)
+
+
+@app.function(
+    image=HF_IMAGE,
+    env=OFFLINE_ENV,
+    volumes=_HF_VOLUMES,
+    **BENCH_HF_STATIC_RESOURCES.function_kwargs(),
+)
+def hf_static_fn(run: dict[str, Any]) -> Any:
+    return _hf_lifetime(run, "hf-static", BENCH_HF_STATIC_RESOURCES)
 
 
 # --- Local entrypoints ------------------------------------------------------
@@ -559,11 +613,14 @@ def _prepare_run() -> dict[str, Any]:
 
 _GPU_FUNCTIONS = {
     "probe": probe_fn,
-    "bf16": bf16_fn,
     "awq": awq_fn,
+    "awq-followup": awq_followup_fn,
+    "bf16": bf16_fn,
+    "hf-naive": hf_naive_fn,
+    "hf-static": hf_static_fn,
     "gptq": gptq_fn,
-    "maxbatch": maxbatch_fn,
-    "hf": hf_fn,
+    "maxbatch-16": maxbatch16_fn,
+    "maxbatch-64": maxbatch64_fn,
 }
 
 
@@ -575,10 +632,12 @@ def prepare() -> None:
 
 
 @app.local_entrypoint()
-def run(lifetime: str) -> None:
+def run(lifetime: str, drop: str = "") -> None:
+    """`--drop c256,...` trims points (budget cuts), recorded in the results."""
     if lifetime not in _GPU_FUNCTIONS:
         raise SystemExit(f"lifetime must be one of {sorted(_GPU_FUNCTIONS)}")
     plan = _prepare_run()
+    plan["drop"] = [label for label in drop.split(",") if label]
     if plan["git"]["dirty"]:
         print("warning: uncommitted changes; the recorded commit may not match")
     call = _GPU_FUNCTIONS[lifetime].spawn(plan)

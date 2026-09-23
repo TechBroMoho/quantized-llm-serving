@@ -347,10 +347,13 @@ def test_static_points_follow_the_measured_batch_time() -> None:
     assert c4.warmup_s == 20 and c4.window_s == 120  # config already long enough
     # 2B users wait for two 40 s batches: E2E 80 s -> warmup 20 + 1.25 * 80 = 120.
     assert plan[1]["expected_e2e_s"] == 80.0 and c2b.warmup_s == 120
-    assert c2b.window_s == 180 and c2b.timeout_s == 900
+    # c = 128 >= 128: the window covers 10 batch cycles of 40 s (ADR-022).
+    assert c2b.window_s == 400 and c2b.timeout_s == 900
+    assert not c2b.adapt and not c4.adapt  # timings are final; no re-adaptation
     slow = probe | {"fitted": [{"batch_size": 64, "seconds": 90.0}]}
-    (_, slow_c2b), _ = static_points_from_probe(base, slow)
-    assert slow_c2b.window_s == 270 and slow_c2b.warmup_s == 245
+    (slow_c4, slow_c2b), _ = static_points_from_probe(base, slow)
+    assert slow_c2b.window_s == 900 and slow_c2b.warmup_s == 245
+    assert slow_c4.window_s == 270  # below 128: three batch cycles
 
 
 def test_perf_report_takes_medians_of_passed_repeats(tmp_path: Path) -> None:
@@ -394,3 +397,132 @@ def test_perf_report_takes_medians_of_passed_repeats(tmp_path: Path) -> None:
     assert round(head["decode_speedup_vs_bf16"]["awq"], 2) == 2.1
     assert head["peak_output_tokens_per_s"]["awq"]["median"] == 2000
     assert head["engine_gain_vllm_bf16_vs_hf"]["naive"] == 100.0
+
+
+def test_high_concurrency_timing_follows_the_expected_request_duration() -> None:
+    from llmbench.bench import adapt_point, expected_e2e
+
+    history = [
+        {
+            "label": "c64",
+            "concurrency": 64,
+            "e2e_p50": 8.19,
+            "tpot_p50": 0.0317,
+            "ttft_p50": 0.0828,
+        },
+        {
+            "label": "c128",
+            "concurrency": 128,
+            "e2e_p50": 14.87,
+            "tpot_p50": 0.0578,
+            "ttft_p50": 0.162,
+        },
+    ]
+    base = BenchPoint("c256", 256, ramp_s=30, warmup_s=80, window_s=180, timeout_s=600)
+    # Extrapolated from c64/c128 (AWQ's real E2E at c256 was 35.3 s).
+    e2e, source = expected_e2e(256, history, {}, 256)
+    assert round(e2e, 1) == 29.7 and "x2" in source
+    point, timing = adapt_point(base, history, {}, 256)
+    assert point.ramp_s == 30 and point.warmup_s == 80 and point.window_s == 300
+    # A measured seed wins over extrapolation.
+    seeded, timing = adapt_point(base, history, {256: 35.3}, 256)
+    assert seeded.ramp_s == 36 and seeded.warmup_s == 80  # max(80, 75)
+    assert seeded.window_s == 355 and timing["source"].startswith("measured earlier")
+    # A point already measured in this lifetime wins over the seed.
+    again, timing = adapt_point(
+        base,
+        history + [dict(history[1], label="c256", concurrency=256, e2e_p50=40.0)],
+        {256: 35.3},
+        256,
+    )
+    assert again.window_s == 400 and timing["source"].startswith("measured here")
+    # Below 128, diagnostics' ramp, and pre-derived timings are left alone.
+    low = BenchPoint("c64", 64, 15, 40, 180, 600)
+    assert adapt_point(low, history, {}, 256) == (low, None)
+    sync = BenchPoint(
+        "c256-sync", 256, 0, 80, 180, 600, diagnostic=True, adapt_ramp=False
+    )
+    adapted_sync, _ = adapt_point(sync, history, {256: 35.3}, 256)
+    assert adapted_sync.ramp_s == 0 and adapted_sync.window_s == 355
+
+
+def test_best_passing_point_is_repeated_after_the_sweep(tmp_path: Path) -> None:
+    port = _port()
+    command = [
+        sys.executable,
+        "-m",
+        "llmbench.mock.server",
+        "--port",
+        str(port),
+        "--ttft-ms",
+        "5",
+        "--itl-ms",
+        "2",
+        "--tokens",
+        "4",
+    ]
+    summary = asyncio.run(
+        run_lifetime(
+            label="repeats",
+            command=command,
+            base_url=f"http://127.0.0.1:{port}",
+            kind="none",
+            payloads=NpyPromptPayloads(
+                _pool(tmp_path, 16), output_tokens=4, seed=0, model="m"
+            ),
+            points=POINTS,
+            processes=2,
+            out_dir=tmp_path / "out",
+            input_tokens=16,
+            output_tokens=4,
+            health_timeout_s=60,
+            idle_timeout_s=10,
+            max_half_deviation=0.5,
+            repeat_best=2,
+        )
+    )
+    labels = [p["label"] for p in summary["points"]]
+    best = max(summary["points"][:2], key=lambda p: p["output_token_throughput_per_s"])
+    assert labels == ["c2", "c4", f"{best['label']}-r2", f"{best['label']}-r3"]
+    assert summary["passed"], summary["failures"]
+
+
+def test_perf_report_merges_follow_ups_and_skips_diagnostics(tmp_path: Path) -> None:
+    from llmbench.perf_report import headline, load_points
+
+    def point(run: str, label: str, tps: float, ok=True, diagnostic=False):
+        d = tmp_path / run / label
+        d.mkdir(parents=True)
+        pct = {"p50": 0.01, "p90": 0.01, "p95": 0.01, "p99": 0.01}
+        d.joinpath("summary.json").write_text(
+            json.dumps(
+                {
+                    "config": {"concurrency": 128},
+                    "passed": ok,
+                    "failures": [],
+                    "diagnostic": diagnostic,
+                    "output_token_throughput_per_s": tps,
+                    "request_throughput_per_s": 1.0,
+                    "completed_in_window_requests": 10,
+                    "ttft_s": pct,
+                    "tpot_s": pct,
+                    "itl_s": pct,
+                    "e2e_s": pct,
+                    "half_window_token_deviation": 0.01,
+                }
+            )
+        )
+
+    point("awq-20260101T000000Z", "c128", 2200)
+    point("awq-followup-20260102T000000Z", "c128-r2", 2100)
+    point("awq-followup-20260102T000000Z", "c128-r3", 2300)
+    point("awq-followup-20260102T000000Z", "c256-sync", 9000, diagnostic=True)
+    head = headline(load_points(tmp_path))
+    peak = head["peak_output_tokens_per_s"]["awq"]
+    assert peak == {
+        "median": 2200,
+        "runs": 3,
+        "min": 2100,
+        "max": 2300,
+        "point": "c128",
+    }

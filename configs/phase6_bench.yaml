@@ -73,8 +73,8 @@ points:
   c64: {concurrency: 64, ramp_s: 15, warmup_s: 40, window_s: 180, timeout_s: 600}
   c128: {concurrency: 128, ramp_s: 20, warmup_s: 50, window_s: 180, timeout_s: 600}
   c256: {concurrency: 256, ramp_s: 30, warmup_s: 80, window_s: 180, timeout_s: 600}
-  # --max-num-seqs 16 queues 240 users: E2E ~70 s (~4.4 s per request, 16 at a time).
-  c256-mb16: {concurrency: 256, ramp_s: 30, warmup_s: 120, window_s: 180, timeout_s: 900}
+  # AWQ follow-up (ADR-022): timings adapt at c >= 128; all-at-once start.
+  c256-sync: {concurrency: 256, ramp_s: 0, warmup_s: 80, window_s: 180, timeout_s: 900, diagnostic: true, adapt_ramp: false}
   probe-c1: {concurrency: 1, ramp_s: 0, warmup_s: 10, window_s: 60, timeout_s: 600}
   probe-c256: {concurrency: 256, ramp_s: 30, warmup_s: 60, window_s: 90, timeout_s: 600}
   # HF: naive queues every request behind the others (~7 s each, estimated),
@@ -84,40 +84,55 @@ points:
   hf-cB: {concurrency: B, ramp_s: 10, warmup_s: 60, window_s: 180, timeout_s: 900}
   hf-c2B: {concurrency: 2B, ramp_s: 20, warmup_s: 90, window_s: 180, timeout_s: 900}
 
-# One server lifetime each. "-r2"/"-r3" repeat a point in the same lifetime
-# (headline repeats; median of 3 with the sweep's own run).
+# One server lifetime each. "-rK" repeats a point. `repeat_best` repeats the
+# sweep's best passing point that many times (ADR-022). At c >= 128 timings
+# adapt to the expected request duration (ADR-022); `e2e_seeds` are durations
+# measured earlier (seconds, by concurrency).
 lifetimes:
   probe:
     variant: awq
     points: [probe-c1, probe-c256]
-  bf16:
-    variant: bf16
-    points: [c1, c4, c16, c64, c128, c256, c1-r2, c256-r2, c1-r3, c256-r3]
-  awq:
+  awq:  # run 2026-09-23 (awq-20260923T220125Z), before ADR-022
     variant: awq
     points: [c1, c4, c16, c64, c128, c256, c1-r2, c256-r2, c1-r3, c256-r3]
     cross_check:  # vllm bench serve at matching settings (random 512/256 prompts)
       - {concurrency: 1, num_prompts: 30}
       - {concurrency: 64, num_prompts: 640}
       - {concurrency: 256, num_prompts: 2048}
-  gptq:
-    variant: gptq
-    points: [c1, c4, c16, c64, c128, c256]
-  maxbatch-16:
+  awq-followup:  # ADR-022: a 4th c=1, the c=128 peak twice, c=256 re-timed
     variant: awq
-    extra_engine_args: [--max-num-seqs, "16"]
-    points: [c256-mb16]
-  maxbatch-64:
-    variant: awq
-    extra_engine_args: [--max-num-seqs, "64"]
-    points: [c256]
+    points: [c1-r4, c128-r2, c128-r3, c256, c256-sync]
+    e2e_seeds: {128: 14.87, 256: 35.60}  # awq-20260923T220125Z medians
+  bf16:
+    variant: bf16
+    points: [c1, c4, c16, c64, c128, c256, c1-r2, c1-r3]
+    repeat_best: 2
   hf-naive:
     variant: bf16
     engine: hf
     mode: naive
-    points: [c1, hf-c4, hf-c16, hf-c16-r2, hf-c16-r3]
+    points: [c1, hf-c4, hf-c16]
+    repeat_best: 2
   hf-static:
     variant: bf16
     engine: hf
     mode: static
-    points: [c4, c16, hf-cB, hf-c2B, hf-c2B-r2, hf-c2B-r3]
+    points: [c4, c16, hf-cB, hf-c2B]
+    repeat_best: 2
+  gptq:
+    variant: gptq
+    points: [c1, c4, c16, c64, c128, c256]
+    repeat_best: 2
+  # Max-batch lifetimes have no sweep, so no repeats (SPEC §6: x1). Seeds from
+  # Little's law on AWQ's measured rates: 256 users / (16 / 3.74 s) = 59.8 s,
+  # 256 / (64 / 8.19 s) = 32.8 s.
+  maxbatch-16:
+    variant: awq
+    extra_engine_args: [--max-num-seqs, "16"]
+    points: [c256]
+    e2e_seeds: {256: 59.8}
+  maxbatch-64:
+    variant: awq
+    extra_engine_args: [--max-num-seqs, "64"]
+    points: [c256]
+    e2e_seeds: {256: 32.8}

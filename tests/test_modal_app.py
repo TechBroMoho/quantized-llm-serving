@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from llmbench.smoke import missing_flags
 from modal_app.common import (
+    BENCH_AWQ_FOLLOWUP_RESOURCES,
     BENCH_AWQ_RESOURCES,
     BENCH_BF16_RESOURCES,
     BENCH_GPTQ_RESOURCES,
-    BENCH_HF_RESOURCES,
-    BENCH_MAXBATCH_RESOURCES,
+    BENCH_HF_NAIVE_RESOURCES,
+    BENCH_HF_STATIC_RESOURCES,
+    BENCH_MAXBATCH16_RESOURCES,
+    BENCH_MAXBATCH64_RESOURCES,
     BENCH_PREPARE_RESOURCES,
     BENCH_PROBE_RESOURCES,
     DOWNLOAD_LARGE_RESOURCES,
@@ -50,11 +53,14 @@ def test_every_function_is_bounded_and_gpus_are_only_on_smokes() -> None:
         EVAL_ONE_RESOURCES: ("L40S", 5400),
         BENCH_PREPARE_RESOURCES: (None, 1200),
         BENCH_PROBE_RESOURCES: ("L40S", 720),
-        BENCH_BF16_RESOURCES: ("L40S", 2820),
         BENCH_AWQ_RESOURCES: ("L40S", 3600),
-        BENCH_GPTQ_RESOURCES: ("L40S", 1800),
-        BENCH_MAXBATCH_RESOURCES: ("L40S", 1200),
-        BENCH_HF_RESOURCES: ("L40S", 3600),
+        BENCH_AWQ_FOLLOWUP_RESOURCES: ("L40S", 2200),
+        BENCH_BF16_RESOURCES: ("L40S", 3600),
+        BENCH_HF_NAIVE_RESOURCES: ("L40S", 1820),
+        BENCH_HF_STATIC_RESOURCES: ("L40S", 3600),
+        BENCH_GPTQ_RESOURCES: ("L40S", 3250),
+        BENCH_MAXBATCH16_RESOURCES: ("L40S", 1170),
+        BENCH_MAXBATCH64_RESOURCES: ("L40S", 780),
     }
     for resources, (gpu, timeout) in expected.items():
         kwargs = resources.function_kwargs()
@@ -139,14 +145,8 @@ def test_bench_config_resolves_and_every_lifetime_has_a_function() -> None:
         assert all(p.warmup_s >= p.ramp_s for p in points), name
     args = config["vllm"]["engine_args"]
     assert "--no-enable-prefix-caching" in args and "--enforce-eager" not in args
-    assert set(bench._GPU_FUNCTIONS) == {
-        "probe",
-        "bf16",
-        "awq",
-        "gptq",
-        "maxbatch",
-        "hf",
-    }
+    # Every configured lifetime can be launched, and nothing else.
+    assert set(bench._GPU_FUNCTIONS) == set(config["lifetimes"])
     # The expected hashes come from the committed Phase 4 records.
     plan = bench._prepare_run()
     assert set(plan["expected_checkpoints"]) == {"bf16", "awq", "gptq"}

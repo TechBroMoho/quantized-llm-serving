@@ -31,8 +31,11 @@ def load_points(root: Path) -> list[dict[str, Any]]:
         cpu = summary.get("cpu_in_window") or {}
         rows.append(
             {
-                "lifetime": match[1],
+                # A follow-up lifetime adds runs to the same variant (ADR-022).
+                "lifetime": match[1].removesuffix("-followup"),
+                "diagnostic": bool(summary.get("diagnostic")),
                 "run": lifetime_dir.name,
+                "time": summary.get("window_start_monotonic_s", 0.0),
                 "label": summary_path.parent.name,
                 "base": re.sub(r"-r\d+$", "", summary_path.parent.name),
                 "concurrency": summary["config"]["concurrency"],
@@ -61,7 +64,10 @@ def median_of(rows: list[dict[str, Any]], lifetime: str, base: str, key: str) ->
     values = [
         r[key]
         for r in rows
-        if r["lifetime"] == lifetime and r["base"] == base and r["passed"]
+        if r["lifetime"] == lifetime
+        and r["base"] == base
+        and r["passed"]
+        and not r["diagnostic"]
     ]
     if not values:
         return None
@@ -137,7 +143,7 @@ def markdown(rows: list[dict[str, Any]], head: dict[str, Any]) -> str:
             f"{'—' if r['headroom'] is None else f'{r["headroom"]:.1f}×'} | "
             f"{(r['client_cores'] or 0):.2f} / "
             f"{'—' if r['server_cores'] is None else f'{r["server_cores"]:.2f}'} | "
-            f"{'yes' if r['passed'] else 'NO'}"
+            f"{'diagnostic' if r['diagnostic'] else 'yes' if r['passed'] else 'NO'}"
             f"{' (warn)' if r['warnings'] else ''} |"
         )
     return "\n".join(lines) + "\n\n```json\n" + json.dumps(head, indent=2) + "\n```\n"
@@ -148,7 +154,7 @@ def main() -> None:
     parser.add_argument("root", type=Path)
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
-    rows = load_points(args.root)
+    rows = sorted(load_points(args.root), key=lambda r: (r["lifetime"], r["run"]))
     text = markdown(rows, headline(rows))
     if args.out:
         args.out.write_text(text)

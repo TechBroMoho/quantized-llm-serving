@@ -159,11 +159,15 @@ EVAL_ONE_RESOURCES = Resources("L40S", 4, 32768, 5400, 300)
 # each timeout is that lifetime's planned envelope.
 BENCH_PREPARE_RESOURCES = Resources(None, 2, 8192, 1200, 300)
 BENCH_PROBE_RESOURCES = Resources("L40S", 8, 32768, 720, 300)
-BENCH_BF16_RESOURCES = Resources("L40S", 8, 32768, 2820, 300)
 BENCH_AWQ_RESOURCES = Resources("L40S", 8, 32768, 3600, 300)
-BENCH_GPTQ_RESOURCES = Resources("L40S", 8, 32768, 1800, 300)
-BENCH_MAXBATCH_RESOURCES = Resources("L40S", 8, 32768, 1200, 300)
-BENCH_HF_RESOURCES = Resources("L40S", 8, 32768, 3600, 300)
+# After ADR-022 (timeouts ~1.3x the simulated plan with measured AWQ E2E).
+BENCH_AWQ_FOLLOWUP_RESOURCES = Resources("L40S", 8, 32768, 2200, 300)
+BENCH_BF16_RESOURCES = Resources("L40S", 8, 32768, 3600, 300)
+BENCH_HF_NAIVE_RESOURCES = Resources("L40S", 8, 32768, 1820, 300)
+BENCH_HF_STATIC_RESOURCES = Resources("L40S", 8, 32768, 3600, 300)
+BENCH_GPTQ_RESOURCES = Resources("L40S", 8, 32768, 3250, 300)
+BENCH_MAXBATCH16_RESOURCES = Resources("L40S", 8, 32768, 1170, 300)
+BENCH_MAXBATCH64_RESOURCES = Resources("L40S", 8, 32768, 780, 300)
 
 
 def load_config(name: str) -> tuple[dict[str, Any], str]:

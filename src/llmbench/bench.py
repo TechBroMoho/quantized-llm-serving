@@ -62,6 +62,13 @@ class BenchPoint:
     warmup_s: float
     window_s: float
     timeout_s: float
+    # Reported, never used for headline numbers or the lifetime's pass/fail
+    # (e.g. the all-at-once c=256 run that probes the cross-check gap).
+    diagnostic: bool = False
+    # False keeps ramp_s as configured (an all-at-once start uses ramp 0).
+    adapt_ramp: bool = True
+    # False: timings already derived elsewhere (HF static, from batch times).
+    adapt: bool = True
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> BenchPoint:
@@ -72,11 +79,94 @@ class BenchPoint:
             warmup_s=float(data["warmup_s"]),
             window_s=float(data["window_s"]),
             timeout_s=float(data["timeout_s"]),
+            diagnostic=bool(data.get("diagnostic", False)),
+            adapt_ramp=bool(data.get("adapt_ramp", True)),
+            adapt=bool(data.get("adapt", True)),
         )
 
     @property
     def planned_s(self) -> float:
         return self.warmup_s + self.window_s
+
+
+# ADR-022: from this concurrency on, users must be spread over a whole
+# request duration and the window must cover >= 10 of them.
+HIGH_CONCURRENCY = 128
+WINDOW_DURATIONS = 10
+
+
+def _ceil5(seconds: float) -> float:
+    return float(5 * -(-seconds // 5))
+
+
+def expected_e2e(
+    concurrency: int,
+    history: Sequence[dict[str, Any]],
+    seeds: dict[int, float],
+    output_tokens: int,
+) -> tuple[float, str] | None:
+    """Expected request duration at `concurrency` (ADR-022), in order of trust:
+    a point already measured at this concurrency in this lifetime, a value
+    measured earlier for this variant (config seed), or an extrapolation from
+    this lifetime's lower-concurrency points (the larger of linear-in-TPOT
+    and proportional-to-concurrency, both of which underestimated AWQ)."""
+    same = [h for h in history if h["concurrency"] == concurrency and h["e2e_p50"]]
+    if same:
+        return float(same[-1]["e2e_p50"]), f"measured here ({same[-1]['label']})"
+    if concurrency in seeds:
+        return float(seeds[concurrency]), "measured earlier (config seed)"
+    lower = sorted(
+        (h for h in history if h["concurrency"] < concurrency and h["e2e_p50"]),
+        key=lambda h: h["concurrency"],
+    )
+    if not lower:
+        return None
+    last = lower[-1]
+    scale = concurrency / last["concurrency"]
+    estimate = float(last["e2e_p50"]) * scale
+    source = f"x{scale:g} of {last['label']}"
+    if len(lower) >= 2 and lower[-2]["concurrency"] < last["concurrency"]:
+        prev = lower[-2]
+        slope = (last["tpot_p50"] - prev["tpot_p50"]) / (
+            last["concurrency"] - prev["concurrency"]
+        )
+        tpot = last["tpot_p50"] + slope * (concurrency - last["concurrency"])
+        linear = last["ttft_p50"] * scale + (output_tokens - 1) * tpot
+        if linear > estimate:
+            estimate, source = (
+                linear,
+                f"TPOT extrapolated from {prev['label']}, {last['label']}",
+            )
+    return estimate, source
+
+
+def adapt_point(
+    point: BenchPoint,
+    history: Sequence[dict[str, Any]],
+    seeds: dict[int, float],
+    output_tokens: int,
+) -> tuple[BenchPoint, dict[str, Any] | None]:
+    """Apply ADR-022 at c >= 128: ramp = one expected E2E, warmup >= ramp +
+    E2E, window >= 10 E2E. Never shortens a configured timing."""
+    if point.concurrency < HIGH_CONCURRENCY or not point.adapt:
+        return point, None
+    found = expected_e2e(point.concurrency, history, seeds, output_tokens)
+    if found is None:
+        return point, {"rule": "ADR-022", "expected_e2e_s": None, "note": "no data"}
+    e2e, source = found
+    ramp = float(-(-e2e // 1)) if point.adapt_ramp else point.ramp_s
+    adapted = BenchPoint(
+        label=point.label,
+        concurrency=point.concurrency,
+        ramp_s=ramp,
+        warmup_s=max(point.warmup_s, _ceil5(ramp + e2e)),
+        window_s=max(point.window_s, _ceil5(WINDOW_DURATIONS * e2e)),
+        timeout_s=max(point.timeout_s, 4 * e2e),
+        diagnostic=point.diagnostic,
+        adapt_ramp=point.adapt_ramp,
+        adapt=point.adapt,
+    )
+    return adapted, {"rule": "ADR-022", "expected_e2e_s": e2e, "source": source}
 
 
 _METRIC_LINE = re.compile(r"^(vllm:[a-z_]+)(?:\{[^}]*\})?\s+([0-9.eE+-]+)$")
@@ -346,10 +436,49 @@ async def run_points(
     cpu: CpuSampler | None = None,
     server_pgid: int | None = None,
     validated_chunks_per_s: float | None = None,
+    e2e_seeds: dict[int, float] | None = None,
+    repeat_best: int = 0,
 ) -> tuple[list[dict[str, Any]], int]:
-    """Run each point in order, saving it before the next; returns the offset."""
-    results = []
-    for point in points:
+    """Run each point in order, saving it before the next; returns the offset.
+
+    With `repeat_best`, the best passing non-diagnostic point (by output
+    tokens/s) is then repeated that many times as `<label>-r2`, `-r3`, ...
+    """
+    results: list[dict[str, Any]] = []
+    history: list[dict[str, Any]] = []
+    queue = list(points)
+    repeats_added = repeat_best == 0
+    while queue or not repeats_added:
+        if not queue:
+            repeats_added = True
+            candidates = [
+                r
+                for r in results
+                if r["passed"]
+                and not r["diagnostic"]
+                and not re.search(r"-r\d+$", r["label"])
+            ]
+            if not candidates:
+                break
+            best = max(candidates, key=lambda r: r["output_token_throughput_per_s"])
+            source = next(p for p in points if p.label == best["label"])
+            queue = [
+                BenchPoint(
+                    f"{best['label']}-r{k}",
+                    source.concurrency,
+                    source.ramp_s,
+                    source.warmup_s,
+                    source.window_s,
+                    source.timeout_s,
+                    source.diagnostic,
+                    source.adapt_ramp,
+                    source.adapt,
+                )
+                for k in range(2, 2 + repeat_best)
+            ]
+            continue
+        configured = queue.pop(0)
+        point, timing = adapt_point(configured, history, e2e_seeds or {}, output_tokens)
         point_dir = out_dir / point.label
         idle = await wait_idle(base_url, kind, idle_timeout_s)
         before = await asyncio.to_thread(server_state, base_url, kind)
@@ -405,8 +534,14 @@ async def run_points(
             ].get("vllm:prefix_cache_hits_total", 0)
             if hits:
                 failures.append(f"prefix cache hits {hits} (caching must be off)")
+        if point.diagnostic:
+            summary["diagnostic_findings"] = failures + warnings
+            failures, warnings = [], []
         summary |= {
             "point": asdict(point),
+            "configured_point": asdict(configured),
+            "timing_rule": timing,
+            "diagnostic": point.diagnostic,
             "idle_before": idle,
             "server_before": before,
             "server_after": after,
@@ -451,7 +586,23 @@ async def run_points(
                     "e2e_s",
                 )
             }
-            | {"label": point.label, "concurrency": point.concurrency}
+            | {
+                "label": point.label,
+                "concurrency": point.concurrency,
+                "diagnostic": point.diagnostic,
+                "diagnostic_findings": summary.get("diagnostic_findings"),
+                "timing_rule": timing,
+                "point": asdict(point),
+            }
+        )
+        history.append(
+            {
+                "label": point.label,
+                "concurrency": point.concurrency,
+                "e2e_p50": summary["e2e_s"]["p50"],
+                "tpot_p50": summary["tpot_s"]["p50"],
+                "ttft_p50": summary["ttft_s"]["p50"],
+            }
         )
         print(
             f"{point.label}: {summary['output_token_throughput_per_s']:.1f} tok/s, "
@@ -555,6 +706,8 @@ async def run_lifetime(
     after_points: Callable[[Path], dict[str, Any]] | None = None,
     max_half_deviation: float = MAX_HALF_WINDOW_DEVIATION,
     validated_chunks_per_s: float | None = None,
+    e2e_seeds: dict[int, float] | None = None,
+    repeat_best: int = 0,
 ) -> dict[str, Any]:
     """One server lifetime; always writes `lifetime_summary.json`."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -598,6 +751,8 @@ async def run_lifetime(
                 cpu=cpu,
                 server_pgid=process.pid,  # start_server makes a new session
                 validated_chunks_per_s=validated_chunks_per_s,
+                e2e_seeds=e2e_seeds,
+                repeat_best=repeat_best,
             )
             failures.extend(
                 f"{point['label']}: {failure}"
@@ -730,11 +885,21 @@ def static_points_from_probe(
         period = batch_seconds(in_batch)
         e2e = math.ceil(point.concurrency / batch_size) * period
         warmup = max(point.warmup_s, 5 * math.ceil((point.ramp_s + margin * e2e) / 5))
-        window = max(point.window_s, 5 * math.ceil(3 * period / 5))
+        cycles = WINDOW_DURATIONS if point.concurrency >= HIGH_CONCURRENCY else 3
+        # Static batches complete together, so a cycle is one batch (ADR-022).
+        window = max(point.window_s, 5 * math.ceil(cycles * period / 5))
         timeout = max(point.timeout_s, 3 * e2e)
         planned.append(
             BenchPoint(
-                point.label, point.concurrency, point.ramp_s, warmup, window, timeout
+                point.label,
+                point.concurrency,
+                point.ramp_s,
+                warmup,
+                window,
+                timeout,
+                point.diagnostic,
+                adapt_ramp=False,
+                adapt=False,
             )
         )
         plan.append(

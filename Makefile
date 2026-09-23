@@ -68,8 +68,9 @@ bench-prompts-rehearsal: eval-env  # $0: prompt build on WikiText-103 validation
 bench-prepare:  # CPU only: checkpoint sha256 check + WikiText-103 prompt pool
 	$(BENCH_RUN)::prepare
 
-bench:  # L40S: LIFETIME=probe|bf16|awq|gptq|maxbatch|hf (ask first)
-	$(BENCH_RUN)::run --lifetime $(LIFETIME)
+DROP ?=
+bench:  # L40S: LIFETIME=<lifetime in configs/phase6_bench.yaml>, DROP=labels (ask first)
+	$(BENCH_RUN)::run --lifetime $(LIFETIME) --drop "$(DROP)"
 
 sync-bench:  # $0: copy Phase 6 results (raw request files stay gzipped)
 	uv run modal volume get llmbench-results phase6 results/perf --force

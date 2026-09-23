@@ -937,3 +937,52 @@ download manifest; the AWQ/GPTQ quantize summaries), writing a record per
 variant on the Volume. Each GPU lifetime refuses to start unless that record
 passed for its exact path and for the same evidence file hash. So AWQ's
 speed and accuracy numbers come from the same bytes.
+
+## ADR-022 — High-concurrency timing, extra runs, and budget order (2026-09-23)
+
+**Context.** In the first AWQ sweep (`awq-20260923T220125Z`), all three
+c=256 points failed the 5% half-window check. Their token bins alternate
+high and low (~29k/~37k per 18 s bin): the 256 users formed two waves one
+request duration (E2E ≈ 35.5 s) apart, because the 30 s ramp was shorter
+than one E2E, and each 90 s half held 2.5 cycles. One c=1 point failed from
+a transient ~10 s slowdown. AWQ's best point was c=128, not the c=256 where
+the repeats had been placed. `vllm bench serve` agreed within ~3% at c=1/64
+but was 23% higher at c=256.
+
+**Decision (Mohammed, 2026-09-23).**
+1. *Timing at c ≥ 128* (`llmbench.bench.adapt_point`). The ramp equals one
+   expected E2E (users evenly spread over a whole request, so no waves),
+   warmup ≥ ramp + E2E, window ≥ 10 E2E. The expected E2E comes from, in
+   order: a point at that concurrency already measured in this lifetime,
+   an earlier measurement for the variant (`e2e_seeds`), or an
+   extrapolation from this lifetime's lower points (the larger of
+   proportional-to-c and linear-in-TPOT). The rule never shortens a
+   configured timing. **The 5% check is unchanged.**
+   - HF static completes whole batches together, so its cycle is one batch
+     time T from the OOM probe: at c ≥ 128 the window is ≥ 10 T (3 T below
+     128). Applying "10 request durations" at c = 2B (E2E = 2T) would
+     double every window without adding any whole cycles to the halves.
+   - Max-batch seeds come from Little's law on AWQ's measured rates:
+     256 / (16 / 3.74 s) = 59.8 s, and 256 / (64 / 8.19 s) = 32.8 s.
+2. *One more c=1 AWQ run*, with the rule fixed in advance: report every run;
+   the headline is the median of the runs that pass.
+3. *Each sweep lifetime repeats its best passing point twice* after the
+   sweep (`repeat_best`), instead of assuming c=256. AWQ's are c=128, in the
+   follow-up. Single-point lifetimes (max-batch, the follow-up) do not
+   repeat (SPEC §6: others ×1). BF16 also keeps explicit c=1 repeats, since
+   single-user decode is a headline.
+4. *All-at-once diagnostic*: c=256 with ramp 0 (`c256-sync`, marked
+   `diagnostic`), to test whether the arrival pattern explains the
+   cross-check gap. Diagnostic points are reported, never used for
+   headlines, and their check results never fail the lifetime.
+5. *Budget.* The Phase 6 cap is raised to $11, and the project must stay
+   under $25. Order: AWQ follow-up, BF16, HF naive, HF static, GPTQ,
+   max-batch 16, max-batch 64. Before each launch: Phase 6 actual + that
+   lifetime's timeout envelope ≤ $11, else trim the lowest-priority runs
+   (max-batch 64 first, then GPTQ's c=256 via `--drop`). HF static trims
+   its own repeats if the probe-derived plan would not fit its timeout.
+   Timeouts are ~1.3× a simulated plan using AWQ's measured E2E (1.25× at
+   c ≥ 64 for BF16/GPTQ).
+
+**Consequences.** The first sweep's failed points stay in the results,
+marked failed. The results table merges `awq-followup` into `awq`.
