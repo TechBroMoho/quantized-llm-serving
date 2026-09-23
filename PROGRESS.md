@@ -2,13 +2,14 @@
 
 ## Status
 
-Phase 6 in progress (2026-09-23). The in-Modal load tester check **passed**
-(9,124.1 chunks/s, 1.52× the gate, $0.0280). The benchmark is built and
-rehearsed on CPU ($0): steady-state windows with output tokens/s as the
-primary metric (ADR-020), WikiText-103 prompts (ADR-021), and checkpoint
-sha256 gating so AWQ's speed and accuracy come from the same bytes.
-Cumulative spend **$12.0930**; nothing running. Next, each needing
-Mohammed's yes: `make bench-prepare` (CPU), then the L40S probe.
+Phase 6 in progress (2026-09-23). The CPU prepare step passed: all three
+checkpoints match Phase 4's sha256 values, and the 50,000-prompt WikiText-103
+pool was built. The AWQ probe on L40S passed: at c=1, 105.8 output tokens/s
+(TPOT p50 9.34 ms); at c=256, 1,944.0 tokens/s (7.28 req/s), GPU-bound (96%
+utilization), with the client using 0.037 cores per process and headroom
+4.69× (≥ 3×). Cumulative spend **$12.3854** (Phase 6 so far $0.3204);
+nothing running. Point timings are revised from the probe. Next: sweeps,
+each needing Mohammed's yes.
 
 ## Phase log
 
@@ -383,6 +384,39 @@ Mohammed's yes: `make bench-prepare` (CPU), then the L40S probe.
   - CPU rehearsals of the exact driver against the mock and a tiny HF server
     (static batches, cuts, idle waits) pass.
 
+- **Phase 6, prepare (run `prepare-20260923T212502Z`, CPU, $0.010784):
+  passed.**
+  - Every file matched Phase 4's sha256: BF16 15 files / 16,397,461,266
+    bytes, AWQ 13 / 6,114,604,278, GPTQ 13 / 6,087,417,885 (23.4 s, 10.9 s,
+    10.4 s).
+  - Prompt pool: 1,801,350 WikiText-103 train lines → 9,900 articles read →
+    75,000 windows → **223 duplicate windows dropped** → 50,000 prompts of
+    exactly 512 tokens, pool sha256 `155f08a3…`.
+- **Phase 6, AWQ probe (run `probe-20260923T213438Z`, L40S, $0.281566):
+  passed.** NVIDIA L40S, vLLM 0.10.2, CUDA graphs.
+  - Startup: healthy after 101.2 s (torch.compile 44.2 s, graph capture
+    4 s). "Model loading took 5.7088 GiB"; GPU KV cache 240,544 tokens
+    (234.9× for 1,024-token requests).
+  - **c=1** (60 s window): 105.8 output tokens/s; TPOT p50 9.34 ms (107.1
+    tokens/s single-user decode); TTFT p50 37.4 ms; E2E p50 2.42 s; 24
+    requests completed. The requests/s edge bound (8.3%) is a warning;
+    tokens/s is unaffected.
+  - **c=256** (90 s window): **1,944.0 output tokens/s**, 7.278 req/s;
+    TTFT p50 308 ms; TPOT p50 133.7 ms; E2E p50 34.4 s; 655 completed, 256
+    cut at the end, 0 errors. Halves agree within 0.43%; edge bound 1.5%. 1
+    chunk per token (1,944 chunks/s). Prefix-cache hits 0, preemptions 0.
+  - **Where the time goes (c=256).** GPU utilization p50 96% while busy,
+    power up to 352.6 W (the 350 W limit). vLLM EngineCore 2.16 cores, API
+    server 0.11; **client processes 0.037 + 0.037 cores** (the internal
+    window CPU and `/proc` agree once `/proc` also counts the worker that
+    exits as the window closes). Container 2.35 of 8 cores busy. The client
+    is not the limit.
+  - **Headroom:** 9,124.1 / 1,944.0 = **4.69×** ≥ 3×. Every sweep point now
+    fails automatically if its received chunk rate leaves less than 3×.
+  - Point timings revised: c=256 warmup 70 → 80 s, a separate
+    `--max-num-seqs 16` point (warmup 120 s), and HF naive c4/c16 warmups
+    40/125 s, per ADR-020's rule (warmup ≥ ramp + one expected E2E).
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -409,6 +443,8 @@ Mohammed's yes: `make bench-prepare` (CPU), then the L40S probe.
 | 2026-09-23 | 5 | Full run 1: BF16 + AWQ complete; GPTQ cancelled ~42 min into MMLU when the Mac slept (`ap-upiufFw2kJEquSk8ZS6hmT`) | L40S | ≈11,380 | $7.397234 | $9.015399 |
 | 2026-09-23 | 5 | GPTQ-only rerun, spawned, passed (`ap-ZlJlWJBg1CYBkMPungNRD3`) | L40S | ≈4,580 | $3.049610 | $12.065009 |
 | 2026-09-23 | 6 | In-Modal load tester check, passed, includes vLLM image rebuild (`ap-alL2wtq71x0HiFGB2iF5IT`) | None | ≈240 | $0.028004 | $12.093013 |
+| 2026-09-23 | 6 | Prepare: checkpoint sha256 check + WikiText-103 prompt pool, passed (`ap-3es0914tudLlXFvC62Qz7f`) | None | n/a | $0.010784 | $12.103797 |
+| 2026-09-23 | 6 | AWQ probe, c=1 and c=256, passed (`ap-RyihFdSLFZprP7tolBMi7H`) | L40S | ≈392 | $0.281566 | $12.385363 |
 
 **Phase 5 actual: $10.7004** against its $11.63 cap ($6 plus Phase 4's
 unused $4.73 and Phase 3's unused $0.90, both reallocated by Mohammed;
@@ -500,3 +536,9 @@ the 1 TiB/month included.
   and the run looked merely non-stationary. The steady-state check caught the
   symptom; worker exceptions now fail the run, and a regression test covers it.
   The same latent problem existed in the older duration mode.
+- Phase 6 probe: the `/proc` CPU evidence first missed the spawned client
+  worker, which exits as the window closes, before the next 1 s sample. The
+  attribution now uses the samples in which each process appears; re-derived
+  from the saved samples, the worker used 0.037 cores, matching its own
+  measurement. `modal app logs` also streams forever; poll `modal app list
+  --json` from a bounded script instead (macOS has no `timeout`).

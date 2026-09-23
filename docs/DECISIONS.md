@@ -467,6 +467,18 @@ validated 9,124/s is less than 3× the real peak. ADR-005 then requires
 revising the target before comparisons are accepted, and the probe decides.
 Every Phase 6 point also records the client's CPU.
 
+**Probe result (2026-09-23).** AWQ at c=256 received 1,944.0 chunks/s (one
+per token): headroom **4.69×**. The client processes used 0.037 cores each
+while the GPU was at 96% utilization, so the client does not limit
+throughput. To keep the rule enforced rather than assumed, every Phase 6
+point now records `client_capacity_headroom` and **fails** below 3×
+(`validated_client_chunks_per_s: 9124.1` in the config). The data is kept;
+the point is just not accepted. If a variant (BF16 is the likeliest)
+exceeds ~3,041 chunks/s, the options go to Mohammed: re-measure capacity
+with more mock processes (one mock was at 0.95 cores), with a mock
+streaming 256-token responses like the real workload, or more client
+processes. The 3× rule is not lowered.
+
 ## ADR-014 — vLLM empty text chunks distort per-request E2E/TPOT (2026-09-23, open)
 
 **Observation.** In the vLLM smoke, 14 of 16 requests had 29–32 text-bearing
@@ -876,6 +888,13 @@ applied identically to vLLM and HF (`run_load(mode="steady")`,
 - *Prompts.* Each point takes fresh indices from the prompt pool, so no
   prompt repeats within a lifetime and every variant sees the same prompts
   in the same order.
+
+**Point timings.** The probe measured AWQ's E2E at 2.42 s (c=1) and 34.4 s
+(c=256), longer than planned at c=256. Warmups were revised (c=256: 80 s; a
+`--max-num-seqs 16` point at 120 s; HF naive c4/c16 at 40/125 s, since
+naive queues each request behind the others). HF static depends on B
+from the OOM probe, so its timings are re-derived at run time from the
+measured batch time; see the HF run plan.
 
 **Consequences.** Throughput no longer depends on how a window aligns with
 request starts. A CPU rehearsal against the mock gave 1,262.5 tokens/s from

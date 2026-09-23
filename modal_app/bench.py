@@ -298,6 +298,7 @@ def _vllm_lifetimes(run: dict[str, Any], names: list[str], resources: Resources)
                 output_tokens=int(workload["output_tokens"]),
                 health_timeout_s=float(config["vllm"]["health_timeout_s"]),
                 idle_timeout_s=float(workload["idle_timeout_s"]),
+                validated_chunks_per_s=float(workload["validated_client_chunks_per_s"]),
                 env=OFFLINE_ENV,
                 checkpoint=RESULTS.commit,
                 metadata=_metadata(run, resources)
@@ -467,6 +468,7 @@ def hf_fn(run: dict[str, Any]) -> Any:
                 output_tokens=int(workload["output_tokens"]),
                 health_timeout_s=float(hf["health_timeout_s"]),
                 idle_timeout_s=float(workload["idle_timeout_s"]),
+                validated_chunks_per_s=float(workload["validated_client_chunks_per_s"]),
                 env=OFFLINE_ENV,
                 checkpoint=RESULTS.commit,
                 metadata=_metadata(run, BENCH_HF_RESOURCES)

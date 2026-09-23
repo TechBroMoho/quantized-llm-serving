@@ -159,35 +159,60 @@ def cores_between(
     end: float,
     server_pgid: int | None,
 ) -> dict[str, Any] | None:
-    """Average CPU cores per process over [start, end], from the samples
-    nearest each edge (taken every ~1 s, so edges are uncertain by ~1 s)."""
+    """Average CPU cores per process over [start, end], from ~1 s samples.
+
+    A process present throughout is measured between the samples bracketing
+    the window. One that starts or exits inside it (a client worker exits as
+    the window closes) is measured over the samples in which it appears, from
+    the sample before its first appearance, so it is not missed.
+    """
     before = [s for s in samples if s[0] <= start]
     after = [s for s in samples if s[0] >= end]
     if not before or not after:
         return None
-    (t0, first), (t1, last) = before[-1], after[0]
-    span = t1 - t0
+    t0, t1 = before[-1][0], after[0][0]
+    span_samples = [s for s in samples if t0 <= s[0] <= t1]
+    seen: dict[str, list[Any]] = {}  # pid -> [comm, pgrp, t_base, cpu_base, t, cpu]
+    previous_t = t0
+    for at, table in span_samples:
+        for pid, (comm, pgrp, cpu) in table["processes"].items():
+            if pid not in seen:
+                started_here = at > t0
+                seen[pid] = [
+                    comm,
+                    pgrp,
+                    previous_t if started_here else at,
+                    0.0 if started_here else cpu,
+                    at,
+                    cpu,
+                ]
+            seen[pid][4:] = [at, cpu]
+        previous_t = at
     rows = []
-    for pid, (comm, pgrp, cpu) in last["processes"].items():
-        initial = first["processes"].get(pid)
-        used = cpu - (initial[2] if initial else 0.0)
-        if used / span >= 0.01:
+    for pid, (comm, pgrp, t_base, cpu_base, t_last, cpu_last) in seen.items():
+        duration = t_last - t_base
+        if duration <= 0:
+            continue
+        cores = (cpu_last - cpu_base) / duration
+        if cores >= 0.01:
             rows.append(
                 {
                     "pid": int(pid),
                     "comm": comm,
                     "group": "server" if pgrp == server_pgid else "client_or_other",
-                    "cores": used / span,
+                    "cores": cores,
+                    "observed_s": duration,
                 }
             )
     rows.sort(key=lambda row: -row["cores"])
+    first, last = before[-1][1], after[0][1]
     busy = (
-        (last["busy_s"] - first["busy_s"]) / span
+        (last["busy_s"] - first["busy_s"]) / (t1 - t0)
         if first["busy_s"] is not None and last["busy_s"] is not None
         else None
     )
     return {
-        "sample_span_s": span,
+        "sample_span_s": t1 - t0,
         "processes": rows,
         "server_cores": sum(r["cores"] for r in rows if r["group"] == "server"),
         "client_or_other_cores": sum(
@@ -320,6 +345,7 @@ async def run_points(
     max_half_deviation: float = MAX_HALF_WINDOW_DEVIATION,
     cpu: CpuSampler | None = None,
     server_pgid: int | None = None,
+    validated_chunks_per_s: float | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
     """Run each point in order, saving it before the next; returns the offset."""
     results = []
@@ -360,6 +386,19 @@ async def run_points(
         failures, warnings = validate_point(
             summary, records, input_tokens=input_tokens, output_tokens=output_tokens
         )
+        if validated_chunks_per_s is not None:
+            # ADR-005: the client's validated capacity must be at least 3x the
+            # chunk rate it actually received, or the point is not accepted.
+            multiple = validated_chunks_per_s / max(
+                summary["chunks_in_window_per_s"], 1e-9
+            )
+            summary["client_capacity_headroom"] = multiple
+            if multiple < 3:
+                failures.append(
+                    f"client headroom {multiple:.2f}x < 3x: "
+                    f"{summary['chunks_in_window_per_s']:.0f} chunks/s received, "
+                    f"{validated_chunks_per_s:.0f}/s validated (ADR-005)"
+                )
         if kind == "vllm":
             hits = after["counters"].get("vllm:prefix_cache_hits_total", 0) - before[
                 "counters"
@@ -405,6 +444,7 @@ async def run_points(
                     "window_process_cpu_cores_average",
                     "client_shard_cpu_cores",
                     "cpu_in_window",
+                    "chunks_in_window_per_s",
                     "ttft_s",
                     "tpot_s",
                     "itl_s",
@@ -514,6 +554,7 @@ async def run_lifetime(
     metadata: dict[str, Any] | None = None,
     after_points: Callable[[Path], dict[str, Any]] | None = None,
     max_half_deviation: float = MAX_HALF_WINDOW_DEVIATION,
+    validated_chunks_per_s: float | None = None,
 ) -> dict[str, Any]:
     """One server lifetime; always writes `lifetime_summary.json`."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -556,6 +597,7 @@ async def run_lifetime(
                 max_half_deviation=max_half_deviation,
                 cpu=cpu,
                 server_pgid=process.pid,  # start_server makes a new session
+                validated_chunks_per_s=validated_chunks_per_s,
             )
             failures.extend(
                 f"{point['label']}: {failure}"

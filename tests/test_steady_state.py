@@ -113,7 +113,11 @@ def test_steady_window_counts_tokens_and_cuts_in_flight_requests() -> None:
     assert summary["window_rule"] == "steady_state_adr020"
     assert summary["errored_or_cancelled_requests"] == 0
     assert {row.status for row in rows} == {"ok", "window_end"}
-    assert summary["cut_at_window_end_requests"] == 8  # every user was mid-request
+    # At most one cut request per user; a user that finished just before the
+    # end starts nothing new, since admission stops at the window end.
+    assert 1 <= summary["cut_at_window_end_requests"] <= 8
+    window_end = summary["window_end_monotonic_s"]
+    assert all(r.started_at < window_end for r in rows if r.status == "window_end")
     assert summary["steady_state_ok"], summary["window_token_bins"]
     assert summary["request_rate_ok"]
     # Token arrivals and completed requests measure the same steady rate.

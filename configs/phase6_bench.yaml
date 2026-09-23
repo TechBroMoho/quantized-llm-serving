@@ -1,7 +1,8 @@
 # Phase 6 performance benchmarks (ADR-020 windows, ADR-021 prompts).
 # Every run embeds this file and its SHA-256 in its results.
-# Point timings are planning values until the L40S probe measures E2E;
-# they are revised here (and committed) before the sweeps are approved.
+# Point timings were revised after the AWQ probe (probe-20260923T213438Z):
+# E2E p50 2.42 s at c=1 and 34.4 s at c=256. Rule (ADR-020): warmup_s >=
+# ramp_s + one expected E2E, with the other systems' E2E extrapolated.
 name: phase6-bench
 gpu: L40S
 model:
@@ -31,7 +32,10 @@ workload:
   input_tokens: 512
   output_tokens: 256
   seed: 0
-  client_processes: 2  # ADR-013: 2 processes, validated in Modal at 9,124 chunks/s
+  client_processes: 2  # ADR-013
+  # In-Modal capacity (loadtest-check-20260923T205147Z). A point receiving more
+  # than a third of this fails ADR-005's 3x headroom rule and is not accepted.
+  validated_client_chunks_per_s: 9124.1
   idle_timeout_s: 900
 
 vllm:
@@ -68,11 +72,15 @@ points:
   c16: {concurrency: 16, ramp_s: 8, warmup_s: 25, window_s: 120, timeout_s: 600}
   c64: {concurrency: 64, ramp_s: 15, warmup_s: 40, window_s: 180, timeout_s: 600}
   c128: {concurrency: 128, ramp_s: 20, warmup_s: 50, window_s: 180, timeout_s: 600}
-  c256: {concurrency: 256, ramp_s: 30, warmup_s: 70, window_s: 180, timeout_s: 600}
+  c256: {concurrency: 256, ramp_s: 30, warmup_s: 80, window_s: 180, timeout_s: 600}
+  # --max-num-seqs 16 queues 240 users: E2E ~70 s (~4.4 s per request, 16 at a time).
+  c256-mb16: {concurrency: 256, ramp_s: 30, warmup_s: 120, window_s: 180, timeout_s: 900}
   probe-c1: {concurrency: 1, ramp_s: 0, warmup_s: 10, window_s: 60, timeout_s: 600}
   probe-c256: {concurrency: 256, ramp_s: 30, warmup_s: 60, window_s: 90, timeout_s: 600}
-  # HF: naive queues every request behind the others; static batches of B.
-  hf-c16: {concurrency: 16, ramp_s: 8, warmup_s: 30, window_s: 180, timeout_s: 900}
+  # HF: naive queues every request behind the others (~7 s each, estimated),
+  # so E2E grows with concurrency; static batches of B.
+  hf-c4: {concurrency: 4, ramp_s: 5, warmup_s: 40, window_s: 120, timeout_s: 900}
+  hf-c16: {concurrency: 16, ramp_s: 8, warmup_s: 125, window_s: 180, timeout_s: 900}
   hf-cB: {concurrency: B, ramp_s: 10, warmup_s: 60, window_s: 180, timeout_s: 900}
   hf-c2B: {concurrency: 2B, ramp_s: 20, warmup_s: 90, window_s: 180, timeout_s: 900}
 
@@ -98,7 +106,7 @@ lifetimes:
   maxbatch-16:
     variant: awq
     extra_engine_args: [--max-num-seqs, "16"]
-    points: [c256]
+    points: [c256-mb16]
   maxbatch-64:
     variant: awq
     extra_engine_args: [--max-num-seqs, "64"]
@@ -107,7 +115,7 @@ lifetimes:
     variant: bf16
     engine: hf
     mode: naive
-    points: [c1, c4, hf-c16, hf-c16-r2, hf-c16-r3]
+    points: [c1, hf-c4, hf-c16, hf-c16-r2, hf-c16-r3]
   hf-static:
     variant: bf16
     engine: hf

@@ -243,6 +243,7 @@ def test_checkpoint_verification_catches_changed_and_missing_files(
 
 def test_process_cpu_is_attributed_to_server_and_clients(tmp_path: Path) -> None:
     import os
+    import shutil
 
     from llmbench.bench import cores_between, read_process_table
 
@@ -258,21 +259,68 @@ def test_process_cpu_is_attributed_to_server_and_clients(tmp_path: Path) -> None
             )
         return read_process_table(tmp_path)
 
-    first = write(
-        0, {10: ("vllm api", 10, 0), 11: ("EngineCore", 10, 0), 20: ("python3", 20, 0)}
-    )
-    last = write(
-        4 * ticks,
+    server, parent = ("EngineCore", 10), ("python3", 20)
+    first = write(0, {11: (*server, 0), 20: (*parent, 0)})
+    # A client worker (pid 30) appears mid-window and exits before the end.
+    middle = write(
+        2 * ticks,
         {
-            10: ("vllm api", 10, ticks),
-            11: ("EngineCore", 10, 2 * ticks),
-            20: ("python3", 20, ticks),
+            11: (*server, ticks),
+            20: (*parent, ticks // 2),
+            30: ("python3", 20, ticks // 2),
         },
     )
+    shutil.rmtree(tmp_path / "30")
+    last = write(4 * ticks, {11: (*server, 2 * ticks), 20: (*parent, ticks)})
     assert first["processes"]["11"][:2] == ["EngineCore", 10]
-    result = cores_between([(0.0, first), (2.0, last)], 0.5, 1.5, server_pgid=10)
+    samples = [(0.0, first), (1.0, middle), (2.0, last)]
+    result = cores_between(samples, 0.5, 1.5, server_pgid=10)
     assert result is not None
-    assert result["server_cores"] == 1.5 and result["client_or_other_cores"] == 0.5
+    assert result["server_cores"] == 1.0
+    worker = next(r for r in result["processes"] if r["pid"] == 30)
+    assert worker["cores"] == 0.5 and worker["observed_s"] == 1.0
+    assert result["client_or_other_cores"] == 1.0  # parent 0.5 + worker 0.5
     assert result["container_busy_cores"] == 2.0
     assert result["processes"][0]["comm"] == "EngineCore"
     assert cores_between([(0.0, first)], 0.5, 1.5, 10) is None
+
+
+def test_points_fail_when_client_headroom_is_below_3x(tmp_path: Path) -> None:
+    port = _port()
+    command = [
+        sys.executable,
+        "-m",
+        "llmbench.mock.server",
+        "--port",
+        str(port),
+        "--ttft-ms",
+        "5",
+        "--itl-ms",
+        "2",
+        "--tokens",
+        "4",
+    ]
+    summary = asyncio.run(
+        run_lifetime(
+            label="headroom",
+            command=command,
+            base_url=f"http://127.0.0.1:{port}",
+            kind="none",
+            payloads=NpyPromptPayloads(
+                _pool(tmp_path, 16), output_tokens=4, seed=0, model="m"
+            ),
+            points=POINTS[:1],
+            processes=2,
+            out_dir=tmp_path / "out",
+            input_tokens=16,
+            output_tokens=4,
+            health_timeout_s=60,
+            idle_timeout_s=10,
+            max_half_deviation=0.5,
+            validated_chunks_per_s=100.0,  # far below what the mock delivers
+        )
+    )
+    assert not summary["passed"]
+    assert any("headroom" in f and "< 3x" in f for f in summary["failures"])
+    saved = json.loads((tmp_path / "out" / "c2" / "summary.json").read_text())
+    assert saved["client_capacity_headroom"] < 3  # data kept, point not accepted
