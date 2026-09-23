@@ -12,6 +12,10 @@ ENV PYTHONPATH=/opt/llmbench/src \
     DO_NOT_TRACK=1 \
     LLMBENCH_VLLM_IMAGE=vllm/vllm-openai:v0.10.2@sha256:607442e407b0fea97f8a132a78b787c121a996dd4de181fa08e8da06e71ec2db
 
+# The base image ships only `python3`; Modal detects the image's Python by
+# running `python`, the same symlink its own add_python images create.
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
 COPY src/llmbench /opt/llmbench/src/llmbench
 COPY configs /opt/llmbench/configs
 
