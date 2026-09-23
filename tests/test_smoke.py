@@ -230,4 +230,4 @@ def test_flag_verification_fails_when_help_fails(tmp_path: Path, monkeypatch) ->
     from llmbench.smoke import verify_vllm_flags
 
     monkeypatch.setenv("PATH", _fake_vllm(tmp_path, "echo boom >&2; exit 1"))
-    assert verify_vllm_flags([], tmp_path) == ["vllm serve --help=all exited 1"]
+    assert verify_vllm_flags([], tmp_path) == ["vllm serve --help exited 1"]

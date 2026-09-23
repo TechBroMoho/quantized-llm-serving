@@ -105,7 +105,11 @@ def missing_flags(flags: Sequence[str], help_text: str) -> list[str]:
 def verify_vllm_flags(
     engine_args: Sequence[str], out_dir: Path, timeout_s: float = 180
 ) -> list[str]:
-    """Check configured flags against the pinned server's own `--help=all`.
+    """Check configured flags against the pinned server's own `--help`.
+
+    Plain `--help` is the full argparse listing; in vLLM 0.10.2
+    `--help=<word>` is a keyword filter (`--help=all` matches only names
+    containing "all"), so it must not be used here.
 
     vLLM 0.10.2 builds its parser from config dataclasses that must infer a
     device, so this only works on a GPU host. Returns failure messages.
@@ -115,7 +119,7 @@ def verify_vllm_flags(
         | {"--served-model-name", "--host", "--port"}
     )
     done = subprocess.run(
-        ["vllm", "serve", "--help=all"],
+        ["vllm", "serve", "--help"],
         capture_output=True,
         text=True,
         timeout=timeout_s,
@@ -124,7 +128,7 @@ def verify_vllm_flags(
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "vllm_serve_help.txt").write_text(done.stdout + done.stderr, "utf-8")
     if done.returncode != 0:
-        return [f"vllm serve --help=all exited {done.returncode}"]
+        return [f"vllm serve --help exited {done.returncode}"]
     return [
         f"flag not in pinned --help: {flag}"
         for flag in missing_flags(flags, done.stdout)

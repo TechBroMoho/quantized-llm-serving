@@ -67,7 +67,7 @@ def vllm_env_check(config: dict[str, Any], stamp: str) -> dict[str, Any]:
     }
     freeze = _run(["python3", "-m", "pip", "freeze"], 60)
     (out / "pip_freeze.txt").write_text(freeze["stdout"])
-    help_run = _run(["vllm", "serve", "--help=all"], 120)
+    help_run = _run(["vllm", "serve", "--help"], 120)
     (out / "vllm_serve_help.txt").write_text(help_run["stdout"] + help_run["stderr"])
     required = sorted(
         set(_flags(config["vllm"]["engine_args"]))
