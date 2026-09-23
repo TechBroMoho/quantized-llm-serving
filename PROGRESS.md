@@ -213,6 +213,22 @@ built): a multi-process load tester revalidated in Modal (ADR-013), and
     failing test that I could not identify; 8 reruns passed and later passing
     runs cleared pytest's record. Watch for it.
 
+- **Phase 5, prefetch 1 (2026-09-23, run `prefetch-20260923T134506Z`,
+  $0.0176): gate failed, probe not started.** Inside the eval image:
+  lm-eval 0.4.11, vLLM 0.10.2, torch 2.8.0+cu128, transformers 4.56.1,
+  datasets 4.1.1. Datasets downloaded through lm-eval's task loading (121 s,
+  58,394,847 bytes; 57 MMLU subjects at Hub commit `c30699e8`, WikiText at
+  `64723477`) and reloaded offline ("Using the latest cached version …
+  offline mode"). The in-image audit matched the laptop exactly (full
+  56,168 / 39,160,912 / max 3,097; probe 2,280 / 1,382,712). The failure was
+  my package check: it listed 13 packages as older than the image freeze
+  (e.g. aiohttp 3.12.7 vs 3.12.15, setuptools 59.6.0 vs 79.0.1). These are
+  Modal's client packages and Ubuntu's system packages, shadowed on
+  `sys.path`; the check kept the *last* copy of each name instead of the one
+  Python imports. Fixed: packages are listed in a subprocess with lm-eval's
+  environment, the first copy wins, and shadowed copies are recorded.
+  Evidence: `results/accuracy/phase5/prefetch-20260923T134506Z/`.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -233,6 +249,7 @@ built): a multi-process load tester revalidated in Modal (ADR-013), and
 | 2026-09-23 | 4 | AWQ W4A16_ASYM quantization, passed (`ap-bi7KgCITqb40g0uoaypiVe`) | L40S | 538 function | $0.385489 | $0.507144 |
 | 2026-09-23 | 4 | GPTQ W4A16 quantization, passed (`ap-PA7aqlQxiqweqcBW0wJNKj`) | L40S | 973 function | $0.726136 | $1.233280 |
 | 2026-09-23 | 4 | vLLM sanity, BF16 + AWQ + GPTQ, passed (`ap-rbKztZzbSRbnw9hvYsp33H`) | L40S | n/a | $0.131285 | $1.364565 |
+| 2026-09-23 | 5 | Eval prefetch, CPU, includes eval image build; gate failed on a false package-drift check (`ap-88OReY3mpGKjX70ev99mWR`) | None | n/a | $0.017580 | $1.382145 |
 
 Phase 3 amounts are **actual** per-app costs from `modal billing report --for
 today --json` (saved in `results/validation/phase3/modal_billing_2026-09-23.json`),
@@ -290,3 +307,9 @@ the 1 TiB/month included.
   recording a cost.
 - Phase 4: progress-bar output flooded two log monitors, which had to be
   stopped. The fix is to wait on process exit and read a filtered log.
+- Phase 5: the first prefetch failed its "image unchanged" gate on 13
+  phantom downgrades. Modal's function process has its own client packages
+  (aiohttp, protobuf, yarl, …) on `sys.path`, and the image has Ubuntu's
+  system dist-packages (six, setuptools, wheel, distro). The check kept the
+  last copy of each name, not the one Python imports. Cost $0.0176; the probe
+  was not started because the gate had failed.

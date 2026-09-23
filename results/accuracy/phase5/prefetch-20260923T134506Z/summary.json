@@ -1,0 +1,390 @@
+{
+  "eval_cache": {
+    "bytes": 58394847,
+    "dataset_dirs": [
+      "EleutherAI___wikitext_document_level/wikitext-2-raw-v1/0.0.0/647234772b9554e208af6c826f23b99e3cac88c8",
+      "cais___mmlu/abstract_algebra/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/anatomy/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/astronomy/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/business_ethics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/clinical_knowledge/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/college_biology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/college_chemistry/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/college_computer_science/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/college_mathematics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/college_medicine/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/college_physics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/computer_security/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/conceptual_physics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/econometrics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/electrical_engineering/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/elementary_mathematics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/formal_logic/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/global_facts/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_biology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_chemistry/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_computer_science/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_european_history/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_geography/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_government_and_politics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_macroeconomics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_mathematics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_microeconomics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_physics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_psychology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_statistics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_us_history/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/high_school_world_history/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/human_aging/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/human_sexuality/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/international_law/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/jurisprudence/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/logical_fallacies/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/machine_learning/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/management/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/marketing/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/medical_genetics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/miscellaneous/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/moral_disputes/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/moral_scenarios/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/nutrition/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/philosophy/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/prehistory/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/professional_accounting/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/professional_law/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/professional_medicine/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/professional_psychology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/public_relations/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/security_studies/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/sociology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/us_foreign_policy/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/virology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe",
+      "cais___mmlu/world_religions/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe"
+    ],
+    "path": "/weights/eval-cache/hf-home"
+  },
+  "failures": [
+    "image package changed: aiohttp: 3.12.7 (wanted 3.12.15)",
+    "image package changed: aiosignal: 1.3.2 (wanted 1.4.0)",
+    "image package changed: certifi: 2025.4.26 (wanted 2025.8.3)",
+    "image package changed: distro: 1.7.0 (wanted 1.9.0)",
+    "image package changed: frozenlist: 1.6.0 (wanted 1.7.0)",
+    "image package changed: multidict: 6.4.4 (wanted 6.6.4)",
+    "image package changed: propcache: 0.3.1 (wanted 0.3.2)",
+    "image package changed: protobuf: 6.31.1 (wanted 6.32.1)",
+    "image package changed: setuptools: 59.6.0 (wanted 79.0.1)",
+    "image package changed: six: 1.16.0 (wanted 1.17.0)",
+    "image package changed: typing_extensions: 4.13.2 (wanted 4.15.0)",
+    "image package changed: wheel: 0.37.1 (wanted 0.45.1)",
+    "image package changed: yarl: 1.20.0 (wanted 1.20.1)"
+  ],
+  "image_package_drift": [
+    "aiohttp: 3.12.7 (wanted 3.12.15)",
+    "aiosignal: 1.3.2 (wanted 1.4.0)",
+    "certifi: 2025.4.26 (wanted 2025.8.3)",
+    "distro: 1.7.0 (wanted 1.9.0)",
+    "frozenlist: 1.6.0 (wanted 1.7.0)",
+    "multidict: 6.4.4 (wanted 6.6.4)",
+    "propcache: 0.3.1 (wanted 0.3.2)",
+    "protobuf: 6.31.1 (wanted 6.32.1)",
+    "setuptools: 59.6.0 (wanted 79.0.1)",
+    "six: 1.16.0 (wanted 1.17.0)",
+    "typing_extensions: 4.13.2 (wanted 4.15.0)",
+    "wheel: 0.37.1 (wanted 0.45.1)",
+    "yarl: 1.20.0 (wanted 1.20.1)"
+  ],
+  "packages": {
+    "compressed-tensors": "0.11.0",
+    "datasets": "4.1.1",
+    "evaluate": "0.4.6",
+    "huggingface-hub": "0.34.4",
+    "lm_eval": "0.4.11",
+    "tokenizers": "0.22.0",
+    "torch": "2.8.0+cu128",
+    "transformers": "4.56.1",
+    "vllm": "0.10.2"
+  },
+  "passed": false,
+  "prompt_lengths_full": {
+    "fits": true,
+    "limits": {},
+    "lm_eval_version": "0.4.11",
+    "max_length": 4096,
+    "tasks": {
+      "mmlu_5shot": {
+        "fits": true,
+        "longest_task": "mmlu_high_school_european_history",
+        "longest_tasks": {
+          "mmlu_high_school_european_history": 3097,
+          "mmlu_high_school_us_history": 2430,
+          "mmlu_high_school_world_history": 1832,
+          "mmlu_professional_law": 2159,
+          "mmlu_security_studies": 1399
+        },
+        "max_tokens": 3097,
+        "mean_tokens": 697.21036889332,
+        "requests": 56168,
+        "requests_by_type": {
+          "loglikelihood": 56168
+        },
+        "requests_over_limit": 0,
+        "total_tokens": 39160912,
+        "truncation_limit": 4095
+      },
+      "wikitext": {
+        "fits": true,
+        "longest_task": "wikitext",
+        "longest_tasks": {
+          "wikitext": 4095
+        },
+        "max_tokens": 4095,
+        "mean_tokens": 3338.096153846154,
+        "requests": 104,
+        "requests_by_type": {
+          "rolling_window": 104
+        },
+        "requests_over_limit": 0,
+        "total_tokens": 347162,
+        "truncation_limit": 4095
+      }
+    },
+    "tokenizer": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218"
+  },
+  "prompt_lengths_probe": {
+    "fits": true,
+    "limits": {
+      "mmlu": 10,
+      "wikitext": 5
+    },
+    "lm_eval_version": "0.4.11",
+    "max_length": 4096,
+    "tasks": {
+      "mmlu_5shot": {
+        "fits": true,
+        "longest_task": "mmlu_high_school_european_history",
+        "longest_tasks": {
+          "mmlu_college_medicine": 1366,
+          "mmlu_high_school_european_history": 2991,
+          "mmlu_high_school_us_history": 2301,
+          "mmlu_high_school_world_history": 1606,
+          "mmlu_professional_law": 1699
+        },
+        "max_tokens": 2991,
+        "mean_tokens": 606.4526315789474,
+        "requests": 2280,
+        "requests_by_type": {
+          "loglikelihood": 2280
+        },
+        "requests_over_limit": 0,
+        "total_tokens": 1382712,
+        "truncation_limit": 4095
+      },
+      "wikitext": {
+        "fits": true,
+        "longest_task": "wikitext",
+        "longest_tasks": {
+          "wikitext": 4095
+        },
+        "max_tokens": 4095,
+        "mean_tokens": 3383.625,
+        "requests": 8,
+        "requests_by_type": {
+          "rolling_window": 8
+        },
+        "requests_over_limit": 0,
+        "total_tokens": 27069,
+        "truncation_limit": 4095
+      }
+    },
+    "tokenizer": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218"
+  },
+  "resources": {
+    "cpu_cores": 2,
+    "gpu": null,
+    "memory_mib": 8192,
+    "startup_timeout_s": 300,
+    "timeout_s": 1800
+  },
+  "run": {
+    "config": {
+      "checkpoints": "phase4_quantize.yaml",
+      "gpu": "L40S",
+      "lm_eval": {
+        "apply_chat_template": false,
+        "batch_size": 1024,
+        "log_samples": true,
+        "model": "vllm",
+        "model_args": {
+          "dtype": "bfloat16",
+          "enable_prefix_caching": false,
+          "enforce_eager": true,
+          "gpu_memory_utilization": 0.8,
+          "max_model_len": 4096,
+          "seed": 1234
+        },
+        "seed": "0,1234,1234,1234",
+        "tasks": {
+          "mmlu": {
+            "expected_samples": 14042,
+            "num_fewshot": 5,
+            "subtasks": 57
+          },
+          "wikitext": {
+            "expected_samples": 62,
+            "num_fewshot": null
+          }
+        },
+        "tokenizer": "bf16"
+      },
+      "name": "phase5-accuracy",
+      "probe": {
+        "limit": {
+          "mmlu": 10,
+          "wikitext": 5
+        },
+        "variant": "bf16"
+      },
+      "stack": {
+        "image": "vllm/vllm-openai:v0.10.2 (docker/Dockerfile) + requirements/eval-linux.txt",
+        "lm_eval": "0.4.11"
+      },
+      "variants": [
+        "bf16",
+        "awq",
+        "gptq"
+      ]
+    },
+    "config_sha256": "2cc11c9a7e3e4158424329a53eccfc4043f1edfcad621e6395f09cbb926e593e",
+    "git": {
+      "commit": "e5d1b48d5c7d1f0adbd06e6db84e41ca52b8b414",
+      "dirty_tracked": false
+    },
+    "quant_config": {
+      "gpu": "L40S",
+      "model": {
+        "id": "Qwen/Qwen3-8B",
+        "revision": "b968826d9c46dd6066d109eabc6255188de91218"
+      },
+      "name": "phase4-quantize",
+      "sanity": {
+        "engine_args": [
+          "--dtype",
+          "bfloat16",
+          "--max-model-len",
+          "4096",
+          "--gpu-memory-utilization",
+          "0.90",
+          "--seed",
+          "0",
+          "--enforce-eager",
+          "--no-enable-prefix-caching",
+          "--generation-config",
+          "vllm",
+          "--disable-uvicorn-access-log"
+        ],
+        "max_model_len": 4096,
+        "max_tokens": 64,
+        "prompts": [
+          "The capital of France is",
+          "def fibonacci(n):\n    \"\"\"Return the n-th Fibonacci number.\"\"\"\n",
+          "Explain in one sentence why the sky is blue:",
+          "Translate to French: Good morning, how are you today?\nFrench:",
+          "The first five prime numbers are"
+        ]
+      },
+      "stack": "requirements/quantize.in",
+      "variants": {
+        "awq": {
+          "calibration": {
+            "dataset_id": "mit-han-lab/pile-val-backup",
+            "format": "user_text",
+            "max_seq_length": 512,
+            "num_samples": 256,
+            "revision": "2f5e46ae6a69cf0dce4b12f78241c408936ca0e4",
+            "shuffle_seed": 42,
+            "split": "validation",
+            "text_field": "text"
+          },
+          "expected_group_size": 128,
+          "expected_symmetric": false,
+          "ignore": [
+            "lm_head"
+          ],
+          "method": "awq",
+          "scheme": "W4A16_ASYM",
+          "targets": [
+            "Linear"
+          ]
+        },
+        "gptq": {
+          "calibration": {
+            "dataset_id": "HuggingFaceH4/ultrachat_200k",
+            "format": "messages",
+            "max_seq_length": 2048,
+            "num_samples": 512,
+            "revision": "8049631c405ae6576f93f445c6b8166f76f5505a",
+            "shuffle_seed": 42,
+            "split": "train_sft",
+            "text_field": "messages"
+          },
+          "expected_group_size": 128,
+          "expected_symmetric": true,
+          "ignore": [
+            "lm_head"
+          ],
+          "method": "gptq",
+          "scheme": "W4A16",
+          "targets": [
+            "Linear"
+          ]
+        }
+      }
+    },
+    "stamp": "20260923T134506Z"
+  },
+  "steps": {
+    "audit_full": {
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "llmbench.eval_audit",
+        "--tokenizer",
+        "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+        "--max-length",
+        "4096",
+        "--out",
+        "/results/phase5/prefetch-20260923T134506Z/prompt_lengths_full.json"
+      ],
+      "elapsed_s": 296.0,
+      "returncode": 0
+    },
+    "audit_probe": {
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "llmbench.eval_audit",
+        "--tokenizer",
+        "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+        "--max-length",
+        "4096",
+        "--out",
+        "/results/phase5/prefetch-20260923T134506Z/prompt_lengths_probe.json",
+        "--limit",
+        "mmlu=10",
+        "--limit",
+        "wikitext=5"
+      ],
+      "elapsed_s": 26.4,
+      "returncode": 0
+    },
+    "download": {
+      "command": [
+        "/usr/bin/python",
+        "-c",
+        "from lm_eval.tasks import TaskManager, get_task_dict; get_task_dict(['mmlu', 'wikitext'], TaskManager())"
+      ],
+      "elapsed_s": 121.3,
+      "returncode": 0
+    }
+  }
+}

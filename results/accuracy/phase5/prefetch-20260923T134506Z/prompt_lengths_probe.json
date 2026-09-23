@@ -1,0 +1,48 @@
+{
+  "tokenizer": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+  "max_length": 4096,
+  "limits": {
+    "mmlu": 10,
+    "wikitext": 5
+  },
+  "lm_eval_version": "0.4.11",
+  "tasks": {
+    "mmlu_5shot": {
+      "requests": 2280,
+      "requests_by_type": {
+        "loglikelihood": 2280
+      },
+      "total_tokens": 1382712,
+      "mean_tokens": 606.4526315789474,
+      "max_tokens": 2991,
+      "longest_task": "mmlu_high_school_european_history",
+      "longest_tasks": {
+        "mmlu_high_school_european_history": 2991,
+        "mmlu_high_school_us_history": 2301,
+        "mmlu_professional_law": 1699,
+        "mmlu_high_school_world_history": 1606,
+        "mmlu_college_medicine": 1366
+      },
+      "truncation_limit": 4095,
+      "requests_over_limit": 0,
+      "fits": true
+    },
+    "wikitext": {
+      "requests": 8,
+      "requests_by_type": {
+        "rolling_window": 8
+      },
+      "total_tokens": 27069,
+      "mean_tokens": 3383.625,
+      "max_tokens": 4095,
+      "longest_task": "wikitext",
+      "longest_tasks": {
+        "wikitext": 4095
+      },
+      "truncation_limit": 4095,
+      "requests_over_limit": 0,
+      "fits": true
+    }
+  },
+  "fits": true
+}

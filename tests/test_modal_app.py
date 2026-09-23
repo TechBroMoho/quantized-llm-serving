@@ -90,3 +90,20 @@ def test_phase4_config_matches_official_examples() -> None:
         assert len(variant["calibration"]["revision"]) == 40
     assert len(config["sanity"]["prompts"]) == 5
     assert "--no-enable-prefix-caching" in config["sanity"]["engine_args"]
+
+
+def test_effective_packages_follow_import_precedence() -> None:
+    from modal_app.evaluate import effective_packages
+
+    entries = [
+        ["aiohttp", "3.12.15", "/usr/local/lib/python3.12/dist-packages"],
+        ["six", "1.17.0", "/usr/local/lib/python3.12/dist-packages"],
+        ["aiohttp", "3.12.7", "/pkg"],
+        ["Six", "1.16.0", "/usr/lib/python3/dist-packages"],
+    ]
+    effective, shadowed = effective_packages(entries)
+    assert effective == {"aiohttp": "3.12.15", "six": "1.17.0"}
+    assert [(item["name"], item["version"]) for item in shadowed] == [
+        ("aiohttp", "3.12.7"),
+        ("Six", "1.16.0"),
+    ]

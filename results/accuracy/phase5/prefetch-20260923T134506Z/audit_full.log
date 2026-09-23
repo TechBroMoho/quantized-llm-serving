@@ -1,0 +1,351 @@
+/usr/local/lib/python3.12/dist-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.5.0) or chardet (6.0.0.post1)/charset_normalizer (3.4.3) doesn't match a supported version!
+  warnings.warn(
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'world_religions' at /tmp/hf-eval/datasets/cais___mmlu/world_religions/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:29 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'professional_law' at /tmp/hf-eval/datasets/cais___mmlu/professional_law/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:31 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'prehistory' at /tmp/hf-eval/datasets/cais___mmlu/prehistory/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:33 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'philosophy' at /tmp/hf-eval/datasets/cais___mmlu/philosophy/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:35 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'moral_scenarios' at /tmp/hf-eval/datasets/cais___mmlu/moral_scenarios/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:37 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'moral_disputes' at /tmp/hf-eval/datasets/cais___mmlu/moral_disputes/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:38 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'logical_fallacies' at /tmp/hf-eval/datasets/cais___mmlu/logical_fallacies/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:40 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'jurisprudence' at /tmp/hf-eval/datasets/cais___mmlu/jurisprudence/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:42 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'international_law' at /tmp/hf-eval/datasets/cais___mmlu/international_law/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:44 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_world_history' at /tmp/hf-eval/datasets/cais___mmlu/high_school_world_history/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:45 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_us_history' at /tmp/hf-eval/datasets/cais___mmlu/high_school_us_history/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:47 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_european_history' at /tmp/hf-eval/datasets/cais___mmlu/high_school_european_history/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:49 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'formal_logic' at /tmp/hf-eval/datasets/cais___mmlu/formal_logic/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:51 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'us_foreign_policy' at /tmp/hf-eval/datasets/cais___mmlu/us_foreign_policy/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:53 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'sociology' at /tmp/hf-eval/datasets/cais___mmlu/sociology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:54 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'security_studies' at /tmp/hf-eval/datasets/cais___mmlu/security_studies/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:56 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'public_relations' at /tmp/hf-eval/datasets/cais___mmlu/public_relations/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:45:58 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'professional_psychology' at /tmp/hf-eval/datasets/cais___mmlu/professional_psychology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:00 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'human_sexuality' at /tmp/hf-eval/datasets/cais___mmlu/human_sexuality/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:01 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_psychology' at /tmp/hf-eval/datasets/cais___mmlu/high_school_psychology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:03 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_microeconomics' at /tmp/hf-eval/datasets/cais___mmlu/high_school_microeconomics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:05 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_macroeconomics' at /tmp/hf-eval/datasets/cais___mmlu/high_school_macroeconomics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:07 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_government_and_politics' at /tmp/hf-eval/datasets/cais___mmlu/high_school_government_and_politics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:09 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_geography' at /tmp/hf-eval/datasets/cais___mmlu/high_school_geography/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:10 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'econometrics' at /tmp/hf-eval/datasets/cais___mmlu/econometrics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:13 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'virology' at /tmp/hf-eval/datasets/cais___mmlu/virology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:14 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'professional_medicine' at /tmp/hf-eval/datasets/cais___mmlu/professional_medicine/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:16 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'professional_accounting' at /tmp/hf-eval/datasets/cais___mmlu/professional_accounting/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:18 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'nutrition' at /tmp/hf-eval/datasets/cais___mmlu/nutrition/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:20 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'miscellaneous' at /tmp/hf-eval/datasets/cais___mmlu/miscellaneous/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:22 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'medical_genetics' at /tmp/hf-eval/datasets/cais___mmlu/medical_genetics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:23 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'marketing' at /tmp/hf-eval/datasets/cais___mmlu/marketing/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:25 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'management' at /tmp/hf-eval/datasets/cais___mmlu/management/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:27 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'human_aging' at /tmp/hf-eval/datasets/cais___mmlu/human_aging/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:29 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'global_facts' at /tmp/hf-eval/datasets/cais___mmlu/global_facts/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:31 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'college_medicine' at /tmp/hf-eval/datasets/cais___mmlu/college_medicine/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:33 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'clinical_knowledge' at /tmp/hf-eval/datasets/cais___mmlu/clinical_knowledge/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:34 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'business_ethics' at /tmp/hf-eval/datasets/cais___mmlu/business_ethics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:36 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'machine_learning' at /tmp/hf-eval/datasets/cais___mmlu/machine_learning/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:38 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_statistics' at /tmp/hf-eval/datasets/cais___mmlu/high_school_statistics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:40 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_physics' at /tmp/hf-eval/datasets/cais___mmlu/high_school_physics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:41 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_mathematics' at /tmp/hf-eval/datasets/cais___mmlu/high_school_mathematics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:43 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_computer_science' at /tmp/hf-eval/datasets/cais___mmlu/high_school_computer_science/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:45 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_chemistry' at /tmp/hf-eval/datasets/cais___mmlu/high_school_chemistry/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:47 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'high_school_biology' at /tmp/hf-eval/datasets/cais___mmlu/high_school_biology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:48 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'elementary_mathematics' at /tmp/hf-eval/datasets/cais___mmlu/elementary_mathematics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:50 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'electrical_engineering' at /tmp/hf-eval/datasets/cais___mmlu/electrical_engineering/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:52 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'conceptual_physics' at /tmp/hf-eval/datasets/cais___mmlu/conceptual_physics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:54 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'computer_security' at /tmp/hf-eval/datasets/cais___mmlu/computer_security/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:56 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'college_physics' at /tmp/hf-eval/datasets/cais___mmlu/college_physics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:58 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'college_mathematics' at /tmp/hf-eval/datasets/cais___mmlu/college_mathematics/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:46:59 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'college_computer_science' at /tmp/hf-eval/datasets/cais___mmlu/college_computer_science/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:47:01 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'college_chemistry' at /tmp/hf-eval/datasets/cais___mmlu/college_chemistry/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:47:03 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'college_biology' at /tmp/hf-eval/datasets/cais___mmlu/college_biology/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:47:05 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'astronomy' at /tmp/hf-eval/datasets/cais___mmlu/astronomy/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:47:07 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'anatomy' at /tmp/hf-eval/datasets/cais___mmlu/anatomy/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:47:08 2026).
+Using the latest cached version of the dataset since cais/mmlu couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'abstract_algebra' at /tmp/hf-eval/datasets/cais___mmlu/abstract_algebra/0.0.0/c30699e8356da336a370243923dbaf21066bb9fe (last modified on Wed Sep 23 06:47:10 2026).
+Overwriting default num_fewshot of mmlu_abstract_algebra from None to 5
+Overwriting default num_fewshot of mmlu_anatomy from None to 5
+Overwriting default num_fewshot of mmlu_astronomy from None to 5
+Overwriting default num_fewshot of mmlu_college_biology from None to 5
+Overwriting default num_fewshot of mmlu_college_chemistry from None to 5
+Overwriting default num_fewshot of mmlu_college_computer_science from None to 5
+Overwriting default num_fewshot of mmlu_college_mathematics from None to 5
+Overwriting default num_fewshot of mmlu_college_physics from None to 5
+Overwriting default num_fewshot of mmlu_computer_security from None to 5
+Overwriting default num_fewshot of mmlu_conceptual_physics from None to 5
+Overwriting default num_fewshot of mmlu_electrical_engineering from None to 5
+Overwriting default num_fewshot of mmlu_elementary_mathematics from None to 5
+Overwriting default num_fewshot of mmlu_high_school_biology from None to 5
+Overwriting default num_fewshot of mmlu_high_school_chemistry from None to 5
+Overwriting default num_fewshot of mmlu_high_school_computer_science from None to 5
+Overwriting default num_fewshot of mmlu_high_school_mathematics from None to 5
+Overwriting default num_fewshot of mmlu_high_school_physics from None to 5
+Overwriting default num_fewshot of mmlu_high_school_statistics from None to 5
+Overwriting default num_fewshot of mmlu_machine_learning from None to 5
+Overwriting default num_fewshot of mmlu_business_ethics from None to 5
+Overwriting default num_fewshot of mmlu_clinical_knowledge from None to 5
+Overwriting default num_fewshot of mmlu_college_medicine from None to 5
+Overwriting default num_fewshot of mmlu_global_facts from None to 5
+Overwriting default num_fewshot of mmlu_human_aging from None to 5
+Overwriting default num_fewshot of mmlu_management from None to 5
+Overwriting default num_fewshot of mmlu_marketing from None to 5
+Overwriting default num_fewshot of mmlu_medical_genetics from None to 5
+Overwriting default num_fewshot of mmlu_miscellaneous from None to 5
+Overwriting default num_fewshot of mmlu_nutrition from None to 5
+Overwriting default num_fewshot of mmlu_professional_accounting from None to 5
+Overwriting default num_fewshot of mmlu_professional_medicine from None to 5
+Overwriting default num_fewshot of mmlu_virology from None to 5
+Overwriting default num_fewshot of mmlu_econometrics from None to 5
+Overwriting default num_fewshot of mmlu_high_school_geography from None to 5
+Overwriting default num_fewshot of mmlu_high_school_government_and_politics from None to 5
+Overwriting default num_fewshot of mmlu_high_school_macroeconomics from None to 5
+Overwriting default num_fewshot of mmlu_high_school_microeconomics from None to 5
+Overwriting default num_fewshot of mmlu_high_school_psychology from None to 5
+Overwriting default num_fewshot of mmlu_human_sexuality from None to 5
+Overwriting default num_fewshot of mmlu_professional_psychology from None to 5
+Overwriting default num_fewshot of mmlu_public_relations from None to 5
+Overwriting default num_fewshot of mmlu_security_studies from None to 5
+Overwriting default num_fewshot of mmlu_sociology from None to 5
+Overwriting default num_fewshot of mmlu_us_foreign_policy from None to 5
+Overwriting default num_fewshot of mmlu_formal_logic from None to 5
+Overwriting default num_fewshot of mmlu_high_school_european_history from None to 5
+Overwriting default num_fewshot of mmlu_high_school_us_history from None to 5
+Overwriting default num_fewshot of mmlu_high_school_world_history from None to 5
+Overwriting default num_fewshot of mmlu_international_law from None to 5
+Overwriting default num_fewshot of mmlu_jurisprudence from None to 5
+Overwriting default num_fewshot of mmlu_logical_fallacies from None to 5
+Overwriting default num_fewshot of mmlu_moral_disputes from None to 5
+Overwriting default num_fewshot of mmlu_moral_scenarios from None to 5
+Overwriting default num_fewshot of mmlu_philosophy from None to 5
+Overwriting default num_fewshot of mmlu_prehistory from None to 5
+Overwriting default num_fewshot of mmlu_professional_law from None to 5
+Overwriting default num_fewshot of mmlu_world_religions from None to 5
+
+100%|██████████| 100/100 [00:00<00:00, 180.89it/s]
+
+100%|██████████| 135/135 [00:00<00:00, 183.54it/s]
+
+100%|██████████| 152/152 [00:00<00:00, 185.28it/s]
+100%|██████████| 152/152 [00:00<00:00, 184.38it/s]
+
+100%|██████████| 144/144 [00:00<00:00, 185.15it/s]
+
+100%|██████████| 100/100 [00:00<00:00, 184.46it/s]
+
+100%|██████████| 100/100 [00:00<00:00, 184.15it/s]
+
+100%|██████████| 100/100 [00:00<00:00, 185.03it/s]
+
+100%|██████████| 102/102 [00:00<00:00, 184.70it/s]
+
+100%|██████████| 100/100 [00:00<00:00, 184.75it/s]
+
+100%|██████████| 235/235 [00:01<00:00, 182.60it/s]
+
+100%|██████████| 145/145 [00:00<00:00, 180.75it/s]
+
+100%|██████████| 378/378 [00:02<00:00, 178.80it/s]
+
+100%|██████████| 310/310 [00:01<00:00, 178.24it/s]
+
+100%|██████████| 203/203 [00:01<00:00, 176.66it/s]
+100%|██████████| 203/203 [00:01<00:00, 177.97it/s]
+
+100%|██████████| 100/100 [00:00<00:00, 177.18it/s]
+
+100%|██████████| 270/270 [00:01<00:00, 176.03it/s]
+
+100%|██████████| 151/151 [00:00<00:00, 175.46it/s]
+
+100%|██████████| 216/216 [00:01<00:00, 181.49it/s]
+
+100%|██████████| 112/112 [00:00<00:00, 180.59it/s]
+
+100%|██████████| 100/100 [00:00<00:00, 127.21it/s]
+
+100%|██████████| 265/265 [00:01<00:00, 176.90it/s]
+
+100%|██████████| 173/173 [00:00<00:00, 179.02it/s]
+
+100%|██████████| 100/100 [00:00<00:00, 178.57it/s]
+
+100%|██████████| 223/223 [00:01<00:00, 178.25it/s]
+
+100%|██████████| 103/103 [00:00<00:00, 178.03it/s]
+
+100%|██████████| 234/234 [00:01<00:00, 177.59it/s]
+
+100%|██████████| 100/100 [00:00<00:00, 177.06it/s]
+
+100%|██████████| 783/783 [00:04<00:00, 183.91it/s]
+
+100%|██████████| 306/306 [00:01<00:00, 183.51it/s]
+
+100%|██████████| 282/282 [00:01<00:00, 181.35it/s]
+
+100%|██████████| 272/272 [00:01<00:00, 183.67it/s]
+
+100%|██████████| 166/166 [00:00<00:00, 182.55it/s]
+
+100%|██████████| 114/114 [00:00<00:00, 182.53it/s]
+100%|██████████| 114/114 [00:00<00:00, 184.00it/s]
+
+100%|██████████| 198/198 [00:01<00:00, 181.87it/s]
+
+100%|██████████| 193/193 [00:01<00:00, 184.30it/s]
+
+100%|██████████| 390/390 [00:02<00:00, 183.74it/s]
+
+100%|██████████| 238/238 [00:01<00:00, 183.19it/s]
+
+100%|██████████| 545/545 [00:02<00:00, 186.49it/s]
+
+100%|██████████| 131/131 [00:00<00:00, 189.96it/s]
+
+100%|██████████| 612/612 [00:03<00:00, 184.15it/s]
+
+100%|██████████| 110/110 [00:00<00:00, 186.23it/s]
+
+100%|██████████| 245/245 [00:01<00:00, 182.14it/s]
+
+100%|██████████| 201/201 [00:01<00:00, 190.08it/s]
+
+100%|██████████| 100/100 [00:00<00:00, 188.79it/s]
+
+100%|██████████| 126/126 [00:00<00:00, 188.91it/s]
+
+100%|██████████| 165/165 [00:00<00:00, 188.55it/s]
+
+100%|██████████| 204/204 [00:01<00:00, 185.56it/s]
+
+100%|██████████| 237/237 [00:01<00:00, 183.14it/s]
+
+100%|██████████| 121/121 [00:00<00:00, 183.89it/s]
+
+100%|██████████| 108/108 [00:00<00:00, 181.27it/s]
+
+100%|██████████| 163/163 [00:00<00:00, 182.58it/s]
+
+100%|██████████| 346/346 [00:01<00:00, 178.33it/s]
+
+100%|██████████| 895/895 [00:05<00:00, 178.72it/s]
+
+100%|██████████| 311/311 [00:01<00:00, 182.45it/s]
+
+100%|██████████| 324/324 [00:02<00:00, 157.86it/s]
+
+100%|█████████▉| 1530/1534 [00:08<00:00, 185.65it/s]
+100%|██████████| 1534/1534 [00:08<00:00, 181.45it/s]
+
+100%|██████████| 171/171 [00:00<00:00, 184.66it/s]
+100%|██████████| 171/171 [00:00<00:00, 184.67it/s]
+fatal: not a git repository (or any of the parent directories): .git
+[Task: wikitext] metric word_perplexity is defined, but aggregation is not. using default aggregation=weighted_perplexity
+[Task: wikitext] metric word_perplexity is defined, but higher_is_better is not. using default higher_is_better=False
+[Task: wikitext] metric byte_perplexity is defined, but aggregation is not. using default aggregation=weighted_perplexity
+[Task: wikitext] metric byte_perplexity is defined, but higher_is_better is not. using default higher_is_better=False
+[Task: wikitext] metric bits_per_byte is defined, but aggregation is not. using default aggregation=bits_per_byte
+[Task: wikitext] metric bits_per_byte is defined, but higher_is_better is not. using default higher_is_better=False
+Using the latest cached version of the dataset since EleutherAI/wikitext_document_level couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-2-raw-v1' at /tmp/hf-eval/datasets/EleutherAI___wikitext_document_level/wikitext-2-raw-v1/0.0.0/647234772b9554e208af6c826f23b99e3cac88c8 (last modified on Wed Sep 23 06:47:13 2026).
+
+100%|██████████| 62/62 [00:00<00:00, 497.24it/s]
+fatal: not a git repository (or any of the parent directories): .git
+{
+  "tokenizer": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+  "max_length": 4096,
+  "limits": {},
+  "lm_eval_version": "0.4.11",
+  "tasks": {
+    "mmlu_5shot": {
+      "requests": 56168,
+      "requests_by_type": {
+        "loglikelihood": 56168
+      },
+      "total_tokens": 39160912,
+      "mean_tokens": 697.21036889332,
+      "max_tokens": 3097,
+      "longest_task": "mmlu_high_school_european_history",
+      "longest_tasks": {
+        "mmlu_high_school_european_history": 3097,
+        "mmlu_high_school_us_history": 2430,
+        "mmlu_professional_law": 2159,
+        "mmlu_high_school_world_history": 1832,
+        "mmlu_security_studies": 1399
+      },
+      "truncation_limit": 4095,
+      "requests_over_limit": 0,
+      "fits": true
+    },
+    "wikitext": {
+      "requests": 104,
+      "requests_by_type": {
+        "rolling_window": 104
+      },
+      "total_tokens": 347162,
+      "mean_tokens": 3338.096153846154,
+      "max_tokens": 4095,
+      "longest_task": "wikitext",
+      "longest_tasks": {
+        "wikitext": 4095
+      },
+      "truncation_limit": 4095,
+      "requests_over_limit": 0,
+      "fits": true
+    }
+  },
+  "fits": true
+}

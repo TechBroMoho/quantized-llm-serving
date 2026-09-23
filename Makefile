@@ -98,6 +98,7 @@ eval-full:  # L40S (BILLABLE): MMLU 5-shot + WikiText-2 for BF16, AWQ, GPTQ
 	$(MODAL_RUN) modal_app.evaluate::full
 
 sync-accuracy:  # $0: copy Phase 5 results (minus per-sample JSONL) from the Volume
+	mkdir -p .cache/phase5-sync
 	uv run modal volume get llmbench-results phase5 .cache/phase5-sync --force
 	uv run python scripts/sync_accuracy.py
 

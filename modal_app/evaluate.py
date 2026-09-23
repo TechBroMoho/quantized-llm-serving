@@ -80,14 +80,64 @@ def offline_env(hf_home: str) -> dict[str, str]:
     }
 
 
-def _installed() -> dict[str, str]:
-    from importlib.metadata import distributions
+# Lists every distribution in sys.path order, as the lm-eval subprocess sees
+# it. Modal's function process also carries Modal's own client packages, and
+# the image has Ubuntu's system dist-packages; the first prefetch mistook
+# those shadowed copies for changes to the image.
+_LIST_DISTRIBUTIONS = """
+import json
+from importlib.metadata import distributions
+print(json.dumps([[d.metadata["Name"], d.version, str(d._path.parent)]
+                  for d in distributions() if d.metadata["Name"]]))
+"""
 
-    return {
-        dist.metadata["Name"]: dist.version
-        for dist in distributions()
-        if dist.metadata["Name"]
-    }
+
+def effective_packages(
+    entries: list[list[str]],
+) -> tuple[dict[str, str], list[dict[str, str]]]:
+    """The version Python imports for each package, plus shadowed copies.
+
+    `entries` are (name, version, location) in sys.path order; the first
+    occurrence of a name is the one `import` resolves.
+    """
+    import re
+
+    effective: dict[str, str] = {}
+    first: dict[str, tuple[str, str]] = {}
+    shadowed = []
+    for name, version, location in entries:
+        key = re.sub(r"[-_.]+", "-", name).lower()
+        if key in first:
+            shadowed.append(
+                {
+                    "name": name,
+                    "version": version,
+                    "location": location,
+                    "shadowed_by": f"{first[key][0]} in {first[key][1]}",
+                }
+            )
+            continue
+        first[key] = (version, location)
+        effective[name] = version
+    return effective, shadowed
+
+
+def _installed(env: dict[str, str]) -> list[list[str]]:
+    """Distributions visible to a subprocess with lm-eval's environment."""
+    import os
+    import subprocess
+    import sys
+
+    done = subprocess.run(
+        [sys.executable, "-c", _LIST_DISTRIBUTIONS],
+        capture_output=True,
+        text=True,
+        env={**os.environ, **env},
+        check=True,
+        timeout=120,
+    )
+    entries: list[list[str]] = json.loads(done.stdout)
+    return entries
 
 
 def _run(command: list[str], log: Any, env: dict[str, str], timeout_s: float) -> int:
@@ -133,20 +183,24 @@ def eval_prefetch(run: dict[str, Any]) -> dict[str, Any]:
 
     out = Path(RESULTS_PATH) / "phase5" / f"prefetch-{run['stamp']}"
     out.mkdir(parents=True, exist_ok=True)
-    installed = _installed()
+    entries = _installed(offline_env(LOCAL_HF_HOME))
+    installed, shadowed = effective_packages(entries)
     constraints = Path(IMAGE_CONSTRAINTS).read_text(encoding="utf-8")
     record: dict[str, Any] = {
         "run": {k: v for k, v in run.items() if k != "config_yaml"},
         "resources": EVAL_PREFETCH_RESOURCES.as_dict(),
         "packages": package_versions(RECORDED_PACKAGES),
         "image_package_drift": package_drift(installed, constraints),
+        "shadowed_distributions": shadowed,
         "failures": [],
         "steps": {},
     }
     record["failures"] += [
         f"image package changed: {d}" for d in record["image_package_drift"]
     ]
-    write_json(out / "installed_packages.json", installed)
+    write_json(
+        out / "installed_packages.json", {"effective": installed, "all": entries}
+    )
     help_text = subprocess.run(
         ["lm-eval", "run", "--help"], capture_output=True, text=True, check=False
     )
