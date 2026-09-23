@@ -2,8 +2,8 @@
 
 ## Status
 
-Phase 1 acceptance passed. Phase 2 has not started. No GPU or Modal function
-has run. This session is limited to local, $0 work.
+Phase 2 acceptance passed. No GPU or Modal function has run. The next phase
+needs an explicit cost estimate and approval before any remote execution.
 
 ## Phase log
 
@@ -44,6 +44,22 @@ has run. This session is limited to local, $0 work.
   deadline and completed during the drain, so they are separately reported as
   late and excluded from in-window throughput. Full `make check` passed (11
   tests, Ruff, mypy, instruction-file comparison). No Modal job ran.
+- **Phase 2 (2026-09-23):** Added the Hugging Face `/v1/completions` streaming
+  baseline with naive serialization and left-padded static batches. A custom
+  `BaseStreamer` emits token IDs per batch row; final `usage` counts generated
+  IDs. The load client now fails when output usage differs from `max_tokens`
+  and checks token-ID prompt length. CPU integration tests used a deterministic
+  tiny GPT-2 that prefers EOS: naive generation batches were `[1, 1]`, static
+  mode batched two unequal-length inputs, and both modes returned three tokens
+  per request. The `min_new_tokens=0` mutation yielded one token and client
+  errors `completion_tokens 1 != max_tokens 3`; normal settings passed. A
+  separate `sshleifer/tiny-gpt2` CPU load run completed 4/4 requests per mode,
+  each with three output tokens and zero errors. Raw records and summaries are
+  in `results/validation/hf_*_cpu.*`; reproduce with the commands in
+  `README.md` (static server uses `--mode static --batch-size 2 --batch-wait-ms
+  50`). `make check` passed: Ruff, strict mypy on 11 source files, 14 tests,
+  and instruction-file comparison. These are functional checks, not performance
+  comparisons.
 
 ## Spend log
 
@@ -51,6 +67,7 @@ has run. This session is limited to local, $0 work.
 | --- | --- | --- | --- | ---: | ---: | ---: |
 | 2026-09-23 | 0 | Local setup and read-only account checks | None | 0 | $0.00 | $0.00 |
 | 2026-09-23 | 1 | Mock, tests, timing and capacity validation, CLI smoke | None | 0 | $0.00 | $0.00 |
+| 2026-09-23 | 2 | HF baseline, CPU integration and local load runs | None | 0 | $0.00 | $0.00 |
 
 The account's remaining Modal credit has not been verified. No billable
 Modal work has been requested in this session.
@@ -64,3 +81,7 @@ Modal work has been requested in this session.
   acceptance checks ran with localhost access; a first capacity attempt also
   exposed a wrong health-probe path. The probe was fixed and the full
   validation then passed.
+- Phase 2's first dependency download and localhost bind were blocked by the
+  sandbox. Approved network/local access let the CPU checks run. The cached
+  tiny model still attempted a metadata lookup; `HF_HUB_OFFLINE=1` made the
+  reproducible server run fully offline.

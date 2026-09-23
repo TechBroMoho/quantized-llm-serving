@@ -18,7 +18,7 @@ from llmbench.mock.server import MockConfig, serve
 
 
 def _versions() -> dict[str, str]:
-    packages = ("llmbench", "aiohttp", "modal")
+    packages = ("llmbench", "aiohttp", "modal", "torch", "transformers", "fastapi")
     found: dict[str, str] = {}
     for package in packages:
         try:

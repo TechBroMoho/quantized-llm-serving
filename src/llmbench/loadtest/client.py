@@ -22,6 +22,9 @@ def _consume_event(record: RequestRecord, data: str, received_at: float) -> bool
         record.status = "error"
         record.error = f"invalid SSE JSON: {exc.msg}"
         return False
+    if "error" in payload:
+        record.status = "error"
+        record.error = f"server generation error: {payload['error']}"
     choices = payload.get("choices")
     if isinstance(choices, list):
         for choice in choices:
@@ -84,6 +87,23 @@ async def stream_request(
                 record.status = "error"
                 record.error = "stream ended without valid usage"
             else:
+                expected_output = payload.get("max_tokens")
+                if (
+                    isinstance(expected_output, int)
+                    and record.completion_tokens != expected_output
+                ):
+                    record.status = "error"
+                    record.error = (
+                        f"completion_tokens {record.completion_tokens} != "
+                        f"max_tokens {expected_output}"
+                    )
+                prompt = payload.get("prompt")
+                if isinstance(prompt, list) and record.prompt_tokens != len(prompt):
+                    record.status = "error"
+                    record.error = (
+                        f"prompt_tokens {record.prompt_tokens} != "
+                        f"input tokens {len(prompt)}"
+                    )
                 if (
                     record.completion_tokens > 1
                     and record.e2e_s is not None

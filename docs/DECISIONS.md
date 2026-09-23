@@ -232,3 +232,41 @@ reports `word_perplexity`. Measure actual five-shot MMLU prompt lengths and
 choose a context limit that fits them before full evaluation.
 
 **Consequences.** No evaluation package or GPU work is added in Phase 0.
+
+## ADR-009 — Hugging Face baseline scheduling and exact output length (2026-09-23)
+
+**Context.** Phase 2 needs a local reference server with fair token counts and
+streaming behavior that can later be compared with vLLM. `TextIteratorStreamer`
+buffers text and does not preserve one event per generated token for a batch.
+
+**Options.** Serialize all requests, or collect a fixed group briefly and run
+one padded `generate()` call. Use token events or decoded word events.
+
+**Decision.** One worker owns model generation. Naive mode dispatches a batch
+of one; static mode gathers up to `batch_size` jobs for `batch_wait_ms`, groups
+only equal output limits, left pads inputs, and passes an attention mask.
+A custom `BaseStreamer` sends one generated token ID per batch row to the
+event loop; it skips the initial prompt callback. Decoding happens per token,
+so the final `usage` count is generated token IDs, not text chunks or
+retokenized text. The load client requires `usage.completion_tokens` to equal
+requested `max_tokens`; token-ID prompts also require exact prompt usage.
+
+Every generation call uses a fresh explicit `GenerationConfig`: greedy
+(`do_sample=False`, one beam and return), `max_new_tokens` and
+`min_new_tokens` both equal the requested limit, one cache policy, neutral
+penalties, explicit BOS/EOS/pad IDs, and no forced tokens or stop sequence.
+The API accepts only explicit greedy streaming request settings and rejects
+unsupported stop sequences. The CPU CLI selects float32; the future GPU
+baseline selects BF16 and SDPA. Pinning model and tokenizer revisions and
+choosing the static batch size by an OOM probe remain Phase 6 work.
+
+**Verification.** The deterministic tiny GPT-2 test model is configured to
+prefer EOS immediately. With `min_new_tokens=3`, naive and static mode each
+return three generated tokens; the static test proves a batch of two with
+unequal prompt lengths. Temporarily setting `min_new_tokens=0` gives one
+generated token and the load client marks both requests as errors with
+`completion_tokens 1 != max_tokens 3`. The normal setting is restored by the
+default path. A separate `sshleifer/tiny-gpt2` CPU run saved four requests per
+mode in `results/validation/hf_{naive,static}_cpu.{json,jsonl}`; all eight
+completed with exactly three output tokens and no errors. These runs are
+functional checks, not performance comparisons.
