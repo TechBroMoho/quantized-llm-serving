@@ -1,13 +1,13 @@
 {
   "capacity_concurrency": 256,
-  "capacity_headroom_multiple": 20.980349999999998,
-  "capacity_margin_chunks_per_s": 35960.7,
+  "capacity_headroom_multiple": 20.202900000000003,
+  "capacity_margin_chunks_per_s": 34405.8,
   "capacity_threshold_chunks_per_s": 6000,
-  "capacity_threshold_multiple": 6.993449999999999,
+  "capacity_threshold_multiple": 6.7343,
   "capacity_window_s": 30.0,
   "client_cpu_core_limit": 2.0,
-  "client_process_cpu_cores_average": 0.9775384333333333,
-  "client_process_cpu_seconds": 29.326153,
+  "client_process_cpu_cores_average": 0.9785740333333333,
+  "client_process_cpu_seconds": 29.357221,
   "config": {
     "concurrency": 256,
     "drain_s": 0.5,
@@ -27,10 +27,10 @@
   "config_sha256": "c12191f794641e69f2ab098e41c5c2019b0adf152c0f8de04cebbda5efa7509f",
   "drain_duration_s": 0.5,
   "e2e_s": {
-    "p50": 0.01702562504215166,
-    "p90": 0.020148100366350265,
-    "p95": 0.021852584031876177,
-    "p99": 0.04102726600831375
+    "p50": 0.01771416698466055,
+    "p90": 0.02077151230769232,
+    "p95": 0.021974839287577198,
+    "p99": 0.03784228506847279
   },
   "error_rate": 0.0,
   "errored_or_cancelled_requests": 0,
@@ -43,32 +43,32 @@
   },
   "in_flight_at_deadline": 256,
   "itl_s": {
-    "p50": 3.2919924706220627e-06,
-    "p90": 3.958004526793957e-06,
-    "p95": 4.291010554879904e-06,
-    "p99": 6.708025466650724e-06
+    "p50": 3.292050678282976e-06,
+    "p90": 3.999972250312567e-06,
+    "p95": 4.332978278398514e-06,
+    "p99": 6.916990969330072e-06
   },
   "late_completed_requests": 256,
-  "measured_text_chunks_per_s": 41960.7,
-  "measurement_text_chunks": 1258821,
-  "offered_requests": 419863,
-  "on_time_completed_requests": 419607,
-  "output_token_throughput_per_s": 41960.7,
+  "measured_text_chunks_per_s": 40405.8,
+  "measurement_text_chunks": 1212174,
+  "offered_requests": 404314,
+  "on_time_completed_requests": 404058,
+  "output_token_throughput_per_s": 40405.8,
   "raw_results_path": "results/validation/capacity_requests.jsonl.gz",
   "rejected_requests": 0,
-  "request_throughput_per_s": 13986.9,
-  "timestamp_utc": "2026-09-23T08:16:09.776398+00:00",
+  "request_throughput_per_s": 13468.6,
+  "timestamp_utc": "2026-09-23T08:26:57.205522+00:00",
   "tpot_s": {
-    "p50": 3.4164986573159695e-06,
-    "p90": 3.83349834010005e-06,
+    "p50": 3.3954856917262077e-06,
+    "p90": 3.8539874367415905e-06,
     "p95": 4.125002305954695e-06,
-    "p99": 7.541995728388429e-06
+    "p99": 7.68748577684164e-06
   },
   "ttft_s": {
-    "p50": 0.017018915968947113,
-    "p90": 0.020141000009607522,
-    "p95": 0.021843878529034556,
-    "p99": 0.04101211300003343
+    "p50": 0.017707458493532613,
+    "p90": 0.02076401230879128,
+    "p95": 0.02196722046355717,
+    "p99": 0.03782584587170268
   },
   "validation": "phase1_client_capacity",
   "versions": {
@@ -78,8 +78,8 @@
   },
   "warmup_requests_completed": 0,
   "window_duration_s": 30.0,
-  "window_end_monotonic_s": 396798.135927541,
-  "window_process_cpu_cores_average": 0.9775384333333333,
-  "window_process_cpu_seconds": 29.326153,
-  "window_start_monotonic_s": 396768.135927541
+  "window_end_monotonic_s": 397445.614328125,
+  "window_process_cpu_cores_average": 0.9785740333333333,
+  "window_process_cpu_seconds": 29.357221,
+  "window_start_monotonic_s": 397415.614328125
 }

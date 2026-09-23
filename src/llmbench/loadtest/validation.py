@@ -19,13 +19,14 @@ from pathlib import Path
 from typing import Any
 
 import aiohttp
+from aiohttp import web
 
 from llmbench.loadtest.client import stream_request
 from llmbench.loadtest.io import write_results
 from llmbench.loadtest.metrics import RequestRecord
 from llmbench.loadtest.runner import run_load
 from llmbench.loadtest.workloads import completions_payload
-from llmbench.mock.server import MockConfig, serve
+from llmbench.mock.server import MockConfig, make_app, serve
 
 CAPACITY_THRESHOLD_CHUNKS_PER_S = 6_000
 CAPACITY_WINDOW_S = 30.0
@@ -47,17 +48,30 @@ def _package_versions() -> dict[str, str]:
 
 
 async def measure_timing_accuracy() -> tuple[dict[str, Any], list[RequestRecord]]:
-    """Measure TTFT/ITL against the known 200 ms / 20 ms mock schedule."""
+    """Compare client timing with actual monotonic mock write timestamps."""
     port = _free_port()
-    config = MockConfig(ttft_s=EXPECTED_TTFT_S, itl_s=EXPECTED_ITL_S, output_tokens=4)
-    process = multiprocessing.get_context("spawn").Process(
-        target=_mock_server_process, args=(port, config), daemon=True
+    sent: dict[str, dict[str, Any]] = {}
+
+    def capture(request_id: str, kind: str, timestamp: float) -> None:
+        entry = sent.setdefault(request_id, {"text": []})
+        if kind == "start":
+            entry["start"] = timestamp
+        else:
+            entry["text"].append(timestamp)
+
+    config = MockConfig(
+        ttft_s=EXPECTED_TTFT_S,
+        itl_s=EXPECTED_ITL_S,
+        output_tokens=4,
+        timestamp_sink=capture,
     )
-    process.start()
+    server = web.AppRunner(make_app(config))
+    await server.setup()
+    site = web.TCPSite(server, "127.0.0.1", port)
+    await site.start()
     base_url = f"http://127.0.0.1:{port}"
     records = []
     try:
-        await _wait_until_ready(process, base_url)
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=2)
         ) as session:
@@ -76,24 +90,45 @@ async def measure_timing_accuracy() -> tuple[dict[str, Any], list[RequestRecord]
                     )
                 )
     finally:
-        process.terminate()
-        process.join(timeout=3)
-        if process.is_alive():
-            process.kill()
-            process.join(timeout=3)
+        await server.cleanup()
     ttfts = [row.ttft_s for row in records if row.ttft_s is not None]
     itls = [gap for row in records for gap in row.itl_s]
+    server_ttfts = [
+        float(sent[row.request_id]["text"][0]) - float(sent[row.request_id]["start"])
+        for row in records
+        if row.request_id in sent
+        and sent[row.request_id].get("start") is not None
+        and len(sent[row.request_id]["text"]) == 4
+    ]
+    server_itls = [
+        right - left
+        for row in records
+        if row.request_id in sent and len(sent[row.request_id]["text"]) == 4
+        for left, right in zip(
+            sent[row.request_id]["text"],
+            sent[row.request_id]["text"][1:],
+            strict=False,
+        )
+    ]
     median_ttft = statistics.median(ttfts) if ttfts else None
     median_itl = statistics.median(itls) if itls else None
+    median_server_ttft = statistics.median(server_ttfts) if server_ttfts else None
+    median_server_itl = statistics.median(server_itls) if server_itls else None
     timing_ok = (
         len(records) == 5
         and all(row.status == "ok" and row.usage_events == 1 for row in records)
+        and len(ttfts) == 5
+        and len(itls) == 15
+        and len(server_ttfts) == 5
+        and len(server_itls) == 15
         and median_ttft is not None
         and median_itl is not None
-        and abs(median_ttft - EXPECTED_TTFT_S)
-        <= EXPECTED_TTFT_S * TIMING_RELATIVE_TOLERANCE
-        and abs(median_itl - EXPECTED_ITL_S)
-        <= EXPECTED_ITL_S * TIMING_RELATIVE_TOLERANCE
+        and median_server_ttft is not None
+        and median_server_itl is not None
+        and abs(median_ttft - median_server_ttft)
+        <= median_server_ttft * TIMING_RELATIVE_TOLERANCE
+        and abs(median_itl - median_server_itl)
+        <= median_server_itl * TIMING_RELATIVE_TOLERANCE
     )
     summary = {
         "validation": "phase1_timing_accuracy",
@@ -105,6 +140,9 @@ async def measure_timing_accuracy() -> tuple[dict[str, Any], list[RequestRecord]
             "samples": 5,
             "empty_text_before_first_token": True,
             "final_usage_only_event": True,
+            "reference": (
+                "server monotonic timestamps after each text response.write completes"
+            ),
         },
         "versions": _package_versions(),
         "host": {
@@ -115,17 +153,19 @@ async def measure_timing_accuracy() -> tuple[dict[str, Any], list[RequestRecord]
         "gpu_name": None,
         "expected_ttft_s": EXPECTED_TTFT_S,
         "expected_itl_s": EXPECTED_ITL_S,
+        "median_server_ttft_s": median_server_ttft,
+        "median_server_itl_s": median_server_itl,
         "relative_tolerance": TIMING_RELATIVE_TOLERANCE,
         "median_ttft_s": median_ttft,
         "median_itl_s": median_itl,
         "ttft_relative_error": (
-            abs(median_ttft - EXPECTED_TTFT_S) / EXPECTED_TTFT_S
-            if median_ttft is not None
+            abs(median_ttft - median_server_ttft) / median_server_ttft
+            if median_ttft is not None and median_server_ttft is not None
             else None
         ),
         "itl_relative_error": (
-            abs(median_itl - EXPECTED_ITL_S) / EXPECTED_ITL_S
-            if median_itl is not None
+            abs(median_itl - median_server_itl) / median_server_itl
+            if median_itl is not None and median_server_itl is not None
             else None
         ),
         "empty_text_events_per_request": 1,

@@ -5,6 +5,8 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import time
+from collections.abc import Callable
 from contextlib import suppress
 from dataclasses import dataclass
 
@@ -21,6 +23,7 @@ class MockConfig:
     send_empty_chunk: bool = True
     include_usage: bool = True
     hold_open_s: float = 0.0
+    timestamp_sink: Callable[[str, str, float], None] | None = None
 
 
 CONFIG_KEY: web.AppKey[MockConfig] = web.AppKey("llmbench_mock_config")
@@ -31,20 +34,17 @@ def _event(payload: dict[str, object]) -> bytes:
 
 
 async def _wait_for_delay(delay_s: float) -> None:
-    """Use a short final spin to avoid OS timer granularity dominating tiny ITLs."""
+    """Wait for the configured delay without compensating for timer granularity."""
     if delay_s <= 0:
         return
-    loop = asyncio.get_running_loop()
-    deadline = loop.time() + delay_s
-    await asyncio.sleep(max(0.0, delay_s - 0.001))
-    while loop.time() < deadline:
-        pass
+    await asyncio.sleep(delay_s)
 
 
 async def completion(request: web.Request) -> web.StreamResponse:
     """Emit configurable text chunks followed by a usage-only event."""
     config = request.app[CONFIG_KEY]
     body = await request.json()
+    request_id = request.headers.get("X-Request-ID", "")
     prompt = body.get("prompt", "")
     prompt_tokens = (
         len(prompt) if isinstance(prompt, list) else len(str(prompt).split())
@@ -55,6 +55,8 @@ async def completion(request: web.Request) -> web.StreamResponse:
     )
     await response.prepare(request)
     try:
+        if config.timestamp_sink is not None:
+            config.timestamp_sink(request_id, "start", time.perf_counter())
         if config.send_empty_chunk:
             await response.write(_event({"choices": [{"text": ""}], "usage": None}))
         await _wait_for_delay(config.ttft_s)
@@ -69,6 +71,8 @@ async def completion(request: web.Request) -> web.StreamResponse:
                     }
                 )
             )
+            if config.timestamp_sink is not None:
+                config.timestamp_sink(request_id, "text", time.perf_counter())
         if config.include_usage:
             await response.write(
                 _event(

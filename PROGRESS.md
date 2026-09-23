@@ -20,7 +20,7 @@ has run. This session is limited to local, $0 work.
 - **Phase 1 (2026-09-23):** Implemented the controllable OpenAI completions
   SSE mock; closed-loop and Poisson open-loop load generation; chunk-based
   TTFT/ITL/TPOT/E2E metrics; usage-based token counts; bounded drain
-  accounting; CLI and raw result writers. Timing validation passed at median
+  accounting; CLI and raw result writers. Initial timing validation passed at median
   TTFT 0.201355 s and ITL 0.020251 s for expected 0.200 s / 0.020 s
   (±5%). The intentional empty-chunk timer mutation failed as expected with
   99.6% TTFT error; it was restored. Capacity validation sustained 41,960.7
@@ -28,7 +28,22 @@ has run. This session is limited to local, $0 work.
   35,960.7/s above it), with 0.98 average client CPU cores, no errors, and no
   rejected requests. `make check`: 11 tests passed; Ruff and strict mypy
   passed. `make mock-validate` passed. A separate CLI smoke run completed
-  four requests with zero errors.
+  four requests with zero errors. The measurements in this first log entry were
+  superseded by the timing audit immediately below.
+- **Phase 1 timing audit (2026-09-23):** Replaced the mock's final-millisecond
+  busy spin (which compensated for coarse asyncio timer granularity) with plain
+  `asyncio.sleep`. Accuracy now compares client timings to same-host monotonic
+  timestamps recorded at handler start and immediately after each text write
+  returns; requested 200/20 ms delays are not the reference. Five-sample client
+  medians were TTFT 0.202324 s vs server 0.201397 s (0.46% difference) and ITL
+  0.021327 s vs server 0.021258 s (0.33%), within ±5%. Treating the initial
+  empty event as text failed with 99.7% TTFT difference; production code was
+  restored and the corrected acceptance passed. Capacity recheck sustained
+  40,405.8 chunks/s (6.73× threshold, 34,405.8/s margin) at 0.98 client CPU
+  cores, zero errors/rejections; 256 requests remained at the measurement
+  deadline and completed during the drain, so they are separately reported as
+  late and excluded from in-window throughput. Full `make check` passed (11
+  tests, Ruff, mypy, instruction-file comparison). No Modal job ran.
 
 ## Spend log
 

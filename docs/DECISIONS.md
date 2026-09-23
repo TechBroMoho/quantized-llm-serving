@@ -88,14 +88,46 @@ throughput. Failed runs and raw records remain available for investigation.
 
 **Consequences.** ITL measures inter-chunk latency, not exact per-token
 latency. Server-generated text and usage must be consistent. `docs/SPEC.md`
-Phase 1 wording has been corrected to match §5. Phase 1's deliberate
-wrong-event mutation treated the mock's empty first chunk as generated text:
-the accuracy test failed with median TTFT 0.000715 s against 0.200 s expected
-(99.6% error). The source was restored and the unmutated acceptance test
-passed. The final five-sample validation measured median TTFT 0.201355 s
-(0.68% error) and ITL 0.020251 s (1.26% error), within the ±5% bounds. The
-captured mutation failure is in
-`results/validation/timing_mutation_failure.txt`.
+Phase 1 wording has been corrected to match §5. See ADR-006 for the timing
+validation correction and its mutation evidence.
+
+## ADR-006 — Timing validation reference (2026-09-23)
+
+**Context.** The initial Phase 1 mock waited until one millisecond before the
+configured deadline, then busy-spun for the final millisecond to compensate
+for coarse asyncio timer granularity. This changed the mock schedule to make
+observed intervals closer to configured 200 ms / 20 ms values. Comparing the
+client to those configured values could not distinguish a client timing bug
+from host scheduling behavior and risked fitting the validation to its target.
+
+**Decision.** Do not compensate for timer granularity: the mock now uses plain
+`asyncio.sleep`. During timing validation, a same-process server records its
+monotonic handler-start time and a timestamp immediately after each
+text-bearing `response.write()` returns (the chunk has been handed to the
+server transport). The client and server use the same monotonic clock domain.
+Compare client median TTFT with median server handler-start-to-first-write
+interval, and client ITL observations with the server's actual consecutive
+text-write intervals, within ±5%. Configured 200 ms / 20 ms values identify
+the requested delays only; they are not the accuracy reference.
+
+**Consequences.** The check measures client timing fidelity against the
+mock's realized scheduling and transport-write timing on that host, not wire
+arrival at a remote peer. It still detects wrong-event timestamping: treating
+the initial empty chunk as text causes client TTFT to disagree with the
+server's first text write. A mutation check must fail and the production code
+must be restored before acceptance. The former spin-based Phase 1 numbers are
+not considered evidence under this corrected method.
+
+**Revalidation (2026-09-23).** Client median TTFT was 0.202324 s against
+server-observed 0.201397 s (0.46% difference); client median ITL was
+0.021327 s against server-observed 0.021258 s (0.33% difference). Both passed
+the ±5% gate. The empty-chunk-as-text mutation failed at 99.7% TTFT difference
+and was restored. See `results/validation/timing_accuracy_summary.json` and
+`results/validation/timing_mutation_failure.txt`. The 30-second capacity
+recheck produced 40,405.8 text chunks/s (6.73× the 6,000/s threshold), 0.98
+average client cores, no errors or rejections, and 256 requests completed only
+during the bounded drain (reported late; excluded from throughput). The
+measurement window alone supplies the rate numerator.
 
 ## ADR-004 — Explicit generation and fair comparisons (2026-09-23)
 

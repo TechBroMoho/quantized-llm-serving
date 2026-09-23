@@ -17,7 +17,7 @@ def test_mock_timing_accuracy() -> None:
     summary, rows = asyncio.run(measure_timing_accuracy())
     assert summary["passed"], (
         f"median TTFT={summary['median_ttft_s']:.6f}s "
-        f"(error={summary['ttft_relative_error']:.1%}); "
+        f"(client/server error={summary['ttft_relative_error']:.1%}); "
         f"median ITL={summary['median_itl_s']:.6f}s "
         f"(error={summary['itl_relative_error']:.1%})"
     )

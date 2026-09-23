@@ -59,7 +59,9 @@ async def stream_request(
     started_at = time.perf_counter()
     record = RequestRecord(request_id=request_id, status="ok", started_at=started_at)
     try:
-        async with session.post(url, json=payload) as response:
+        async with session.post(
+            url, json=payload, headers={"X-Request-ID": request_id}
+        ) as response:
             if response.status < 200 or response.status >= 300:
                 record.status = "error"
                 record.error = f"HTTP {response.status}"
