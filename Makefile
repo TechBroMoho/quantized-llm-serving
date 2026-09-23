@@ -1,7 +1,7 @@
 UV_CACHE_DIR ?= .cache/uv
 export UV_CACHE_DIR
 
-.PHONY: setup fmt lint typecheck test check
+.PHONY: setup fmt lint typecheck test check mock-validate
 
 setup:
 	uv sync --dev
@@ -22,3 +22,6 @@ test:
 
 check: lint typecheck test
 	cmp CLAUDE.md AGENTS.md
+
+mock-validate:
+	uv run python -m llmbench.loadtest.validation --output-dir results/validation

@@ -15,6 +15,7 @@ Install `uv` and run:
 ```sh
 make setup
 make check
+make mock-validate
 ```
 
 GPU experiments are outside the local workflow and require a separate cost

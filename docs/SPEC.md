@@ -198,8 +198,8 @@ Estimated GPU cost per phase is on L40S at ~$1.95/hr plus CPU/mem. Re-estimate b
   - per-request JSONL (TTFT, ITL list, TPOT, E2E, tokens, status/error) and a summary JSON (throughputs, percentiles, error rate, config, versions, host info);
   - a CLI: `llmbench load --url ... --concurrency ... --workload ... --out ...`.
 - **Validation (commit the results to `results/validation/`):**
-  1. **Accuracy:** against a mock with TTFT=200ms and ITL=20ms, the measured medians are within ±5% (tests).
-  2. **Client capacity:** against a near-zero-latency mock at 256 concurrent streams, the tester sustains well above the event rate the real benchmarks need. Show its CPU usage, and prove the client won't be the bottleneck.
+  1. **Accuracy:** against a mock with TTFT=200ms and ITL=20ms, the measured medians are within ±5%. The stream includes an empty text chunk before generated text and a final usage-only event. A deliberately broken timer must make this test fail.
+  2. **Client capacity:** against a near-zero-latency mock at 256 concurrent streams, sustain at least 6,000 received text chunks/s for 30 seconds, with the tester averaging no more than two CPU cores. This is 3× the provisional 2,000 chunks/s planning peak recorded in DECISIONS.md. Report the measured rate and margin above the threshold. Revalidate inside the Modal container in Phase 3 or 6; a laptop result alone does not rule out a client bottleneck there.
 - **Acceptance:** `make check` green; the validation report is committed. **STOP.**
 
 ### Phase 2: HF baseline server ($0)

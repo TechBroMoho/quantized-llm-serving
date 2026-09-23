@@ -16,8 +16,8 @@ hidden size 4096, intermediate size 12288, 32 query heads, 8 KV heads,
 head dimension 128, vocabulary size 151936, and untied embeddings. The
 [model card](https://huggingface.co/Qwen/Qwen3-8B) states Apache-2.0. Current
 [llm-compressor AWQ mappings](https://github.com/vllm-project/llm-compressor/blob/main/src/llmcompressor/modifiers/transform/awq/mappings.py)
-include `Qwen3ForCausalLM`, and its [GPTQ example]
-(https://docs.vllm.ai/projects/llm-compressor/en/latest/examples/quantization_w4a16/)
+include `Qwen3ForCausalLM`, and its
+[GPTQ example](https://docs.vllm.ai/projects/llm-compressor/en/latest/examples/quantization_w4a16/)
 uses W4A16. This establishes documented architecture support, not a claim that
 our checkpoints have been produced or served.
 
@@ -88,7 +88,14 @@ throughput. Failed runs and raw records remain available for investigation.
 
 **Consequences.** ITL measures inter-chunk latency, not exact per-token
 latency. Server-generated text and usage must be consistent. `docs/SPEC.md`
-Phase 1 wording has been corrected to match §5.
+Phase 1 wording has been corrected to match §5. Phase 1's deliberate
+wrong-event mutation treated the mock's empty first chunk as generated text:
+the accuracy test failed with median TTFT 0.000715 s against 0.200 s expected
+(99.6% error). The source was restored and the unmutated acceptance test
+passed. The final five-sample validation measured median TTFT 0.201355 s
+(0.68% error) and ITL 0.020251 s (1.26% error), within the ±5% bounds. The
+captured mutation failure is in
+`results/validation/timing_mutation_failure.txt`.
 
 ## ADR-004 — Explicit generation and fair comparisons (2026-09-23)
 
@@ -131,7 +138,13 @@ container in Phase 3 or 6; revise the capacity target if observed GPU event
 rates exceed 2,000/s, before accepting performance comparisons.
 
 **Consequences.** Passing on the laptop alone does not establish that the
-co-located benchmark client is never a bottleneck.
+co-located benchmark client is never a bottleneck. On macOS 26.5 with Python
+3.12.13, the Phase 1 30-second local run measured 41,960.7 text chunks/s at
+256 streams: 6.99× the 6,000/s gate (35,960.7/s above it), or 20.98× the
+provisional 2,000/s planning rate. The client used 0.98 average CPU cores,
+with no errors or rejected requests. The summary and compressed per-request
+JSONL are committed in `results/validation/`. Revalidation in the Modal
+container remains required.
 
 ## ADR-006 — Time-boxed windows and draining (2026-09-23)
 
