@@ -125,13 +125,61 @@ async def measure_timing_accuracy() -> tuple[dict[str, Any], list[RequestRecord]
         and median_itl is not None
         and median_server_ttft is not None
         and median_server_itl is not None
-        and abs(median_ttft - median_server_ttft)
-        <= median_server_ttft * TIMING_RELATIVE_TOLERANCE
-        and abs(median_itl - median_server_itl)
-        <= median_server_itl * TIMING_RELATIVE_TOLERANCE
     )
+    # Compare matched observations, not pooled medians which hide outliers.
+    # Use the client's request start for both TTFTs: handler entry omits setup.
+    observations = []
+    for row in records:
+        trace = sent.get(row.request_id, {})
+        writes = trace.get("text", [])
+        expected = {}
+        errors = {}
+        if len(writes) == 4:
+            expected = {
+                "ttft_s": writes[0] - row.started_at,
+                "e2e_s": writes[-1] - row.started_at,
+                "tpot_s": (writes[-1] - writes[0]) / 3,
+            }
+            for name, reference in expected.items():
+                actual = getattr(row, name)
+                errors[name] = (
+                    abs(actual - reference) / reference
+                    if actual is not None and reference > 0
+                    else float("inf")
+                )
+            expected_gaps = [b - a for a, b in zip(writes, writes[1:], strict=False)]
+            if len(row.itl_s) == len(expected_gaps):
+                errors.update(
+                    {
+                        f"itl_{i}": abs(actual - reference) / reference
+                        for i, (actual, reference) in enumerate(
+                            zip(row.itl_s, expected_gaps, strict=True)
+                        )
+                    }
+                )
+        passed = (
+            row.status == "ok"
+            and row.text_chunks == 4
+            and row.empty_text_chunks == 1
+            and row.usage_events == 1
+            and len(errors) == 6
+            and all(error <= TIMING_RELATIVE_TOLERANCE for error in errors.values())
+        )
+        observations.append(
+            {
+                "request_id": row.request_id,
+                "client_start_monotonic_s": row.started_at,
+                "server_start_monotonic_s": trace.get("start"),
+                "server_text_write_monotonic_s": writes,
+                "expected_from_client_start": expected,
+                "relative_errors": errors,
+                "passed": passed,
+            }
+        )
+    timing_ok = timing_ok and all(item["passed"] for item in observations)
     summary = {
         "validation": "phase1_timing_accuracy",
+        "paired_observations": observations,
         "timestamp_utc": datetime.now(UTC).isoformat(),
         "config": {
             "mock_ttft_s": EXPECTED_TTFT_S,
@@ -215,9 +263,9 @@ async def _measure(output_dir: Path) -> dict[str, Any]:
     print(
         "timing: "
         f"TTFT {timing_summary['median_ttft_s']:.4f}s "
-        f"(expected {EXPECTED_TTFT_S:.3f}s), "
+        f"(server {timing_summary['median_server_ttft_s']:.4f}s), "
         f"ITL {timing_summary['median_itl_s']:.4f}s "
-        f"(expected {EXPECTED_ITL_S:.3f}s)"
+        f"(server {timing_summary['median_server_itl_s']:.4f}s)"
     )
     if not timing_summary["passed"]:
         raise RuntimeError("timing accuracy validation failed")
@@ -313,16 +361,7 @@ async def _measure(output_dir: Path) -> dict[str, Any]:
             f"({rate / CAPACITY_THRESHOLD_CHUNKS_PER_S:.2f}x threshold), "
             f"CPU: {cpu_cores:.2f} cores"
         )
-        if rate < CAPACITY_THRESHOLD_CHUNKS_PER_S:
-            raise RuntimeError(
-                f"capacity {rate:.1f}/s is below the "
-                f"{CAPACITY_THRESHOLD_CHUNKS_PER_S}/s threshold"
-            )
-        if cpu_cores > CLIENT_CPU_CORE_LIMIT:
-            raise RuntimeError(
-                f"client CPU {cpu_cores:.2f} cores exceeds "
-                f"{CLIENT_CPU_CORE_LIMIT:.1f} core limit"
-            )
+        check_capacity(summary)
         return summary
     finally:
         process.terminate()
@@ -330,6 +369,18 @@ async def _measure(output_dir: Path) -> dict[str, Any]:
         if process.is_alive():
             process.kill()
             process.join(timeout=3)
+
+
+def check_capacity(summary: dict[str, Any]) -> None:
+    """Capacity is useful only if the client also preserves valid outcomes."""
+    if summary["errored_or_cancelled_requests"] or summary["rejected_requests"]:
+        raise RuntimeError("capacity run has errors or rejections")
+    rate = float(summary["measured_text_chunks_per_s"])
+    cores = float(summary["client_process_cpu_cores_average"])
+    if rate < CAPACITY_THRESHOLD_CHUNKS_PER_S:
+        raise RuntimeError(f"capacity {rate:.1f}/s is below threshold")
+    if cores > CLIENT_CPU_CORE_LIMIT:
+        raise RuntimeError(f"client CPU {cores:.2f} cores exceeds limit")
 
 
 def main() -> None:

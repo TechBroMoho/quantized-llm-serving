@@ -1,0 +1,165 @@
+{
+  "config": {
+    "empty_text_before_first_token": true,
+    "final_usage_only_event": true,
+    "mock_itl_s": 0.02,
+    "mock_ttft_s": 0.2,
+    "output_tokens": 4,
+    "reference": "server monotonic timestamps after each text response.write completes",
+    "samples": 5
+  },
+  "config_sha256": "20083cfdb18b0937851f2903c773f416a1644184d37ada47caaabb6232aae306",
+  "empty_text_events_per_request": 1,
+  "expected_itl_s": 0.02,
+  "expected_ttft_s": 0.2,
+  "gpu_name": null,
+  "host": {
+    "logical_cpu_count": 10,
+    "platform": "macOS-26.5-arm64-arm-64bit",
+    "python": "3.12.13"
+  },
+  "itl_relative_error": 0.0017833337475392306,
+  "median_itl_s": 0.02113049995386973,
+  "median_server_itl_s": 0.02116825000848621,
+  "median_server_ttft_s": 0.201189459010493,
+  "median_ttft_s": 0.20198191597592086,
+  "paired_observations": [
+    {
+      "client_start_monotonic_s": 399150.372194625,
+      "expected_from_client_start": {
+        "e2e_s": 0.2658732910058461,
+        "tpot_s": 0.0209520833256344,
+        "ttft_s": 0.2030170410289429
+      },
+      "passed": true,
+      "relative_errors": {
+        "e2e_s": 0.0015561924468518533,
+        "itl_0": 0.002608714515874321,
+        "itl_1": 0.0009016201801587849,
+        "itl_2": 0.011091060028235442,
+        "tpot_s": 0.0030154682187620552,
+        "ttft_s": 0.0011043850407368692
+      },
+      "request_id": "timing-0",
+      "server_start_monotonic_s": 399150.373848916,
+      "server_text_write_monotonic_s": [
+        399150.575211666,
+        399150.596486875,
+        399150.617698625,
+        399150.638067916
+      ]
+    },
+    {
+      "client_start_monotonic_s": 399150.6386225,
+      "expected_from_client_start": {
+        "e2e_s": 0.2654763750033453,
+        "tpot_s": 0.02122198633151129,
+        "ttft_s": 0.20181041600881144
+      },
+      "passed": true,
+      "relative_errors": {
+        "e2e_s": 0.0007561878724908407,
+        "itl_0": 0.0026070402229738366,
+        "itl_1": 0.00172008520008376,
+        "itl_2": 0.002257209051097642,
+        "tpot_s": 0.00045942994596939377,
+        "ttft_s": 0.0008498073117391718
+      },
+      "request_id": "timing-1",
+      "server_start_monotonic_s": 399150.639251333,
+      "server_text_write_monotonic_s": [
+        399150.840432916,
+        399150.861609416,
+        399150.882925833,
+        399150.904098875
+      ]
+    },
+    {
+      "client_start_monotonic_s": 399150.904358583,
+      "expected_from_client_start": {
+        "e2e_s": 0.26524895802140236,
+        "tpot_s": 0.021253944335815806,
+        "ttft_s": 0.20148712501395494
+      },
+      "passed": true,
+      "relative_errors": {
+        "e2e_s": 0.002500168095168374,
+        "itl_0": 0.0003319941804352554,
+        "itl_1": 0.0012671301414935471,
+        "itl_2": 0.02539278322951148,
+        "tpot_s": 0.008501041084745626,
+        "ttft_s": 0.0006011551362320357
+      },
+      "request_id": "timing-2",
+      "server_start_monotonic_s": 399150.904663791,
+      "server_text_write_monotonic_s": [
+        399151.105845708,
+        399151.126680208,
+        399151.147494958,
+        399151.169607541
+      ]
+    },
+    {
+      "client_start_monotonic_s": 399151.170448708,
+      "expected_from_client_start": {
+        "e2e_s": 0.26477154198801145,
+        "tpot_s": 0.020859305669243138,
+        "ttft_s": 0.20219362498028204
+      },
+      "passed": true,
+      "relative_errors": {
+        "e2e_s": 0.001205911406523633,
+        "itl_0": 0.003572568485489583,
+        "itl_1": 0.00016106351652882823,
+        "itl_2": 0.005597015539157648,
+        "tpot_s": 0.0031593896712627536,
+        "ttft_s": 0.0006013196408872399
+      },
+      "request_id": "timing-3",
+      "server_start_monotonic_s": 399151.17140175,
+      "server_text_write_monotonic_s": [
+        399151.372642333,
+        399151.393810583,
+        399151.41398875,
+        399151.43522025
+      ]
+    },
+    {
+      "client_start_monotonic_s": 399151.435596458,
+      "expected_from_client_start": {
+        "e2e_s": 0.2642976250499487,
+        "tpot_s": 0.020926444344998647,
+        "ttft_s": 0.20151829201495275
+      },
+      "passed": true,
+      "relative_errors": {
+        "e2e_s": 0.0008979760902997622,
+        "itl_0": 0.0038719141985950646,
+        "itl_1": 0.0046321119706392005,
+        "itl_2": 0.00692169189536915,
+        "tpot_s": 0.002070074814949339,
+        "ttft_s": 0.0005328301998254134
+      },
+      "request_id": "timing-4",
+      "server_start_monotonic_s": 399151.435925291,
+      "server_text_write_monotonic_s": [
+        399151.63711475,
+        399151.65816375,
+        399151.678969583,
+        399151.699894083
+      ]
+    }
+  ],
+  "passed": true,
+  "raw_results_path": "results/validation/audit/timing_accuracy_summary.jsonl",
+  "relative_tolerance": 0.05,
+  "timestamp_utc": "2026-09-23T08:55:22.236274+00:00",
+  "ttft_relative_error": 0.003938859268896961,
+  "usage_events_per_request": 1,
+  "validation": "phase1_timing_accuracy",
+  "versions": {
+    "aiohttp": "3.14.3",
+    "llmbench": "0.1.0",
+    "modal": "1.3.3"
+  }
+}

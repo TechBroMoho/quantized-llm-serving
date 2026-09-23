@@ -88,10 +88,10 @@ throughput. Failed runs and raw records remain available for investigation.
 
 **Consequences.** ITL measures inter-chunk latency, not exact per-token
 latency. Server-generated text and usage must be consistent. `docs/SPEC.md`
-Phase 1 wording has been corrected to match §5. See ADR-006 for the timing
+Phase 1 wording has been corrected to match §5. See ADR-010 for the timing
 validation correction and its mutation evidence.
 
-## ADR-006 — Timing validation reference (2026-09-23)
+## ADR-010 — Timing validation reference (2026-09-23)
 
 **Context.** The initial Phase 1 mock waited until one millisecond before the
 configured deadline, then busy-spun for the final millisecond to compensate
@@ -169,14 +169,11 @@ CPU measurement method, host, and limits. Revalidate within the actual Modal
 container in Phase 3 or 6; revise the capacity target if observed GPU event
 rates exceed 2,000/s, before accepting performance comparisons.
 
-**Consequences.** Passing on the laptop alone does not establish that the
-co-located benchmark client is never a bottleneck. On macOS 26.5 with Python
-3.12.13, the Phase 1 30-second local run measured 41,960.7 text chunks/s at
-256 streams: 6.99× the 6,000/s gate (35,960.7/s above it), or 20.98× the
-provisional 2,000/s planning rate. The client used 0.98 average CPU cores,
-with no errors or rejected requests. The summary and compressed per-request
-JSONL are committed in `results/validation/`. Revalidation in the Modal
-container remains required.
+**Consequences.** Passing on the laptop alone does not establish capacity in
+Modal. The original 41,960.7 chunks/s claim has no retained matching raw run;
+it is withdrawn as evidence. The retained pre-audit replacement is
+`results/validation/capacity_summary.json` with its compressed request records.
+The current audit run is in `results/validation/audit/`; see ADR-011.
 
 ## ADR-006 — Time-boxed windows and draining (2026-09-23)
 
@@ -270,3 +267,56 @@ default path. A separate `sshleifer/tiny-gpt2` CPU run saved four requests per
 mode in `results/validation/hf_{naive,static}_cpu.{json,jsonl}`; all eight
 completed with exactly three output tokens and no errors. These runs are
 functional checks, not performance comparisons.
+
+## ADR-011 — Adversarial audit before Phase 3 (2026-09-23)
+
+**Context.** Prior acceptance proved only a narrow happy path. Pooled timing
+medians hid a corrupt request, the batching test observed the scheduler's own
+counter, and identical token outputs could hide row-routing errors. The pinned
+Transformers 4.56.2 `_prepare_generation_config` replaces global-default-valued
+fields with model defaults unless `use_model_defaults=False` is passed.
+
+**Decision.** Explicitly disable that fallback. Test with hostile sampling,
+beam, repetition, and forced-EOS model defaults. Reject unsupported request
+settings instead of silently ignoring them. Preserve the EOS-preferring tiny
+model tests and run the short-output mutation in both scheduling modes.
+Observe the actual `generate()` invocation and returned sequences; test
+unequal input lengths, padding/masks, distinct per-row tokens, and delivery
+before `end()`. This retains real Transformers generation with a deterministic
+forward hook for row-specific logits, not a replacement fake generate method.
+
+Replace the median-only timing gate with matched per-request/per-gap checks
+for TTFT, E2E, TPOT and ITL, all at the existing 5% tolerance. Use client
+request start for the server TTFT/E2E reference; retain handler-based medians
+only for historical context. Save all server write timestamps in the summary.
+A deliberately corrupted single request must fail even when medians pass.
+This supersedes ADR-010's median-only acceptance rule. The server and client
+share one loop/clock: this is localhost fidelity evidence, not remote arrival
+truth or a substitute for the Phase 6 independent vLLM cross-check.
+
+Require a complete SSE terminator and one usage object with nonnegative integer
+counts and a consistent total (booleans are not counts). Exact prompt/output
+lengths still come from usage, not chunk counting. Save failed requests, then
+make the CLI exit nonzero on errors/rejections. Capacity acceptance must also
+reject errors/rejections, regardless of rate. Open-loop windows now wait until
+the deadline before draining and safely handle zero arrivals.
+
+**Evidence.** `audit_failing_tests.txt` records 8 failures before fixes;
+`audit_additional_failures.txt` records two missing acceptance guards;
+`audit_settings_failures.txt` records three silently ignored settings. All are
+under `results/validation/`. `audit_check.txt` records the final full check.
+`audit/actual_batch.json` contains the real generate inputs, outputs and config;
+`audit/timing_accuracy_summary.{json,jsonl}` and
+`audit/capacity_{summary.json,requests.jsonl.gz}` retain the new measurements.
+Reproduce commands are in README. Prior results remain unmodified.
+
+**Evidence limits.** The Phase 0 account/setup claims and historical test counts
+lack saved command transcripts and are not independently reverified here.
+Analytical memory/bandwidth estimates in ADR-001 are calculations from model
+config, not benchmark results. The old HF CLI summaries prove 4/4 completions
+per mode but do not contain server batching/config traces; use the new actual
+batch evidence for batching assertions. Initial spin-based timing/capacity
+numbers lack the matching retained raw run and are not accepted evidence.
+No GPU performance, accuracy, or exact 512/256-token workload has been validated.
+The present CLI still constructs variable-length text prompts; pinned,
+unique token-ID workload construction must be implemented before GPU comparisons.

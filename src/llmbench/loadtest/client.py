@@ -22,6 +22,10 @@ def _consume_event(record: RequestRecord, data: str, received_at: float) -> bool
         record.status = "error"
         record.error = f"invalid SSE JSON: {exc.msg}"
         return False
+    if not isinstance(payload, dict):
+        record.status = "error"
+        record.error = "SSE JSON must be an object"
+        return False
     if "error" in payload:
         record.status = "error"
         record.error = f"server generation error: {payload['error']}"
@@ -39,15 +43,23 @@ def _consume_event(record: RequestRecord, data: str, received_at: float) -> bool
     usage = payload.get("usage")
     if usage is not None:
         record.usage_events += 1
-        if isinstance(usage, dict):
-            prompt_tokens = usage.get("prompt_tokens")
-            completion_tokens = usage.get("completion_tokens")
-            if isinstance(prompt_tokens, int) and isinstance(completion_tokens, int):
-                record.prompt_tokens = prompt_tokens
-                record.completion_tokens = completion_tokens
-            else:
+        if not isinstance(usage, dict) or record.usage_events != 1:
+            record.status = "error"
+            record.error = "expected one usage object"
+        else:
+            counts: list[Any] = [
+                usage.get(key)
+                for key in ("prompt_tokens", "completion_tokens", "total_tokens")
+            ]
+            if any(type(count) is not int or count < 0 for count in counts):
                 record.status = "error"
-                record.error = "usage event is missing integer token counts"
+                record.error = "usage counts must be nonnegative integers"
+            elif counts[2] != counts[0] + counts[1]:
+                record.status = "error"
+                record.error = "inconsistent total_tokens"
+            else:
+                record.prompt_tokens = counts[0]
+                record.completion_tokens = counts[1]
     return False
 
 
@@ -69,6 +81,7 @@ async def stream_request(
                 record.status = "error"
                 record.error = f"HTTP {response.status}"
             else:
+                done_received = False
                 data_lines: list[str] = []
                 async for raw_line in response.content:
                     line = raw_line.decode("utf-8", errors="replace").rstrip("\r\n")
@@ -78,7 +91,11 @@ async def stream_request(
                         data = "\n".join(data_lines)
                         data_lines.clear()
                         if _consume_event(record, data, time.perf_counter()):
+                            done_received = True
                             break
+                if not done_received and record.status == "ok":
+                    record.status = "error"
+                    record.error = "stream ended without [DONE]"
         if record.status == "ok":
             if record.text_chunks == 0:
                 record.status = "error"

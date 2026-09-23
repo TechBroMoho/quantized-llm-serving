@@ -160,6 +160,7 @@ class Baseline:
                 input_ids=torch.tensor(ids, dtype=torch.long, device=device),
                 attention_mask=torch.tensor(masks, dtype=torch.long, device=device),
                 generation_config=generation,
+                use_model_defaults=False,
                 streamer=TokenStreamer(jobs, loop),
             )
 
@@ -185,6 +186,22 @@ def make_app(baseline: Baseline) -> FastAPI:
 
     @app.post("/v1/completions")
     async def completion(body: dict[str, Any]) -> StreamingResponse:
+        allowed = {
+            "model",
+            "prompt",
+            "max_tokens",
+            "stream",
+            "stream_options",
+            "n",
+            "temperature",
+            "top_p",
+            "frequency_penalty",
+            "presence_penalty",
+            "seed",
+            "stop",
+        }
+        if unsupported := body.keys() - allowed:
+            raise HTTPException(400, f"unsupported settings: {sorted(unsupported)}")
         prompt = body.get("prompt")
         if isinstance(prompt, str):
             prompt = baseline.tokenizer.encode(prompt, add_special_tokens=False)

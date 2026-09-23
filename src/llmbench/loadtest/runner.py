@@ -151,9 +151,12 @@ async def run_load(
                 else:
                     rejected += 1
                 next_arrival += rng.expovariate(rate_per_s)
+            await asyncio.sleep(max(0.0, deadline - time.perf_counter()))
             window_end = deadline
             window_cpu_seconds = time.process_time() - window_cpu_start
-            done, pending = await asyncio.wait(pending, timeout=drain_s)
+            done = set()
+            if pending:
+                done, pending = await asyncio.wait(pending, timeout=drain_s)
             for task in pending:
                 task.cancel("bounded drain ended")
             await asyncio.gather(*done, *pending, return_exceptions=True)

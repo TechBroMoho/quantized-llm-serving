@@ -1,0 +1,2 @@
+timing: TTFT 0.2020s (server 0.2012s), ITL 0.0211s (server 0.0212s)
+capacity: 36538.1 chunks/s (6.09x threshold), CPU: 0.97 cores

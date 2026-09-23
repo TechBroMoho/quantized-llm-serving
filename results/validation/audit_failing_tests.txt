@@ -1,0 +1,534 @@
+FFFFFFF...F                                                              [100%]
+=================================== FAILURES ===================================
+_________________ test_timing_gate_rejects_one_corrupt_request _________________
+
+    def test_timing_gate_rejects_one_corrupt_request() -> None:
+        original = validation.stream_request
+    
+        async def corrupt(*args, **kwargs):
+            row = await original(*args, **kwargs)
+            if row.request_id == "timing-0":
+                row.ttft_s += 0.1
+                row.e2e_s += 0.1
+                row.itl_s[0] += 0.1
+            return row
+    
+        with patch.object(validation, "stream_request", corrupt):
+            summary, _ = asyncio.run(validation.measure_timing_accuracy())
+>       assert not summary["passed"], "pooled medians hide a corrupt request"
+E       AssertionError: pooled medians hide a corrupt request
+E       assert not True
+
+tests/test_audit_regressions.py:32: AssertionError
+____________ test_open_loop_with_no_arrivals_completes_full_window _____________
+
+    def test_open_loop_with_no_arrivals_completes_full_window() -> None:
+        async def run():
+            start = time.perf_counter()
+            summary, rows = await run_load(
+                url="http://127.0.0.1:1", concurrency=1, timeout_s=1, drain_s=0.01,
+                payload_factory=lambda _: {}, mode="open", duration_s=0.05,
+                rate_per_s=0.000001, seed=0,
+            )
+            assert time.perf_counter() - start >= 0.05
+            assert summary["offered_requests"] == 0
+            assert rows == []
+>       asyncio.run(run())
+
+tests/test_audit_regressions.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_audit_regressions.py:38: in run
+    summary, rows = await run_load(
+src/llmbench/loadtest/runner.py:156: in run_load
+    done, pending = await asyncio.wait(pending, timeout=drain_s)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fs = set(), timeout = 0.01, return_when = 'ALL_COMPLETED'
+
+    async def wait(fs, *, timeout=None, return_when=ALL_COMPLETED):
+        """Wait for the Futures or Tasks given by fs to complete.
+    
+        The fs iterable must not be empty.
+    
+        Coroutines will be wrapped in Tasks.
+    
+        Returns two sets of Future: (done, pending).
+    
+        Usage:
+    
+            done, pending = await asyncio.wait(fs)
+    
+        Note: This does not raise TimeoutError! Futures that aren't done
+        when the timeout occurs are returned in the second set.
+        """
+        if futures.isfuture(fs) or coroutines.iscoroutine(fs):
+            raise TypeError(f"expect a list of futures, not {type(fs).__name__}")
+        if not fs:
+>           raise ValueError('Set of Tasks/Futures is empty.')
+E           ValueError: Set of Tasks/Futures is empty.
+
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/tasks.py:454: ValueError
+________ test_invalid_usage_or_incomplete_stream_is_rejected[duplicate] ________
+
+fault = 'duplicate'
+
+    @pytest.mark.parametrize("fault", ["duplicate", "bool", "negative", "total", "no_done"])
+    def test_invalid_usage_or_incomplete_stream_is_rejected(fault) -> None:
+        async def run():
+            async def handler(_):
+                usage = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+                if fault == "bool":
+                    usage["completion_tokens"] = True
+                if fault == "negative":
+                    usage["prompt_tokens"] = -1
+                if fault == "total":
+                    usage["total_tokens"] = 99
+                events = [{"choices": [{"text": "x"}]}, {"usage": usage}]
+                if fault == "duplicate":
+                    events.append({"usage": usage})
+                body = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+                if fault != "no_done":
+                    body += "data: [DONE]\n\n"
+                return web.Response(text=body, content_type="text/event-stream")
+            app = web.Application()
+            app.router.add_post("/", handler)
+            async with TestServer(app) as server, aiohttp.ClientSession() as session:
+                row = await stream_request(
+                    session, str(server.make_url("/")),
+                    completions_payload(prompt="x", request_index=0, output_tokens=1, seed=0),
+                    request_id="invalid",
+                )
+            assert row.status == "error", fault
+>       asyncio.run(run())
+
+tests/test_audit_regressions.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def run():
+        async def handler(_):
+            usage = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+            if fault == "bool":
+                usage["completion_tokens"] = True
+            if fault == "negative":
+                usage["prompt_tokens"] = -1
+            if fault == "total":
+                usage["total_tokens"] = 99
+            events = [{"choices": [{"text": "x"}]}, {"usage": usage}]
+            if fault == "duplicate":
+                events.append({"usage": usage})
+            body = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+            if fault != "no_done":
+                body += "data: [DONE]\n\n"
+            return web.Response(text=body, content_type="text/event-stream")
+        app = web.Application()
+        app.router.add_post("/", handler)
+        async with TestServer(app) as server, aiohttp.ClientSession() as session:
+            row = await stream_request(
+                session, str(server.make_url("/")),
+                completions_payload(prompt="x", request_index=0, output_tokens=1, seed=0),
+                request_id="invalid",
+            )
+>       assert row.status == "error", fault
+E       AssertionError: duplicate
+E       assert 'ok' == 'error'
+E         
+E         - error
+E         + ok
+
+tests/test_audit_regressions.py:75: AssertionError
+__________ test_invalid_usage_or_incomplete_stream_is_rejected[bool] ___________
+
+fault = 'bool'
+
+    @pytest.mark.parametrize("fault", ["duplicate", "bool", "negative", "total", "no_done"])
+    def test_invalid_usage_or_incomplete_stream_is_rejected(fault) -> None:
+        async def run():
+            async def handler(_):
+                usage = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+                if fault == "bool":
+                    usage["completion_tokens"] = True
+                if fault == "negative":
+                    usage["prompt_tokens"] = -1
+                if fault == "total":
+                    usage["total_tokens"] = 99
+                events = [{"choices": [{"text": "x"}]}, {"usage": usage}]
+                if fault == "duplicate":
+                    events.append({"usage": usage})
+                body = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+                if fault != "no_done":
+                    body += "data: [DONE]\n\n"
+                return web.Response(text=body, content_type="text/event-stream")
+            app = web.Application()
+            app.router.add_post("/", handler)
+            async with TestServer(app) as server, aiohttp.ClientSession() as session:
+                row = await stream_request(
+                    session, str(server.make_url("/")),
+                    completions_payload(prompt="x", request_index=0, output_tokens=1, seed=0),
+                    request_id="invalid",
+                )
+            assert row.status == "error", fault
+>       asyncio.run(run())
+
+tests/test_audit_regressions.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def run():
+        async def handler(_):
+            usage = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+            if fault == "bool":
+                usage["completion_tokens"] = True
+            if fault == "negative":
+                usage["prompt_tokens"] = -1
+            if fault == "total":
+                usage["total_tokens"] = 99
+            events = [{"choices": [{"text": "x"}]}, {"usage": usage}]
+            if fault == "duplicate":
+                events.append({"usage": usage})
+            body = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+            if fault != "no_done":
+                body += "data: [DONE]\n\n"
+            return web.Response(text=body, content_type="text/event-stream")
+        app = web.Application()
+        app.router.add_post("/", handler)
+        async with TestServer(app) as server, aiohttp.ClientSession() as session:
+            row = await stream_request(
+                session, str(server.make_url("/")),
+                completions_payload(prompt="x", request_index=0, output_tokens=1, seed=0),
+                request_id="invalid",
+            )
+>       assert row.status == "error", fault
+E       AssertionError: bool
+E       assert 'ok' == 'error'
+E         
+E         - error
+E         + ok
+
+tests/test_audit_regressions.py:75: AssertionError
+________ test_invalid_usage_or_incomplete_stream_is_rejected[negative] _________
+
+fault = 'negative'
+
+    @pytest.mark.parametrize("fault", ["duplicate", "bool", "negative", "total", "no_done"])
+    def test_invalid_usage_or_incomplete_stream_is_rejected(fault) -> None:
+        async def run():
+            async def handler(_):
+                usage = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+                if fault == "bool":
+                    usage["completion_tokens"] = True
+                if fault == "negative":
+                    usage["prompt_tokens"] = -1
+                if fault == "total":
+                    usage["total_tokens"] = 99
+                events = [{"choices": [{"text": "x"}]}, {"usage": usage}]
+                if fault == "duplicate":
+                    events.append({"usage": usage})
+                body = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+                if fault != "no_done":
+                    body += "data: [DONE]\n\n"
+                return web.Response(text=body, content_type="text/event-stream")
+            app = web.Application()
+            app.router.add_post("/", handler)
+            async with TestServer(app) as server, aiohttp.ClientSession() as session:
+                row = await stream_request(
+                    session, str(server.make_url("/")),
+                    completions_payload(prompt="x", request_index=0, output_tokens=1, seed=0),
+                    request_id="invalid",
+                )
+            assert row.status == "error", fault
+>       asyncio.run(run())
+
+tests/test_audit_regressions.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def run():
+        async def handler(_):
+            usage = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+            if fault == "bool":
+                usage["completion_tokens"] = True
+            if fault == "negative":
+                usage["prompt_tokens"] = -1
+            if fault == "total":
+                usage["total_tokens"] = 99
+            events = [{"choices": [{"text": "x"}]}, {"usage": usage}]
+            if fault == "duplicate":
+                events.append({"usage": usage})
+            body = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+            if fault != "no_done":
+                body += "data: [DONE]\n\n"
+            return web.Response(text=body, content_type="text/event-stream")
+        app = web.Application()
+        app.router.add_post("/", handler)
+        async with TestServer(app) as server, aiohttp.ClientSession() as session:
+            row = await stream_request(
+                session, str(server.make_url("/")),
+                completions_payload(prompt="x", request_index=0, output_tokens=1, seed=0),
+                request_id="invalid",
+            )
+>       assert row.status == "error", fault
+E       AssertionError: negative
+E       assert 'ok' == 'error'
+E         
+E         - error
+E         + ok
+
+tests/test_audit_regressions.py:75: AssertionError
+__________ test_invalid_usage_or_incomplete_stream_is_rejected[total] __________
+
+fault = 'total'
+
+    @pytest.mark.parametrize("fault", ["duplicate", "bool", "negative", "total", "no_done"])
+    def test_invalid_usage_or_incomplete_stream_is_rejected(fault) -> None:
+        async def run():
+            async def handler(_):
+                usage = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+                if fault == "bool":
+                    usage["completion_tokens"] = True
+                if fault == "negative":
+                    usage["prompt_tokens"] = -1
+                if fault == "total":
+                    usage["total_tokens"] = 99
+                events = [{"choices": [{"text": "x"}]}, {"usage": usage}]
+                if fault == "duplicate":
+                    events.append({"usage": usage})
+                body = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+                if fault != "no_done":
+                    body += "data: [DONE]\n\n"
+                return web.Response(text=body, content_type="text/event-stream")
+            app = web.Application()
+            app.router.add_post("/", handler)
+            async with TestServer(app) as server, aiohttp.ClientSession() as session:
+                row = await stream_request(
+                    session, str(server.make_url("/")),
+                    completions_payload(prompt="x", request_index=0, output_tokens=1, seed=0),
+                    request_id="invalid",
+                )
+            assert row.status == "error", fault
+>       asyncio.run(run())
+
+tests/test_audit_regressions.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def run():
+        async def handler(_):
+            usage = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+            if fault == "bool":
+                usage["completion_tokens"] = True
+            if fault == "negative":
+                usage["prompt_tokens"] = -1
+            if fault == "total":
+                usage["total_tokens"] = 99
+            events = [{"choices": [{"text": "x"}]}, {"usage": usage}]
+            if fault == "duplicate":
+                events.append({"usage": usage})
+            body = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+            if fault != "no_done":
+                body += "data: [DONE]\n\n"
+            return web.Response(text=body, content_type="text/event-stream")
+        app = web.Application()
+        app.router.add_post("/", handler)
+        async with TestServer(app) as server, aiohttp.ClientSession() as session:
+            row = await stream_request(
+                session, str(server.make_url("/")),
+                completions_payload(prompt="x", request_index=0, output_tokens=1, seed=0),
+                request_id="invalid",
+            )
+>       assert row.status == "error", fault
+E       AssertionError: total
+E       assert 'ok' == 'error'
+E         
+E         - error
+E         + ok
+
+tests/test_audit_regressions.py:75: AssertionError
+_________ test_invalid_usage_or_incomplete_stream_is_rejected[no_done] _________
+
+fault = 'no_done'
+
+    @pytest.mark.parametrize("fault", ["duplicate", "bool", "negative", "total", "no_done"])
+    def test_invalid_usage_or_incomplete_stream_is_rejected(fault) -> None:
+        async def run():
+            async def handler(_):
+                usage = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+                if fault == "bool":
+                    usage["completion_tokens"] = True
+                if fault == "negative":
+                    usage["prompt_tokens"] = -1
+                if fault == "total":
+                    usage["total_tokens"] = 99
+                events = [{"choices": [{"text": "x"}]}, {"usage": usage}]
+                if fault == "duplicate":
+                    events.append({"usage": usage})
+                body = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+                if fault != "no_done":
+                    body += "data: [DONE]\n\n"
+                return web.Response(text=body, content_type="text/event-stream")
+            app = web.Application()
+            app.router.add_post("/", handler)
+            async with TestServer(app) as server, aiohttp.ClientSession() as session:
+                row = await stream_request(
+                    session, str(server.make_url("/")),
+                    completions_payload(prompt="x", request_index=0, output_tokens=1, seed=0),
+                    request_id="invalid",
+                )
+            assert row.status == "error", fault
+>       asyncio.run(run())
+
+tests/test_audit_regressions.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def run():
+        async def handler(_):
+            usage = {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}
+            if fault == "bool":
+                usage["completion_tokens"] = True
+            if fault == "negative":
+                usage["prompt_tokens"] = -1
+            if fault == "total":
+                usage["total_tokens"] = 99
+            events = [{"choices": [{"text": "x"}]}, {"usage": usage}]
+            if fault == "duplicate":
+                events.append({"usage": usage})
+            body = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+            if fault != "no_done":
+                body += "data: [DONE]\n\n"
+            return web.Response(text=body, content_type="text/event-stream")
+        app = web.Application()
+        app.router.add_post("/", handler)
+        async with TestServer(app) as server, aiohttp.ClientSession() as session:
+            row = await stream_request(
+                session, str(server.make_url("/")),
+                completions_payload(prompt="x", request_index=0, output_tokens=1, seed=0),
+                request_id="invalid",
+            )
+>       assert row.status == "error", fault
+E       AssertionError: no_done
+E       assert 'ok' == 'error'
+E         
+E         - error
+E         + ok
+
+tests/test_audit_regressions.py:75: AssertionError
+________ test_model_generation_defaults_cannot_override_greedy_settings ________
+
+    def test_model_generation_defaults_cannot_override_greedy_settings() -> None:
+        from llmbench.baseline.hf_server import Job
+    
+        async def run():
+            model = _model()
+            model.generation_config.forced_eos_token_id = 7
+            model.generation_config.repetition_penalty = 2.0
+            baseline = Baseline(model, TinyTokenizer(), mode="naive")
+            job = Job([1, 2, 3], 3)
+            await asyncio.to_thread(baseline._generate, [job], asyncio.get_running_loop())
+            tokens = []
+            while (token := await job.events.get()) is not None:
+                tokens.append(token)
+            # EOS=0 is suppressed; tied zero logits greedily choose token 1.
+            assert tokens == [1, 1, 1]
+>       asyncio.run(run())
+
+tests/test_hf_baseline.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def run():
+        model = _model()
+        model.generation_config.forced_eos_token_id = 7
+        model.generation_config.repetition_penalty = 2.0
+        baseline = Baseline(model, TinyTokenizer(), mode="naive")
+        job = Job([1, 2, 3], 3)
+        await asyncio.to_thread(baseline._generate, [job], asyncio.get_running_loop())
+        tokens = []
+        while (token := await job.events.get()) is not None:
+            tokens.append(token)
+        # EOS=0 is suppressed; tied zero logits greedily choose token 1.
+>       assert tokens == [1, 1, 1]
+E       assert [1, 1, 7] == [1, 1, 1]
+E         
+E         At index 2 diff: 7 != 1
+E         Use -v to get more diff
+
+tests/test_hf_baseline.py:135: AssertionError
+----------------------------- Captured stderr call -----------------------------
+`generation_config` default values have been modified to match model-specific defaults: {'repetition_penalty': 2.0, 'forced_eos_token_id': 7}. If this is not desired, please set these values explicitly.
+------------------------------ Captured log call -------------------------------
+WARNING  transformers.generation.utils:logging.py:328 `generation_config` default values have been modified to match model-specific defaults: {'repetition_penalty': 2.0, 'forced_eos_token_id': 7}. If this is not desired, please set these values explicitly.
+=========================== short test summary info ============================
+FAILED tests/test_audit_regressions.py::test_timing_gate_rejects_one_corrupt_request
+FAILED tests/test_audit_regressions.py::test_open_loop_with_no_arrivals_completes_full_window
+FAILED tests/test_audit_regressions.py::test_invalid_usage_or_incomplete_stream_is_rejected[duplicate]
+FAILED tests/test_audit_regressions.py::test_invalid_usage_or_incomplete_stream_is_rejected[bool]
+FAILED tests/test_audit_regressions.py::test_invalid_usage_or_incomplete_stream_is_rejected[negative]
+FAILED tests/test_audit_regressions.py::test_invalid_usage_or_incomplete_stream_is_rejected[total]
+FAILED tests/test_audit_regressions.py::test_invalid_usage_or_incomplete_stream_is_rejected[no_done]
+FAILED tests/test_hf_baseline.py::test_model_generation_defaults_cannot_override_greedy_settings
+8 failed, 3 passed in 4.15s

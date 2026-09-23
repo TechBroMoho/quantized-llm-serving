@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 2 acceptance passed. No GPU or Modal function has run. The next phase
+Phases 0–2 audited and corrected before Phase 3. No GPU or Modal function has run. The next phase
 needs an explicit cost estimate and approval before any remote execution.
 
 ## Phase log
@@ -19,17 +19,10 @@ needs an explicit cost estimate and approval before any remote execution.
   has been exercised.
 - **Phase 1 (2026-09-23):** Implemented the controllable OpenAI completions
   SSE mock; closed-loop and Poisson open-loop load generation; chunk-based
-  TTFT/ITL/TPOT/E2E metrics; usage-based token counts; bounded drain
-  accounting; CLI and raw result writers. Initial timing validation passed at median
-  TTFT 0.201355 s and ITL 0.020251 s for expected 0.200 s / 0.020 s
-  (±5%). The intentional empty-chunk timer mutation failed as expected with
-  99.6% TTFT error; it was restored. Capacity validation sustained 41,960.7
-  text chunks/s for 30 seconds at 256 streams (6.99× the 6,000/s threshold,
-  35,960.7/s above it), with 0.98 average client CPU cores, no errors, and no
-  rejected requests. `make check`: 11 tests passed; Ruff and strict mypy
-  passed. `make mock-validate` passed. A separate CLI smoke run completed
-  four requests with zero errors. The measurements in this first log entry were
-  superseded by the timing audit immediately below.
+  timing, usage counts, bounded drains, and raw result writers. The initial
+  spin-based timing/capacity figures are withdrawn as evidence: their matching
+  raw run was replaced, not retained. The later timing audit below has retained
+  files. Historical 11-test and CLI-smoke claims lack saved command transcripts.
 - **Phase 1 timing audit (2026-09-23):** Replaced the mock's final-millisecond
   busy spin (which compensated for coarse asyncio timer granularity) with plain
   `asyncio.sleep`. Accuracy now compares client timings to same-host monotonic
@@ -61,6 +54,23 @@ needs an explicit cost estimate and approval before any remote execution.
   and instruction-file comparison. These are functional checks, not performance
   comparisons.
 
+- **Pre-Phase-3 skeptical audit (2026-09-23):** Reproduced bugs before fixes
+  (8 initial regression failures, 2 acceptance-guard failures, 3 ignored-setting
+  failures; saved logs in `results/validation/audit*failures.txt` and
+  `audit_failing_tests.txt`). Disabled Transformers model-default fallback;
+  reject ignored API settings; strengthened SSE/usage validity and CLI failure
+  status; fixed empty/short open-loop windows; enforce zero-error capacity gate.
+  Added actual generate-call, padding/mask and distinct-row streamer evidence,
+  and tested EOS suppression in both modes. Paired timing validates TTFT/E2E/
+  TPOT and every gap; server timestamps are now saved. Local capacity measured
+  36,538.1 chunks/s (6.09× gate), 0.97 CPU cores; raw files in
+  `results/validation/audit/`. `make check` passed: 30 tests, Ruff, strict
+  mypy (11 source files), and instruction-file comparison; saved in
+  `results/validation/audit_check.txt`.
+  ADR-011 distinguishes verified results, historical unsupported claims and
+  analytical estimates. The Phase 3 plan is in `docs/PHASE3_PLAN.md`.
+  No Modal commands, image builds, downloads or functions ran during this audit.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Estimate | Running total |
@@ -68,6 +78,7 @@ needs an explicit cost estimate and approval before any remote execution.
 | 2026-09-23 | 0 | Local setup and read-only account checks | None | 0 | $0.00 | $0.00 |
 | 2026-09-23 | 1 | Mock, tests, timing and capacity validation, CLI smoke | None | 0 | $0.00 | $0.00 |
 | 2026-09-23 | 2 | HF baseline, CPU integration and local load runs | None | 0 | $0.00 | $0.00 |
+| 2026-09-23 | Audit | Local regression and mock revalidation | None | 0 | $0.00 | $0.00 |
 
 The account's remaining Modal credit has not been verified. No billable
 Modal work has been requested in this session.
@@ -85,3 +96,7 @@ Modal work has been requested in this session.
   sandbox. Approved network/local access let the CPU checks run. The cached
   tiny model still attempted a metadata lookup; `HF_HUB_OFFLINE=1` made the
   reproducible server run fully offline.
+
+- The audit exposed Transformers model defaults overriding explicit-looking
+  config values; a fresh GenerationConfig alone was insufficient. Local socket
+  tests needed sandbox network access; no remote compute was involved.

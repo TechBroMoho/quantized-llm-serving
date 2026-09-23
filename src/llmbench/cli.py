@@ -167,3 +167,5 @@ def main() -> None:
         return
     summary = asyncio.run(_run_load(args))
     print(json.dumps(summary, indent=2, sort_keys=True))
+    if summary["errored_or_cancelled_requests"] or summary["rejected_requests"]:
+        raise SystemExit(1)

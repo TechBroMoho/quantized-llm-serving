@@ -6,6 +6,7 @@ import asyncio
 import socket
 from typing import Any
 
+import pytest
 import torch
 import uvicorn
 from transformers import GPT2Config, GPT2LMHeadModel
@@ -112,7 +113,150 @@ def test_static_batch_exact_length() -> None:
     assert sizes == [2]
 
 
-def test_length_guard_catches_min_new_tokens_mutation() -> None:
-    _, rows, _ = asyncio.run(_run("naive", min_override=0))
+@pytest.mark.parametrize("mode", ["naive", "static"])
+def test_length_guard_catches_min_new_tokens_mutation(mode) -> None:
+    _, rows, _ = asyncio.run(_run(mode, min_override=0))
     assert all(row.status == "error" for row in rows)
     assert all("completion_tokens 1 != max_tokens 3" in row.error for row in rows)
+
+
+def test_model_generation_defaults_cannot_override_greedy_settings() -> None:
+    from llmbench.baseline.hf_server import Job
+
+    async def run():
+        model = _model()
+        model.generation_config.do_sample = True
+        model.generation_config.num_beams = 2
+        model.generation_config.forced_eos_token_id = 7
+        model.generation_config.repetition_penalty = 2.0
+        baseline = Baseline(model, TinyTokenizer(), mode="naive")
+        job = Job([1, 2, 3], 3)
+        await asyncio.to_thread(baseline._generate, [job], asyncio.get_running_loop())
+        tokens = []
+        while (token := await job.events.get()) is not None:
+            tokens.append(token)
+        # EOS=0 is suppressed; tied zero logits greedily choose token 1.
+        assert tokens == [1, 1, 1]
+
+    asyncio.run(run())
+
+
+def test_actual_generate_batches_and_routes_distinct_rows() -> None:
+    """Inspect the real generate boundary and compare streamed IDs to its output."""
+    from unittest.mock import patch
+
+    from llmbench.baseline.hf_server import Job
+
+    async def run():
+        model = _model()
+
+        # Deterministic, row-dependent logits while retaining real HF generation.
+        def row_logits(module, args, kwargs, output):
+            ids = kwargs["input_ids"]
+            output.logits.fill_(-100)
+            next_ids = (ids[:, -1] % 6) + 1
+            output.logits[:, -1].scatter_(1, next_ids[:, None], 100)
+            return output
+
+        hook = model.register_forward_hook(row_logits, with_kwargs=True)
+        baseline = Baseline(
+            model, TinyTokenizer(), mode="static", batch_size=2, batch_wait_ms=50
+        )
+        jobs = [Job([1, 2], 3), Job([1, 3, 4], 3)]
+        original = model.generate
+        calls = []
+
+        def observe(**kwargs):
+            result = original(**kwargs)
+            calls.append((kwargs, result.tolist()))
+            return result
+
+        try:
+            with patch.object(model, "generate", side_effect=observe):
+                await baseline.start()
+                for job in jobs:
+                    baseline.pending.put_nowait(job)
+                streamed = []
+                for job in jobs:
+                    tokens = []
+                    while (
+                        token := await asyncio.wait_for(job.events.get(), 5)
+                    ) is not None:
+                        assert isinstance(token, int)
+                        tokens.append(token)
+                    streamed.append(tokens)
+                await baseline.stop()
+            assert len(calls) == 1
+            arguments, sequences = calls[0]
+            assert arguments["input_ids"].tolist() == [[0, 1, 2], [1, 3, 4]]
+            assert arguments["attention_mask"].tolist() == [[0, 1, 1], [1, 1, 1]]
+            assert streamed == [[3, 4, 5], [5, 6, 1]]
+            assert streamed == [row[-3:] for row in sequences]
+            import json
+            import os
+            from pathlib import Path
+
+            if evidence_dir := os.environ.get("LLMBENCH_AUDIT_EVIDENCE_DIR"):
+                path = Path(evidence_dir)
+                path.mkdir(parents=True, exist_ok=True)
+                (path / "actual_batch.json").write_text(
+                    json.dumps(
+                        {
+                            "model": "local GPT2 with row-dependent forward hook",
+                            "torch": torch.__version__,
+                            "generate_calls": len(calls),
+                            "input_ids": arguments["input_ids"].tolist(),
+                            "attention_mask": arguments["attention_mask"].tolist(),
+                            "generated_sequences": sequences,
+                            "streamed_per_row": streamed,
+                            "generation_config": arguments[
+                                "generation_config"
+                            ].to_dict(),
+                            "use_model_defaults": arguments["use_model_defaults"],
+                        },
+                        indent=2,
+                    )
+                    + "\n"
+                )
+        finally:
+            hook.remove()
+            await baseline.stop()
+
+    asyncio.run(run())
+
+
+def test_streamer_delivers_before_generation_ends() -> None:
+    from llmbench.baseline.hf_server import Job, TokenStreamer
+
+    async def run():
+        jobs = [Job([1], 2), Job([2], 2)]
+        streamer = TokenStreamer(jobs, asyncio.get_running_loop())
+        streamer.put(torch.tensor([[1], [2]]))
+        streamer.put(torch.tensor([3, 4]))
+        assert await asyncio.wait_for(jobs[0].events.get(), 1) == 3
+        assert await asyncio.wait_for(jobs[1].events.get(), 1) == 4
+        assert all(job.events.empty() for job in jobs)
+        streamer.put(torch.tensor([5, 6]))
+        streamer.end()
+        for job, expected in zip(jobs, [5, 6], strict=True):
+            assert await job.events.get() == expected
+            assert await job.events.get() is None
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("setting", ["top_k", "repetition_penalty", "logit_bias"])
+def test_api_rejects_silently_ignored_generation_settings(setting) -> None:
+    from fastapi import HTTPException
+
+    baseline = Baseline(_model(), TinyTokenizer(), mode="naive")
+    app = make_app(baseline)
+    endpoint = next(
+        route.endpoint
+        for route in app.routes
+        if getattr(route, "path", None) == "/v1/completions"
+    )
+    payload = _payload(0) | {setting: 2}
+    with pytest.raises(HTTPException) as error:
+        asyncio.run(endpoint(payload))
+    assert error.value.status_code == 400

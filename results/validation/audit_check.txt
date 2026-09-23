@@ -1,0 +1,10 @@
+uv run --dev ruff check src tests
+All checks passed!
+uv run --dev ruff format --check src tests
+17 files already formatted
+uv run --dev mypy --strict src
+Success: no issues found in 11 source files
+uv run --dev pytest -q
+..............................                                           [100%]
+30 passed in 6.11s
+cmp CLAUDE.md AGENTS.md
