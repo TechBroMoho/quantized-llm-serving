@@ -153,6 +153,17 @@ EVAL_FULL_RESOURCES = Resources("L40S", 4, 32768, 15000, 300)
 # One variant (e.g. rerunning GPTQ). full-20260923T142440Z: BF16 took 4,256 s,
 # AWQ 4,342 s (MMLU + WikiText), so 5,400 s leaves ~24%.
 EVAL_ONE_RESOURCES = Resources("L40S", 4, 32768, 5400, 300)
+# Phase 6 (docs/PHASE4_6_ESTIMATE.md). CPU prepare: checkpoint sha256 check
+# (~28.6 GB) and the WikiText-103 prompt pool. GPU lifetimes: 8 cores for
+# vLLM's API server + engine core and the 2 client processes (ADR-013);
+# each timeout is that lifetime's planned envelope.
+BENCH_PREPARE_RESOURCES = Resources(None, 2, 8192, 1200, 300)
+BENCH_PROBE_RESOURCES = Resources("L40S", 8, 32768, 720, 300)
+BENCH_BF16_RESOURCES = Resources("L40S", 8, 32768, 2820, 300)
+BENCH_AWQ_RESOURCES = Resources("L40S", 8, 32768, 3600, 300)
+BENCH_GPTQ_RESOURCES = Resources("L40S", 8, 32768, 1800, 300)
+BENCH_MAXBATCH_RESOURCES = Resources("L40S", 8, 32768, 1200, 300)
+BENCH_HF_RESOURCES = Resources("L40S", 8, 32768, 3600, 300)
 
 
 def load_config(name: str) -> tuple[dict[str, Any], str]:

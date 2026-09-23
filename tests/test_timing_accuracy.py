@@ -53,10 +53,10 @@ def test_timing_gate_catches_empty_chunk_timed_as_text(monkeypatch) -> None:
     # ADR-010's mutation: the leading empty chunk sets TTFT.
     original = client._consume_event
 
-    def broken(record, data, received_at):
+    def broken(record, data, received_at, window=None):
         if '"text":""' in data:
             record.add_text(received_at)
-        return original(record, data, received_at)
+        return original(record, data, received_at, window)
 
     monkeypatch.setattr(client, "_consume_event", broken)
     summary, _ = asyncio.run(measure_timing_accuracy())

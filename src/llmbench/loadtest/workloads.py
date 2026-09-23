@@ -19,6 +19,7 @@ def completions_payload(
     model: str = "mock-model",
     ignore_eos: bool = False,
     skip_special_tokens: bool | None = None,
+    continuous_usage: bool = False,
 ) -> dict[str, Any]:
     """Create one request with explicit greedy generation parameters.
 
@@ -28,7 +29,9 @@ def completions_payload(
 
     `skip_special_tokens=False` makes vLLM stream special tokens as text, as
     the HF baseline does, so every generated token yields a text-bearing
-    chunk (ADR-014). None omits the field.
+    chunk (ADR-014). None omits the field. `continuous_usage` asks for the
+    cumulative token count on every chunk, used by steady-state windows
+    (ADR-020).
     """
     payload: dict[str, Any] = {
         "model": model,
@@ -38,7 +41,11 @@ def completions_payload(
             else list(prompt)
         ),
         "stream": True,
-        "stream_options": {"include_usage": True},
+        "stream_options": (
+            {"include_usage": True, "continuous_usage_stats": True}
+            if continuous_usage
+            else {"include_usage": True}
+        ),
         "n": 1,
         "max_tokens": output_tokens,
         "temperature": 0.0,
@@ -132,6 +139,7 @@ class TextPayloads:
     output_tokens: int
     seed: int
     model: str = "mock-model"
+    continuous_usage: bool = False
 
     def __call__(self, request_index: int) -> dict[str, Any]:
         return completions_payload(
@@ -140,6 +148,7 @@ class TextPayloads:
             output_tokens=self.output_tokens,
             seed=self.seed,
             model=self.model,
+            continuous_usage=self.continuous_usage,
         )
 
 

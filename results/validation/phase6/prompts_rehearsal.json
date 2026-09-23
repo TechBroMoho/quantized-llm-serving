@@ -1,0 +1,15 @@
+{
+  "articles_read": 42,
+  "windows_available": 306,
+  "duplicate_windows": 0,
+  "windows_needed": 300,
+  "prompt_count": 200,
+  "prompt_tokens": 512,
+  "seed": 20260923,
+  "pool_sha256": "8e98b51edef6d9c30708ac9128f9367851edfcfc4d94511055ab6774896ce17e",
+  "lines": 3760,
+  "articles_in_file": 60,
+  "first_article_heading": " = Homarus gammarus = ",
+  "prompt_0_first_200_chars": " a seventeenth century English folk song . It may fetch very high prices and may be sold fresh , frozen , canned or powdered . Both the claws and the abdomen of H. gammarus contain \" excellent \" white",
+  "retokenized_prompt_0_length": 512
+}

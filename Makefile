@@ -57,6 +57,23 @@ smoke: smoke-vllm smoke-hf
 sync-results:  # $0: copy Phase 3 results from the results Volume
 	uv run modal volume get llmbench-results phase3 results/validation --force
 
+# --- Phase 6 benchmarks (BILLABLE except the rehearsal and sync) ---
+BENCH_RUN = $(MODAL_RUN) modal_app.bench
+.PHONY: bench-prompts-rehearsal bench-prepare bench sync-bench
+bench-prompts-rehearsal: eval-env  # $0: prompt build on WikiText-103 validation
+	HF_HOME=$(CURDIR)/.cache/hf-eval PYTHONPATH=src $(EVAL_VENV)/bin/python \
+		scripts/bench_prompts_rehearsal.py $(QWEN3_TOKENIZER) \
+		results/validation/phase6/prompts_rehearsal.json
+
+bench-prepare:  # CPU only: checkpoint sha256 check + WikiText-103 prompt pool
+	$(BENCH_RUN)::prepare
+
+bench:  # L40S: LIFETIME=probe|bf16|awq|gptq|maxbatch|hf (ask first)
+	$(BENCH_RUN)::run --lifetime $(LIFETIME)
+
+sync-bench:  # $0: copy Phase 6 results (raw request files stay gzipped)
+	uv run modal volume get llmbench-results phase6 results/perf --force
+
 # --- Phase 6 prerequisites ---
 .PHONY: modal-loadtest-check sync-loadtest-check
 modal-loadtest-check:  # CPU only (BILLABLE, tiny): ADR-013 gate in the vLLM image

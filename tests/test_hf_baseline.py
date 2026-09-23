@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import socket
 from typing import Any
 
@@ -305,3 +306,89 @@ def test_stats_report_actual_batches_and_settings() -> None:
     assert result["generated_batch_sizes"] == [3, 1]
     assert result["mode"] == "static" and result["batch_size"] == 3
     assert result["dtype"] == "torch.float32"
+
+
+def test_continuous_usage_is_cumulative_on_every_token_chunk() -> None:
+    continuous = {"include_usage": True, "continuous_usage_stats": True}
+
+    async def generate() -> list[dict[str, Any]]:
+        baseline = Baseline(_model(), TinyTokenizer(), mode="naive")
+        endpoint = _completion_endpoint(baseline)
+        await baseline.start()
+        try:
+            response = await endpoint(_payload(0) | {"stream_options": continuous})
+            events = []
+            async for chunk in response.body_iterator:
+                text = chunk.decode() if isinstance(chunk, bytes) else str(chunk)
+                data = text.removeprefix("data: ").strip()
+                if data != "[DONE]":
+                    events.append(json.loads(data))
+            return events
+        finally:
+            await baseline.stop()
+
+    events = asyncio.run(generate())
+    progress = [e["usage"]["completion_tokens"] for e in events if e.get("choices")]
+    assert progress == [1, 2, 3]
+    assert events[-1] == {
+        "choices": [],
+        "usage": {"prompt_tokens": 3, "completion_tokens": 3, "total_tokens": 6},
+    }
+
+
+def test_api_rejects_other_stream_options() -> None:
+    from fastapi import HTTPException
+
+    endpoint = _completion_endpoint(Baseline(_model(), TinyTokenizer(), mode="naive"))
+    for options in (
+        {"include_usage": True, "extra": True},
+        {"include_usage": True, "continuous_usage_stats": False},
+    ):
+        with pytest.raises(HTTPException) as error:
+            asyncio.run(endpoint(_payload(0) | {"stream_options": options}))
+        assert error.value.status_code == 400
+
+
+def test_disconnected_clients_are_skipped_and_stop_their_batch() -> None:
+    from llmbench.baseline.hf_server import AllCancelled, Job
+
+    jobs = [Job([1], 3), Job([1], 3)]
+    ids = torch.zeros((2, 1), dtype=torch.long)
+    assert not AllCancelled(jobs)(ids, torch.zeros(1)).any()
+    jobs[0].cancelled = True
+    assert not AllCancelled(jobs)(ids, torch.zeros(1)).any()  # one client left
+    jobs[1].cancelled = True
+    assert AllCancelled(jobs)(ids, torch.zeros(1)).all()
+
+    async def run() -> tuple[int, list[int]]:
+        baseline = Baseline(_model(), TinyTokenizer(), mode="naive")
+        gone, live = Job([1, 2], 3, cancelled=True), Job([1, 2], 3)
+        baseline.pending.put_nowait(gone)
+        baseline.pending.put_nowait(live)
+        await baseline.start()
+        try:
+            tokens = []
+            while (token := await live.events.get()) is not None:
+                tokens.append(token)
+        finally:
+            await baseline.stop()
+        return baseline.skipped_cancelled_jobs, tokens
+
+    skipped, tokens = asyncio.run(run())
+    assert skipped == 1 and len(tokens) == 3
+
+
+def test_closing_the_stream_marks_the_job_cancelled() -> None:
+    async def run() -> bool:
+        baseline = Baseline(_model(), TinyTokenizer(), mode="naive")
+        endpoint = _completion_endpoint(baseline)
+        response = await endpoint(_payload(0))
+        job = baseline.pending.get_nowait()
+        baseline.pending.put_nowait(job)
+        job.events.put_nowait(1)
+        iterator = response.body_iterator
+        await iterator.__anext__()  # one token chunk, then the client leaves
+        await iterator.aclose()  # type: ignore[attr-defined]
+        return job.cancelled
+
+    assert asyncio.run(run())

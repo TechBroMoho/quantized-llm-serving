@@ -24,8 +24,14 @@ from typing import Any
 
 import aiohttp
 
-from llmbench.loadtest.client import stream_request
-from llmbench.loadtest.metrics import RequestRecord, summarize
+from llmbench.loadtest.client import WINDOW_END_REASON, stream_request
+from llmbench.loadtest.metrics import (
+    MAX_HALF_WINDOW_DEVIATION,
+    RequestRecord,
+    TokenWindow,
+    summarize,
+    summarize_steady,
+)
 
 PayloadFactory = Callable[[int], dict[str, Any]]
 StartWindow = Callable[[int], Awaitable[float]]
@@ -52,11 +58,17 @@ class _Shard:
     request_count: int | None
     rate_per_s: float | None
     seed: int | str
+    total_users: int = 1
+    index_offset: int = 0
 
     def warmup_index(self, k: int) -> int:
         return -(1 + self.index + k * self.count)
 
     def request_index(self, k: int) -> int:
+        return self.index_offset + self.index + k * self.count
+
+    def user_id(self, k: int) -> int:
+        """Global virtual-user number of this shard's k-th user."""
         return self.index + k * self.count
 
 
@@ -81,6 +93,18 @@ class _Options:
     payload_factory: PayloadFactory
     mode: str
     duration_s: float | None
+    warmup_s: float = 0.0
+    ramp_s: float = 0.0
+
+
+def _raise_worker_errors(results: list[Any]) -> None:
+    """`gather(return_exceptions=True)` must not hide a failed virtual user
+    (e.g. an exhausted prompt pool); cancellation at a deadline is expected."""
+    for result in results:
+        if isinstance(result, BaseException) and not isinstance(
+            result, asyncio.CancelledError
+        ):
+            raise RuntimeError(f"a load worker failed: {result!r}") from result
 
 
 def _split(total: int, parts: int) -> list[int]:
@@ -170,7 +194,46 @@ async def _run_shard(
                 offered += 1
                 await execute(index)
 
-        if options.mode == "closed":
+        if options.mode == "steady":
+            assert duration_s is not None
+            measure_start = window_start + options.warmup_s
+            window_end = measure_start + duration_s
+            token_window = TokenWindow(measure_start, window_end)
+
+            async def steady_user(k: int) -> None:
+                nonlocal request_number, offered
+                # Staggered start: users are spread evenly over the ramp.
+                user_start = window_start + options.ramp_s * shard.user_id(k) / max(
+                    1, shard.total_users
+                )
+                await asyncio.sleep(max(0.0, user_start - time.perf_counter()))
+                while time.perf_counter() < window_end:
+                    index = shard.request_index(request_number)
+                    request_number += 1
+                    offered += 1
+                    record = await stream_request(
+                        session,
+                        shard.url,
+                        payload_factory(index),
+                        request_id=f"request-{index:09d}",
+                        window=token_window,
+                    )
+                    records.append(record)
+
+            pending = {
+                asyncio.create_task(steady_user(k), name=f"steady-{k}")
+                for k in range(shard.concurrency)
+            }
+            await asyncio.sleep(max(0.0, measure_start - time.perf_counter()))
+            window_cpu_start = time.process_time()
+            await asyncio.sleep(max(0.0, window_end - time.perf_counter()))
+            window_cpu_seconds = time.process_time() - window_cpu_start
+            for task in pending:
+                task.cancel(WINDOW_END_REASON)
+            _raise_worker_errors(await asyncio.gather(*pending, return_exceptions=True))
+            # Report the measurement window, not the warmup start.
+            window_start = measure_start
+        elif options.mode == "closed":
             pending = {
                 asyncio.create_task(worker(), name=f"closed-loop-{i}")
                 for i in range(shard.concurrency)
@@ -183,7 +246,9 @@ async def _run_shard(
                 done, pending = await asyncio.wait(pending, timeout=options.drain_s)
                 for task in pending:
                     task.cancel("bounded drain ended")
-                await asyncio.gather(*done, *pending, return_exceptions=True)
+                _raise_worker_errors(
+                    await asyncio.gather(*done, *pending, return_exceptions=True)
+                )
             else:
                 await asyncio.gather(*pending)
                 window_end = time.perf_counter()
@@ -350,12 +415,21 @@ async def run_load(
     warmup_requests: int = 0,
     seed: int = 0,
     processes: int = 1,
+    warmup_s: float = 0.0,
+    ramp_s: float = 0.0,
+    index_offset: int = 0,
+    max_half_deviation: float = MAX_HALF_WINDOW_DEVIATION,
 ) -> tuple[dict[str, Any], list[RequestRecord]]:
     """Run a load window, stop admission, then drain only for a bounded time.
 
     `processes` shards users, requests, warmups and the open-loop rate across
     client processes; `payload_factory` must then be picklable. `url` may list
     one URL per process (the capacity validation gives each its own mock).
+
+    `mode="steady"` (ADR-020): users start staggered over `ramp_s`, run a
+    closed loop, and are measured over `duration_s` after `warmup_s`;
+    requests still running at the window end are cut. `index_offset` keeps
+    request indices (and so prompts) unique across runs on one server.
     """
     if concurrency < 1:
         raise ValueError("concurrency must be at least 1")
@@ -365,8 +439,14 @@ async def run_load(
         raise ValueError("duration_s must be positive")
     if request_count is not None and request_count < 1:
         raise ValueError("request_count must be positive")
-    if mode not in {"closed", "open"}:
-        raise ValueError("mode must be 'closed' or 'open'")
+    if mode not in {"closed", "open", "steady"}:
+        raise ValueError("mode must be 'closed', 'open' or 'steady'")
+    if mode == "steady" and (
+        duration_s is None or warmup_requests or not 0 <= ramp_s <= warmup_s
+    ):
+        raise ValueError(
+            "steady mode needs duration_s, no warmup requests, 0 <= ramp_s <= warmup_s"
+        )
     if mode == "open" and (rate_per_s is None or rate_per_s <= 0):
         raise ValueError("open-loop mode needs a positive rate_per_s")
     if mode == "open" and request_count is not None:
@@ -404,6 +484,8 @@ async def run_load(
             # One process keeps the historical seed; shards need independent
             # arrival streams (string seeds are deterministic across runs).
             seed=seed if processes == 1 else f"{seed}/{p}",
+            total_users=concurrency,
+            index_offset=index_offset,
         )
         for p in range(processes)
     ]
@@ -413,6 +495,8 @@ async def run_load(
         payload_factory=payload_factory,
         mode=mode,
         duration_s=duration_s,
+        warmup_s=warmup_s,
+        ramp_s=ramp_s,
     )
     clock: dict[str, Any] | None = None
     if processes == 1:
@@ -428,7 +512,29 @@ async def run_load(
     )
     if len({record.request_id for record in records}) != len(records):
         raise RuntimeError("duplicate request IDs across load shards")
-    for record in records:
+    config = {
+        "mode": mode,
+        "concurrency": concurrency,
+        "duration_s": duration_s,
+        "request_count": request_count,
+        "rate_per_s": rate_per_s,
+        "timeout_s": timeout_s,
+        "drain_s": drain_s,
+        "warmup_requests": warmup_requests,
+        "seed": seed,
+        "processes": processes,
+    }
+    if mode == "steady":
+        config |= {"warmup_s": warmup_s, "ramp_s": ramp_s, "index_offset": index_offset}
+        summary = summarize_steady(
+            records,
+            window_start=window_start,
+            window_end=window_end,
+            offered_requests=sum(result.offered for result in results),
+            config=config,
+            max_half_deviation=max_half_deviation,
+        )
+    for record in records if mode != "steady" else []:
         if (
             record.status == "ok"
             and record.completed_at is not None
@@ -437,25 +543,15 @@ async def run_load(
             record.status = "late_completion"
 
     window_cpu_seconds = sum(result.cpu_seconds for result in results)
-    summary = summarize(
-        records,
-        window_start=window_start,
-        window_end=window_end,
-        offered_requests=sum(result.offered for result in results),
-        rejected_requests=sum(result.rejected for result in results),
-        config={
-            "mode": mode,
-            "concurrency": concurrency,
-            "duration_s": duration_s,
-            "request_count": request_count,
-            "rate_per_s": rate_per_s,
-            "timeout_s": timeout_s,
-            "drain_s": drain_s,
-            "warmup_requests": warmup_requests,
-            "seed": seed,
-            "processes": processes,
-        },
-    )
+    if mode != "steady":
+        summary = summarize(
+            records,
+            window_start=window_start,
+            window_end=window_end,
+            offered_requests=sum(result.offered for result in results),
+            rejected_requests=sum(result.rejected for result in results),
+            config=config,
+        )
     summary["drain_duration_s"] = drain_s
     summary["warmup_requests_completed"] = sum(r.warmup_done for r in results)
     # Summed over every client process: the tester's total CPU (ADR-005).
@@ -470,6 +566,9 @@ async def run_load(
     summary["shard_users"] = users
     if clock is not None:
         summary["process_clock_check"] = clock
+    summary["max_request_index"] = max(
+        (int(r.request_id.rsplit("-", 1)[1]) for r in records), default=None
+    )
     summary["measurement_text_chunks"] = sum(
         row.text_chunks
         for row in records

@@ -9,11 +9,32 @@ from typing import Any
 
 import aiohttp
 
-from llmbench.loadtest.metrics import RequestRecord
+from llmbench.loadtest.metrics import RequestRecord, TokenWindow
+
+# Cancellation reason for requests still running when a steady-state window
+# closes (ADR-020): recorded as status "window_end", not as an error.
+WINDOW_END_REASON = "measurement window ended"
 
 
-def _consume_event(record: RequestRecord, data: str, received_at: float) -> bool:
-    """Consume one SSE data field; return true for the stream terminator."""
+def _fail(record: RequestRecord, error: str) -> None:
+    """Mark a usage failure, keeping the first error if there already is one."""
+    if record.status == "ok":
+        record.status = "error"
+        record.error = error
+
+
+def _consume_event(
+    record: RequestRecord,
+    data: str,
+    received_at: float,
+    window: TokenWindow | None = None,
+) -> bool:
+    """Consume one SSE data field; return true for the stream terminator.
+
+    A usage object on a chunk with choices is cumulative progress
+    (`continuous_usage_stats`, ADR-020); the usage on a chunk without choices
+    is the final count, and there must be exactly one of those.
+    """
     if data == "[DONE]":
         return True
     try:
@@ -41,25 +62,44 @@ def _consume_event(record: RequestRecord, data: str, received_at: float) -> bool
                 else:
                     record.empty_text_chunks += 1
     usage = payload.get("usage")
-    if usage is not None:
-        record.usage_events += 1
-        if not isinstance(usage, dict) or record.usage_events != 1:
-            record.status = "error"
-            record.error = "expected one usage object"
-        else:
-            counts: list[Any] = [
-                usage.get(key)
-                for key in ("prompt_tokens", "completion_tokens", "total_tokens")
-            ]
-            if any(type(count) is not int or count < 0 for count in counts):
-                record.status = "error"
-                record.error = "usage counts must be nonnegative integers"
-            elif counts[2] != counts[0] + counts[1]:
-                record.status = "error"
-                record.error = "inconsistent total_tokens"
-            else:
-                record.prompt_tokens = counts[0]
-                record.completion_tokens = counts[1]
+    if usage is None:
+        return False
+    if not isinstance(usage, dict):
+        _fail(record, "usage must be an object")
+        return False
+    counts: list[Any] = [
+        usage.get(key) for key in ("prompt_tokens", "completion_tokens", "total_tokens")
+    ]
+    if any(type(count) is not int or count < 0 for count in counts):
+        _fail(record, "usage counts must be nonnegative integers")
+        return False
+    if counts[2] != counts[0] + counts[1]:
+        _fail(record, "inconsistent total_tokens")
+        return False
+    if isinstance(choices, list) and choices:
+        # Cumulative progress: tokens arrived with this chunk.
+        delta = counts[1] - record.streamed_tokens
+        record.usage_progress_events += 1
+        if delta < 0:
+            _fail(record, "cumulative usage decreased")
+            return False
+        record.streamed_tokens = counts[1]
+        if window is not None and delta:
+            index = window.bin_of(received_at)
+            if index is not None:
+                record.window_token_bins[index] += delta
+        return False
+    record.usage_events += 1
+    if record.usage_events != 1:
+        _fail(record, "expected one usage object")
+    elif record.usage_progress_events and counts[1] != record.streamed_tokens:
+        _fail(
+            record,
+            f"final usage {counts[1]} != streamed usage {record.streamed_tokens}",
+        )
+    else:
+        record.prompt_tokens = counts[0]
+        record.completion_tokens = counts[1]
     return False
 
 
@@ -69,10 +109,13 @@ async def stream_request(
     payload: dict[str, Any],
     *,
     request_id: str,
+    window: TokenWindow | None = None,
 ) -> RequestRecord:
     """Stream one request; only non-empty text chunks define text timings."""
     started_at = time.perf_counter()
     record = RequestRecord(request_id=request_id, status="ok", started_at=started_at)
+    if window is not None:
+        record.window_token_bins = [0] * window.bins
     try:
         async with session.post(
             url, json=payload, headers={"X-Request-ID": request_id}
@@ -91,7 +134,7 @@ async def stream_request(
                         data = "\n".join(data_lines)
                         data_lines.clear()
                         received_at = time.perf_counter()
-                        if _consume_event(record, data, received_at):
+                        if _consume_event(record, data, received_at, window):
                             record.stream_end_s = received_at - started_at
                             done_received = True
                             break
@@ -135,9 +178,10 @@ async def stream_request(
                     record.tpot_s = None
     except asyncio.CancelledError as exc:
         reason = str(exc)
-        record.status = (
-            "drain_timeout" if reason == "bounded drain ended" else "cancelled"
-        )
+        record.status = {
+            "bounded drain ended": "drain_timeout",
+            WINDOW_END_REASON: "window_end",
+        }.get(reason, "cancelled")
         record.error = (
             f"request task cancelled: {reason}" if reason else "request task cancelled"
         )

@@ -447,6 +447,26 @@ raw request file stays local (gitignored, sha256 `4751c849…917912`); the
 summaries are committed. An earlier run of this commit's code, before the
 final timing plan, gave 88,943.0 chunks/s.
 
+**In-container revalidation: passed** (2026-09-23, `make modal-loadtest-check`,
+app `ap-alL2wtq71x0HiFGB2iF5IT`, CPU only, 8 cores / 4 GiB, **$0.028004**).
+Inside the vLLM image under gVisor (`os.cpu_count()` = 8):
+- Timing, 1 client process: ITL p99 0.56% (4,000 gaps); TTFT/E2E/TPOT
+  ≤ 0.12% at p50 and p99. Through a worker process: ITL p99 1.54%.
+- Capacity: **9,124.1 chunks/s (1.52× the 6,000/s gate)** at 1.86 client
+  cores (25.9 s and 29.9 s of CPU over 30 s), 0 errors or rejections, clock
+  check passed. The mock serving shard 0 was at 0.95 cores, so 9,124/s is a
+  lower bound on the client's capacity, not its limit. Phase 3's
+  single-process client managed 3,786/s here.
+- Evidence: `results/validation/phase6/loadtest-check-20260923T205147Z/`.
+
+**Consequence for ADR-005's headroom.** The 6,000/s gate was 3× a
+provisional 2,000/s peak. With `skip_special_tokens=false`, vLLM sends about
+one chunk per token, so the peak chunk rate is roughly the peak output
+tokens/s. If the probe measures more than ~3,040 tokens/s at c=256, the
+validated 9,124/s is less than 3× the real peak. ADR-005 then requires
+revising the target before comparisons are accepted, and the probe decides.
+Every Phase 6 point also records the client's CPU.
+
 ## ADR-014 — vLLM empty text chunks distort per-request E2E/TPOT (2026-09-23, open)
 
 **Observation.** In the vLLM smoke, 14 of 16 requests had 29–32 text-bearing
@@ -813,3 +833,88 @@ not measured beyond single `make check` runs.
 **Consequences.** SPEC Phase 1 wording is updated. The earlier timing
 summaries (ADR-010, audit, Phase 3) used the old sample and rule and stay as
 they were. The in-Modal check runs the full gate.
+
+## ADR-020 — Steady-state measurement windows for Phase 6 (2026-09-23)
+
+**Context.** ADR-006 counts only requests that start *and* finish inside the
+window, with every user starting at the window's start. At high concurrency
+that undercounts by up to one request duration per window (for example,
+~20 s of E2E in a 180 s window at c=256, about 10%). Because E2E differs
+between systems, the bias would differ too, and it would distort the peak
+throughput ratio.
+
+**Decision (Mohammed, 2026-09-23).** Phase 6 uses a steady-state window,
+applied identically to vLLM and HF (`run_load(mode="steady")`,
+`summarize_steady`). ADR-006 stays in force for the smokes and validations.
+- *Warmup.* Users start staggered evenly over `ramp_s`, then run closed
+  loops. The window opens at `warmup_s` ≥ `ramp_s` (planned ≥ ramp + one
+  expected E2E) and lasts `window_s`. At its end, admission stops and
+  requests still in flight are cut (`window_end`, not an error). The next
+  point waits until the server reports no running or queued work.
+- *Primary metric: output tokens/s.* The server's tokens whose chunk arrived
+  inside the window, divided by `window_s`. The counts come from cumulative
+  per-chunk usage (`stream_options.continuous_usage_stats`, verified in vLLM
+  v0.10.2's `serving_completion.py`; the HF server emits the same field), so
+  merged or empty-text chunks are still counted exactly. The final usage
+  must equal the last cumulative count, or the request is invalid.
+- *Secondary: requests/s.* Requests that complete inside the window, divided
+  by `window_s`; latency percentiles come from the same requests. Output
+  tokens of completed requests per second is also reported.
+- *Validity, recorded per point:*
+  - the token rates in the window's two halves must agree within **5%**
+    (steady state; a point that fails is invalid);
+  - a request-count edge bound, 2B / n, where B is the largest group of
+    completions within one median ITL of each other: moving an edge can
+    change the count by at most B. Above 5% it is a warning that qualifies
+    requests/s only; tokens/s is unaffected.
+- *HF baseline.* A disconnected client's queued job is skipped, and a
+  `generate()` call stops once every client in its batch has gone
+  (`AllCancelled`), so cut requests never run into the next point.
+- *Other checks per point:* zero errors, exact 512/256 usage on every
+  completed request, per-chunk usage present, the ADR-014 chunk check, and
+  zero vLLM prefix-cache hits (counter delta).
+- *Prompts.* Each point takes fresh indices from the prompt pool, so no
+  prompt repeats within a lifetime and every variant sees the same prompts
+  in the same order.
+
+**Consequences.** Throughput no longer depends on how a window aligns with
+request starts. A CPU rehearsal against the mock gave 1,262.5 tokens/s from
+arrivals vs 1,270.0 from completed requests (0.6% apart) with flat bins.
+Found while building it: a failed virtual user (an exhausted prompt pool)
+was silently swallowed by `gather(return_exceptions=True)` in both steady and
+duration modes. Worker errors now fail the run, with a regression test. The
+rehearsal tests use a 50% half-window limit, because ~1 s windows on a busy
+laptop are not steady to 5%; the 5% default applies to real runs and has its
+own unit test.
+
+## ADR-021 — W1 prompts from WikiText-103 (2026-09-23)
+
+**Decision (Mohammed, 2026-09-23).** The 512-token W1 prompts come from
+WikiText-103 raw (`Salesforce/wikitext`, `wikitext-103-raw-v1`, train split,
+revision `b08601e0…`).
+- Articles are rebuilt at top-level ` = Title = ` headings and tokenized once
+  with the pinned Qwen3-8B tokenizer, without special tokens. Each article is
+  cut into consecutive non-overlapping 512-token windows; the remainder is
+  dropped, so no window spans two articles.
+- The first 75,000 windows (1.5× oversampling) are reduced to distinct
+  windows without special tokens. 50,000 are then sampled with seed 20260923
+  and stored as an int32 array on the weights Volume, with a manifest (pool
+  sha256, dataset files and sizes, tokenizer).
+- Prompts are sent as token IDs, so there is no re-tokenization drift.
+- The pool is larger than any lifetime's planned requests (~25k).
+
+**License.** WikiText is CC BY-SA 3.0 / GFDL, not public domain as SPEC §6's
+example suggested. We store and send token IDs only. The manifest carries the
+license and a 64-token decoded sample; no text is committed otherwise.
+
+**Rehearsal ($0).** `make bench-prompts-rehearsal` ran the same code on the
+WikiText-103 validation file: 60 articles, exact 512-token windows, no
+duplicates, and the first prompt decodes to article text and re-tokenizes to
+512 tokens (`results/validation/phase6/prompts_rehearsal.json`).
+
+**Checkpoint identity.** The CPU `prepare` step checks every file of all
+three checkpoints against the sha256 values Phase 4 recorded (the BF16
+download manifest; the AWQ/GPTQ quantize summaries), writing a record per
+variant on the Volume. Each GPU lifetime refuses to start unless that record
+passed for its exact path and for the same evidence file hash. So AWQ's
+speed and accuracy numbers come from the same bytes.

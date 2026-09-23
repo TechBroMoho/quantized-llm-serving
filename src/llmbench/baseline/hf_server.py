@@ -15,6 +15,10 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
+from transformers.generation.stopping_criteria import (
+    StoppingCriteria,
+    StoppingCriteriaList,
+)
 from transformers.generation.streamers import BaseStreamer
 
 
@@ -26,6 +30,27 @@ class Job:
         default_factory=asyncio.Queue
     )
     count: int = 0
+    # Set when the client disconnects (e.g. a steady-state window closed).
+    cancelled: bool = False
+
+
+class AllCancelled(StoppingCriteria):
+    """Stop a generate() call once every client in its batch has gone.
+
+    Without this, work for disconnected clients would keep the GPU busy into
+    the next measurement (ADR-020). One remaining client keeps the batch going.
+    """
+
+    def __init__(self, jobs: list[Job]):
+        self.jobs = jobs
+
+    def __call__(
+        self, input_ids: torch.Tensor, scores: torch.Tensor, **kwargs: Any
+    ) -> torch.Tensor:
+        done = all(job.cancelled for job in self.jobs)
+        return torch.full(
+            (input_ids.shape[0],), done, dtype=torch.bool, device=input_ids.device
+        )
 
 
 class TokenStreamer(BaseStreamer):
@@ -76,6 +101,9 @@ class Baseline:
         self.pending: asyncio.Queue[Job] = asyncio.Queue()
         self.worker: asyncio.Task[None] | None = None
         self.generated_batch_sizes: list[int] = []
+        self.busy = False
+        self.skipped_cancelled_jobs = 0
+        self.stopped_batches = 0
 
     async def start(self) -> None:
         self.worker = asyncio.create_task(self._run())
@@ -89,6 +117,9 @@ class Baseline:
     async def _run(self) -> None:
         while True:
             first = await self.pending.get()
+            if first.cancelled:
+                self.skipped_cancelled_jobs += 1
+                continue
             jobs = [first]
             deadline = asyncio.get_running_loop().time() + self.batch_wait_s
             while len(jobs) < self.batch_size:
@@ -99,6 +130,9 @@ class Baseline:
                     candidate = await asyncio.wait_for(self.pending.get(), remaining)
                 except TimeoutError:
                     break
+                if candidate.cancelled:
+                    self.skipped_cancelled_jobs += 1
+                    continue
                 if candidate.max_new_tokens != first.max_new_tokens:
                     # A single generate call has one length setting.
                     self.pending.put_nowait(candidate)
@@ -106,13 +140,18 @@ class Baseline:
                 jobs.append(candidate)
             try:
                 self.generated_batch_sizes.append(len(jobs))
+                self.busy = True
                 await asyncio.to_thread(
                     self._generate, jobs, asyncio.get_running_loop()
                 )
+                if all(job.cancelled for job in jobs):
+                    self.stopped_batches += 1
             except Exception as exc:
                 for job in jobs:
                     job.events.put_nowait(exc)
                     job.events.put_nowait(None)
+            finally:
+                self.busy = False
 
     def _generate(self, jobs: list[Job], loop: asyncio.AbstractEventLoop) -> None:
         pad_id = self.tokenizer.pad_token_id
@@ -162,6 +201,7 @@ class Baseline:
                 generation_config=generation,
                 use_model_defaults=False,
                 streamer=TokenStreamer(jobs, loop),
+                stopping_criteria=StoppingCriteriaList([AllCancelled(jobs)]),
             )
 
 
@@ -193,6 +233,10 @@ def make_app(baseline: Baseline) -> FastAPI:
             "batch_size": baseline.batch_size,
             "batch_wait_s": baseline.batch_wait_s,
             "generated_batch_sizes": list(baseline.generated_batch_sizes),
+            "pending": baseline.pending.qsize(),
+            "busy": baseline.busy,
+            "skipped_cancelled_jobs": baseline.skipped_cancelled_jobs,
+            "stopped_batches": baseline.stopped_batches,
             "device": str(parameter.device),
             "dtype": str(parameter.dtype),
             "attn_implementation": getattr(
@@ -235,9 +279,15 @@ def make_app(baseline: Baseline) -> FastAPI:
         maximum = body.get("max_tokens")
         if not isinstance(maximum, int) or isinstance(maximum, bool) or maximum < 1:
             raise HTTPException(400, "max_tokens must be a positive integer")
+        continuous = body.get("stream_options") == {
+            "include_usage": True,
+            "continuous_usage_stats": True,
+        }
         required: dict[str, Any] = {
             "stream": True,
-            "stream_options": {"include_usage": True},
+            "stream_options": body["stream_options"]
+            if continuous
+            else {"include_usage": True},
             "n": 1,
             "temperature": 0.0,
             "top_p": 1.0,
@@ -259,7 +309,24 @@ def make_app(baseline: Baseline) -> FastAPI:
         job = Job(prompt=prompt, max_new_tokens=maximum)
         await baseline.pending.put(job)
 
+        def usage() -> dict[str, int]:
+            return {
+                "prompt_tokens": len(job.prompt),
+                "completion_tokens": job.count,
+                "total_tokens": len(job.prompt) + job.count,
+            }
+
         async def stream() -> Any:
+            finished = False
+            try:
+                async for event in tokens():
+                    yield event
+                finished = True
+            finally:
+                if not finished:  # client went away mid-stream
+                    job.cancelled = True
+
+        async def tokens() -> Any:
             while True:
                 item = await job.events.get()
                 if item is None:
@@ -269,7 +336,13 @@ def make_app(baseline: Baseline) -> FastAPI:
                     break
                 job.count += 1
                 text = baseline.tokenizer.decode([item], skip_special_tokens=False)
-                yield _event({"choices": [{"text": text}], "usage": None})
+                yield _event(
+                    {
+                        "choices": [{"text": text}],
+                        # Cumulative, like vLLM's continuous_usage_stats.
+                        "usage": usage() if continuous else None,
+                    }
+                )
             yield _event(
                 {
                     "choices": [],

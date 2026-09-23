@@ -52,6 +52,8 @@ async def completion(request: web.Request) -> web.StreamResponse:
     prompt_tokens = (
         len(prompt) if isinstance(prompt, list) else len(str(prompt).split())
     )
+    options = body.get("stream_options") or {}
+    continuous = bool(options.get("continuous_usage_stats"))
     response = web.StreamResponse(
         status=200,
         headers={"Content-Type": "text/event-stream", "Cache-Control": "no-cache"},
@@ -71,7 +73,15 @@ async def completion(request: web.Request) -> web.StreamResponse:
                 _event(
                     {
                         "choices": [{"text": "x" if is_text else ""}],
-                        "usage": None,
+                        "usage": (
+                            {
+                                "prompt_tokens": prompt_tokens,
+                                "completion_tokens": index + 1,
+                                "total_tokens": prompt_tokens + index + 1,
+                            }
+                            if continuous
+                            else None
+                        ),
                     }
                 )
             )

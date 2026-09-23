@@ -4,6 +4,13 @@ from __future__ import annotations
 
 from llmbench.smoke import missing_flags
 from modal_app.common import (
+    BENCH_AWQ_RESOURCES,
+    BENCH_BF16_RESOURCES,
+    BENCH_GPTQ_RESOURCES,
+    BENCH_HF_RESOURCES,
+    BENCH_MAXBATCH_RESOURCES,
+    BENCH_PREPARE_RESOURCES,
+    BENCH_PROBE_RESOURCES,
     DOWNLOAD_LARGE_RESOURCES,
     DOWNLOAD_RESOURCES,
     EVAL_FULL_RESOURCES,
@@ -41,6 +48,13 @@ def test_every_function_is_bounded_and_gpus_are_only_on_smokes() -> None:
         EVAL_PROBE_RESOURCES: ("L40S", 1200),
         EVAL_FULL_RESOURCES: ("L40S", 15000),
         EVAL_ONE_RESOURCES: ("L40S", 5400),
+        BENCH_PREPARE_RESOURCES: (None, 1200),
+        BENCH_PROBE_RESOURCES: ("L40S", 720),
+        BENCH_BF16_RESOURCES: ("L40S", 2820),
+        BENCH_AWQ_RESOURCES: ("L40S", 3600),
+        BENCH_GPTQ_RESOURCES: ("L40S", 1800),
+        BENCH_MAXBATCH_RESOURCES: ("L40S", 1200),
+        BENCH_HF_RESOURCES: ("L40S", 3600),
     }
     for resources, (gpu, timeout) in expected.items():
         kwargs = resources.function_kwargs()
@@ -111,3 +125,34 @@ def test_effective_packages_follow_import_precedence() -> None:
         ("aiohttp", "3.12.7"),
         ("Six", "1.16.0"),
     ]
+
+
+def test_bench_config_resolves_and_every_lifetime_has_a_function() -> None:
+    from llmbench.bench import resolve_points
+    from modal_app import bench
+
+    config, _ = load_config("phase6_bench.yaml")
+    assert config["gpu"] == "L40S"
+    for name, spec in config["lifetimes"].items():
+        points = resolve_points(config["points"], spec["points"], batch_size=32)
+        assert points, name
+        assert all(p.warmup_s >= p.ramp_s for p in points), name
+    args = config["vllm"]["engine_args"]
+    assert "--no-enable-prefix-caching" in args and "--enforce-eager" not in args
+    assert set(bench._GPU_FUNCTIONS) == {
+        "probe",
+        "bf16",
+        "awq",
+        "gptq",
+        "maxbatch",
+        "hf",
+    }
+    # The expected hashes come from the committed Phase 4 records.
+    plan = bench._prepare_run()
+    assert set(plan["expected_checkpoints"]) == {"bf16", "awq", "gptq"}
+    safetensors = [
+        f
+        for f in plan["expected_checkpoints"]["awq"]["files"]
+        if f["path"].endswith(".safetensors")
+    ]
+    assert sum(f["bytes"] for f in safetensors) == 6_098_617_040

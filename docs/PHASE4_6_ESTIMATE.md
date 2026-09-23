@@ -12,7 +12,7 @@
 >
 > | Step | Resources | Expected | Envelope (timeout) |
 > | --- | --- | ---: | ---: |
-> | In-Modal load tester check (ADR-013) + image layer build | CPU 8 cores / 4 GiB, 5 min (10) | $0.039 | $0.078 |
+> | In-Modal load tester check (ADR-013) + image layer build — **actual $0.0280** | CPU 8 cores / 4 GiB, 5 min (10) | $0.039 | $0.078 |
 > | Checkpoint sha256 check vs Phase 4 + W1 real-text prompts | CPU 2 cores / 8 GiB, 10 min (20) | $0.026 | $0.053 |
 > | L40S probe: AWQ startup, short c=1 and c=256 windows | L40S, 8 min (12) | $0.345 | $0.517 |
 > | vLLM BF16: sweep {1,4,16,64,128,256} + 2 repeats at c=1 and peak | L40S, 35 min (47) | $1.507 | $2.024 |

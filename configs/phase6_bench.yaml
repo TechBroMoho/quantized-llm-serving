@@ -1,0 +1,115 @@
+# Phase 6 performance benchmarks (ADR-020 windows, ADR-021 prompts).
+# Every run embeds this file and its SHA-256 in its results.
+# Point timings are planning values until the L40S probe measures E2E;
+# they are revised here (and committed) before the sweeps are approved.
+name: phase6-bench
+gpu: L40S
+model:
+  id: Qwen/Qwen3-8B
+  revision: b968826d9c46dd6066d109eabc6255188de91218
+quantization_config: phase4_quantize.yaml  # where Phase 4 wrote AWQ/GPTQ
+
+# The checkpoints must match the files Phase 4 produced, and Phase 5 measured
+# accuracy on, byte for byte (sha256), before any GPU time is spent.
+expected_checkpoints:
+  bf16: results/quantization/phase4/download-20260923T102838Z/manifest.json
+  awq: results/quantization/phase4/quantize-awq-20260923T103930Z/summary.json
+  gptq: results/quantization/phase4/quantize-gptq-20260923T121835Z/summary.json
+
+prompts:  # W1: exact 512-token windows of WikiText-103 (ADR-021)
+  dataset: Salesforce/wikitext
+  revision: b08601e04326c79dfdd32d625aee71d232d685c3
+  files:
+    - wikitext-103-raw-v1/train-00000-of-00002.parquet
+    - wikitext-103-raw-v1/train-00001-of-00002.parquet
+  input_tokens: 512
+  count: 50000  # > the most requests any lifetime can send (~25k planned)
+  oversample: 1.5  # sample from the first 75,000 windows
+  seed: 20260923
+
+workload:
+  input_tokens: 512
+  output_tokens: 256
+  seed: 0
+  client_processes: 2  # ADR-013: 2 processes, validated in Modal at 9,124 chunks/s
+  idle_timeout_s: 900
+
+vllm:
+  health_timeout_s: 900
+  engine_args:
+    - --dtype
+    - bfloat16
+    - --max-model-len
+    - "1024"  # 512 + 256 = 768 tokens per request
+    - --gpu-memory-utilization
+    - "0.90"
+    - --max-num-seqs
+    - "256"
+    - --seed
+    - "0"
+    - --no-enable-prefix-caching  # unique prompts and no cache reuse (SPEC §6)
+    - --generation-config
+    - vllm  # ignore the checkpoint's sampling defaults
+    - --disable-uvicorn-access-log
+    # No --enforce-eager: performance runs use CUDA graphs.
+
+hf:
+  dtype: bfloat16
+  attn_implementation: sdpa
+  health_timeout_s: 600
+  batch_wait_ms: 50
+  oom_candidates: [8, 16, 32, 48, 64, 96, 128]
+
+# Steady-state points (ADR-020): users start staggered over ramp_s; the
+# window opens at warmup_s (>= ramp_s + one expected E2E).
+points:
+  c1: {concurrency: 1, ramp_s: 0, warmup_s: 15, window_s: 120, timeout_s: 600}
+  c4: {concurrency: 4, ramp_s: 5, warmup_s: 20, window_s: 120, timeout_s: 600}
+  c16: {concurrency: 16, ramp_s: 8, warmup_s: 25, window_s: 120, timeout_s: 600}
+  c64: {concurrency: 64, ramp_s: 15, warmup_s: 40, window_s: 180, timeout_s: 600}
+  c128: {concurrency: 128, ramp_s: 20, warmup_s: 50, window_s: 180, timeout_s: 600}
+  c256: {concurrency: 256, ramp_s: 30, warmup_s: 70, window_s: 180, timeout_s: 600}
+  probe-c1: {concurrency: 1, ramp_s: 0, warmup_s: 10, window_s: 60, timeout_s: 600}
+  probe-c256: {concurrency: 256, ramp_s: 30, warmup_s: 60, window_s: 90, timeout_s: 600}
+  # HF: naive queues every request behind the others; static batches of B.
+  hf-c16: {concurrency: 16, ramp_s: 8, warmup_s: 30, window_s: 180, timeout_s: 900}
+  hf-cB: {concurrency: B, ramp_s: 10, warmup_s: 60, window_s: 180, timeout_s: 900}
+  hf-c2B: {concurrency: 2B, ramp_s: 20, warmup_s: 90, window_s: 180, timeout_s: 900}
+
+# One server lifetime each. "-r2"/"-r3" repeat a point in the same lifetime
+# (headline repeats; median of 3 with the sweep's own run).
+lifetimes:
+  probe:
+    variant: awq
+    points: [probe-c1, probe-c256]
+  bf16:
+    variant: bf16
+    points: [c1, c4, c16, c64, c128, c256, c1-r2, c256-r2, c1-r3, c256-r3]
+  awq:
+    variant: awq
+    points: [c1, c4, c16, c64, c128, c256, c1-r2, c256-r2, c1-r3, c256-r3]
+    cross_check:  # vllm bench serve at matching settings (random 512/256 prompts)
+      - {concurrency: 1, num_prompts: 30}
+      - {concurrency: 64, num_prompts: 640}
+      - {concurrency: 256, num_prompts: 2048}
+  gptq:
+    variant: gptq
+    points: [c1, c4, c16, c64, c128, c256]
+  maxbatch-16:
+    variant: awq
+    extra_engine_args: [--max-num-seqs, "16"]
+    points: [c256]
+  maxbatch-64:
+    variant: awq
+    extra_engine_args: [--max-num-seqs, "64"]
+    points: [c256]
+  hf-naive:
+    variant: bf16
+    engine: hf
+    mode: naive
+    points: [c1, c4, hf-c16, hf-c16-r2, hf-c16-r3]
+  hf-static:
+    variant: bf16
+    engine: hf
+    mode: static
+    points: [c4, c16, hf-cB, hf-c2B, hf-c2B-r2, hf-c2B-r3]

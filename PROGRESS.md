@@ -2,16 +2,13 @@
 
 ## Status
 
-Phase 6 prerequisites done locally ($0, 2026-09-23): ADR-014
-(`skip_special_tokens=false` plus a ≥ 0.5 text-chunks-per-token check),
-ADR-013 (multi-process load tester; 88,246.5 chunks/s locally with 2
-processes at 1.94 cores), and ADR-019 (the flaky timing test was host CPU
-contention; strict medians everywhere, a 50 ms tail bound in the unit test,
-a real p99 in the evidence runs). Phase 5 results are unchanged: MMLU 5-shot BF16 74.88%,
-AWQ 73.93% (−0.95 pp), GPTQ 73.24% (−1.65 pp). Cumulative spend **$12.0650**;
-`modal app list` showed nothing running at the end of Phase 5. Next, pending
-Mohammed's yes: the CPU-only in-Modal load tester check (~$0.04), then
-building the Phase 6 benchmark (estimate $7.34, envelope $9.99).
+Phase 6 in progress (2026-09-23). The in-Modal load tester check **passed**
+(9,124.1 chunks/s, 1.52× the gate, $0.0280). The benchmark is built and
+rehearsed on CPU ($0): steady-state windows with output tokens/s as the
+primary metric (ADR-020), WikiText-103 prompts (ADR-021), and checkpoint
+sha256 gating so AWQ's speed and accuracy come from the same bytes.
+Cumulative spend **$12.0930**; nothing running. Next, each needing
+Mohammed's yes: `make bench-prepare` (CPU), then the L40S probe.
 
 ## Phase log
 
@@ -352,6 +349,40 @@ building the Phase 6 benchmark (estimate $7.34, envelope $9.99).
   - `make check` (once, final code): Ruff, strict mypy (16 files), 103
     tests passed, instruction-file comparison.
 
+- **Phase 6, in-Modal load tester check (2026-09-23, app
+  `ap-alL2wtq71x0HiFGB2iF5IT`, CPU 8 cores / 4 GiB, $0.028004): passed.**
+  Full timing gate with 1 client process (ITL p99 0.56% over 4,000 gaps) and
+  2 (1.54%). Capacity **9,124.1 chunks/s (1.52×)** at 1.86 client cores, 0
+  errors or rejections, clock check passed. One mock was at 0.95 cores, so
+  this is a lower bound. If the probe's c=256 output rate exceeds ~3,040
+  tokens/s, the headroom falls below ADR-005's 3× and needs a decision.
+  Evidence: `results/validation/phase6/loadtest-check-20260923T205147Z/`.
+- **Phase 6, benchmark build (2026-09-23, $0).**
+  - Steady-state mode (ADR-020): staggered ramp, warmup, a window, then
+    cut. Tokens are counted by arrival from cumulative per-chunk usage (vLLM
+    `continuous_usage_stats`; the HF server emits the same). Requests/s
+    counts completions inside the window. Recorded checks: half-window
+    stationarity (≤ 5%, else the point is invalid) and a request-count edge
+    bound (a warning).
+  - HF server: skips jobs whose client left and stops a batch whose clients
+    have all gone (so cut windows cannot leak into the next point); `/stats`
+    reports pending/busy for the idle wait.
+  - Prompts (ADR-021): WikiText-103 articles → exact 512-token windows →
+    50,000 distinct, seeded, as a memory-mapped int32 pool.
+    `make bench-prompts-rehearsal` on the validation file: 60 articles,
+    exact windows, the prompt decodes and re-tokenizes to 512.
+  - `llmbench.bench`: lifetimes, points, idle waits, vLLM counters (prefix
+    hits must be 0), `nvidia-smi` sampling, per-point saving, the `vllm
+    bench serve` cross-check (flags checked in v0.10.2 source and again
+    against the image's `--help`), and the HF OOM probe
+    (`llmbench.baseline.oom_probe`, the server's own `_generate`).
+  - `modal_app.bench`: `prepare` (CPU) verifies all three checkpoints against
+    Phase 4's sha256 and builds the pool. GPU lifetimes refuse unverified
+    checkpoints and spawn so they don't depend on the laptop.
+    `configs/phase6_bench.yaml` holds planning point timings until the probe.
+  - CPU rehearsals of the exact driver against the mock and a tiny HF server
+    (static batches, cuts, idle waits) pass.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -377,6 +408,7 @@ building the Phase 6 benchmark (estimate $7.34, envelope $9.99).
 | 2026-09-23 | 5 | Timed probe, BF16, MMLU `--limit 10` + WikiText `--limit 5`, passed (`ap-BDLHfeHEYkcp93cPSBkH2Y`) | L40S | ≈317 | $0.210801 | $1.618165 |
 | 2026-09-23 | 5 | Full run 1: BF16 + AWQ complete; GPTQ cancelled ~42 min into MMLU when the Mac slept (`ap-upiufFw2kJEquSk8ZS6hmT`) | L40S | ≈11,380 | $7.397234 | $9.015399 |
 | 2026-09-23 | 5 | GPTQ-only rerun, spawned, passed (`ap-ZlJlWJBg1CYBkMPungNRD3`) | L40S | ≈4,580 | $3.049610 | $12.065009 |
+| 2026-09-23 | 6 | In-Modal load tester check, passed, includes vLLM image rebuild (`ap-alL2wtq71x0HiFGB2iF5IT`) | None | ≈240 | $0.028004 | $12.093013 |
 
 **Phase 5 actual: $10.7004** against its $11.63 cap ($6 plus Phase 4's
 unused $4.73 and Phase 3's unused $0.90, both reallocated by Mohammed;
@@ -463,3 +495,8 @@ the 1 TiB/month included.
   one failure could not be attributed. Then the first full-gate evidence run
   failed ITL p99 at 6.21% with 8 concurrent streams sharing the mock's event
   loop; the evidence runs now use one stream per process.
+- Phase 6 build: a failed virtual user (the prompt pool ran out in a CPU
+  rehearsal) was silently swallowed by `asyncio.gather(return_exceptions=True)`,
+  and the run looked merely non-stationary. The steady-state check caught the
+  symptom; worker exceptions now fail the run, and a regression test covers it.
+  The same latent problem existed in the older duration mode.

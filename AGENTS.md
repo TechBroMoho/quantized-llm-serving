@@ -51,7 +51,11 @@ make eval-rehearsal / eval-audit           # CPU rehearsal + prompt-length audit
 make eval-prefetch                         # Modal CPU: eval image check + datasets (BILLABLE, tiny)
 make eval-probe / eval-full                # Modal L40S accuracy runs, detached (BILLABLE, ask first)
 make sync-accuracy / accuracy-table RUN_DIR=...  # copy Phase 5 results, build the table, $0
-make bench CONFIG=...                      # Phase 6 GPU benchmarks (BILLABLE; not yet implemented)
+make modal-loadtest-check                  # Modal CPU: ADR-013 load tester gates in the vLLM image (BILLABLE, tiny)
+make bench-prompts-rehearsal               # $0: Phase 6 prompt build on WikiText-103 validation
+make bench-prepare                         # Modal CPU: checkpoint sha256 check + prompt pool (BILLABLE, tiny)
+make bench LIFETIME=probe|bf16|awq|gptq|maxbatch|hf  # Phase 6 L40S lifetimes, spawned (BILLABLE, ask first)
+make sync-loadtest-check / sync-bench      # copy Phase 6 check / benchmark results, $0
 make plots / report                        # regenerate charts + RESULTS.md from results/, $0 (Phase 7)
 ```
 
