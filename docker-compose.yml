@@ -1,0 +1,42 @@
+# Serve one model with the project's vLLM image on a local NVIDIA GPU:
+#   MODEL=Qwen/Qwen3-0.6B docker compose up --build
+# The engine flags mirror configs/phase3_smoke.yaml except eager mode.
+services:
+  vllm:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: llmbench-vllm:v0.10.2
+    ports:
+      - "8000:8000"
+    ipc: host
+    environment:
+      HF_TOKEN: ${HF_TOKEN:-}
+      VLLM_NO_USAGE_STATS: "1"
+    volumes:
+      - ${HF_CACHE_DIR:-~/.cache/huggingface}:/root/.cache/huggingface
+    command:
+      - --model
+      - ${MODEL:-Qwen/Qwen3-0.6B}
+      - --revision
+      - ${MODEL_REVISION:-c1899de289a04d12100db370d81485cdf75e47ca}
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --dtype
+      - bfloat16
+      - --max-model-len
+      - ${MAX_MODEL_LEN:-1024}
+      - --gpu-memory-utilization
+      - "0.85"
+      - --no-enable-prefix-caching
+      - --generation-config
+      - vllm
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

@@ -184,6 +184,22 @@ def make_app(baseline: Baseline) -> FastAPI:
     async def health() -> dict[str, str]:
         return {"status": "ok"}
 
+    @app.get("/stats")
+    async def stats() -> dict[str, Any]:
+        """Expose the scheduler's settings and every actual generate() batch."""
+        parameter = next(baseline.model.parameters())
+        return {
+            "mode": baseline.mode,
+            "batch_size": baseline.batch_size,
+            "batch_wait_s": baseline.batch_wait_s,
+            "generated_batch_sizes": list(baseline.generated_batch_sizes),
+            "device": str(parameter.device),
+            "dtype": str(parameter.dtype),
+            "attn_implementation": getattr(
+                baseline.model.config, "_attn_implementation", None
+            ),
+        }
+
     @app.post("/v1/completions")
     async def completion(body: dict[str, Any]) -> StreamingResponse:
         allowed = {
@@ -199,6 +215,7 @@ def make_app(baseline: Baseline) -> FastAPI:
             "presence_penalty",
             "seed",
             "stop",
+            "ignore_eos",
         }
         if unsupported := body.keys() - allowed:
             raise HTTPException(400, f"unsupported settings: {sorted(unsupported)}")
@@ -232,6 +249,9 @@ def make_app(baseline: Baseline) -> FastAPI:
             )
         if body.get("stop") not in (None, []):
             raise HTTPException(400, "stop sequences are unsupported")
+        if body.get("ignore_eos", True) is not True:
+            # min_new_tokens == max_new_tokens always suppresses EOS here.
+            raise HTTPException(400, "ignore_eos=false is unsupported")
         job = Job(prompt=prompt, max_new_tokens=maximum)
         await baseline.pending.put(job)
 

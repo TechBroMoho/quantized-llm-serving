@@ -41,9 +41,12 @@ We quantize an open 8B LLM (default `Qwen/Qwen3-8B`) to 4-bit with AWQ and GPTQ 
 ```
 make setup / check / test                  # local, $0
 make mock-validate                         # load tester validation vs mock server, $0
-make smoke                                 # Modal smoke test on cheap GPU (BILLABLE, small)
-make quantize / eval / bench CONFIG=...    # Modal GPU jobs (BILLABLE, ask first)
-make plots / report                        # regenerate charts + RESULTS.md from results/, $0
+make docker-check                          # hadolint + docker compose config, $0
+make modal-download / modal-checks         # Modal CPU-only download + image checks (BILLABLE, tiny)
+make smoke (smoke-vllm / smoke-hf)         # Modal L4 smoke tests, detached (BILLABLE, small)
+make sync-results                          # copy phase3 results from the Modal Volume, $0
+make quantize / eval / bench CONFIG=...    # Modal GPU jobs (BILLABLE, ask first; Phase 4+, not yet implemented)
+make plots / report                        # regenerate charts + RESULTS.md from results/, $0 (Phase 7)
 ```
 
 ## Style

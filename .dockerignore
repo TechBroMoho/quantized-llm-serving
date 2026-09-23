@@ -1,0 +1,5 @@
+**
+!src/llmbench/**
+!configs/**
+**/__pycache__
+**/*.py[cod]

@@ -1,0 +1,43 @@
+# Phase 3 functional smoke test: plumbing only, not a performance comparison.
+# Every run embeds this file and its SHA-256 in its results.
+name: phase3-smoke
+gpu: L4  # smoke GPU per CLAUDE.md; performance comparisons use L40S
+model:
+  id: Qwen/Qwen3-0.6B
+  revision: c1899de289a04d12100db370d81485cdf75e47ca  # resolved 2026-09-23
+workload:
+  input_tokens: 512
+  output_tokens: 32
+  concurrency: 4
+  warmup_requests: 4
+  measured_requests: 16
+  timeout_s: 120
+  seed: 20260923
+vllm:
+  image: vllm/vllm-openai:v0.10.2@sha256:607442e407b0fea97f8a132a78b787c121a996dd4de181fa08e8da06e71ec2db
+  health_timeout_s: 600
+  engine_args:
+    - --dtype
+    - bfloat16
+    - --max-model-len
+    - "1024"
+    - --gpu-memory-utilization
+    - "0.85"
+    - --max-num-seqs
+    - "256"
+    - --seed
+    - "0"
+    - --enforce-eager  # bounds smoke startup; performance runs will use CUDA graphs
+    - --no-enable-prefix-caching
+    - --generation-config
+    - vllm  # ignore the checkpoint's sampling defaults
+    - --disable-uvicorn-access-log
+hf:
+  dtype: bfloat16
+  attn_implementation: sdpa
+  health_timeout_s: 300
+  modes:
+    - mode: naive
+    - mode: static
+      batch_size: 4  # smoke coverage only; the Phase 6 size comes from an OOM probe
+      batch_wait_ms: 50

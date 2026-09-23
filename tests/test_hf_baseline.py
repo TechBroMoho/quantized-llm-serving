@@ -260,3 +260,36 @@ def test_api_rejects_silently_ignored_generation_settings(setting) -> None:
     with pytest.raises(HTTPException) as error:
         asyncio.run(endpoint(payload))
     assert error.value.status_code == 400
+
+
+def _completion_endpoint(baseline: Baseline) -> Any:
+    app = make_app(baseline)
+    return next(
+        route.endpoint
+        for route in app.routes
+        if getattr(route, "path", None) == "/v1/completions"
+    )
+
+
+def test_api_accepts_ignore_eos_true_and_rejects_false() -> None:
+    from fastapi import HTTPException
+
+    endpoint = _completion_endpoint(Baseline(_model(), TinyTokenizer(), mode="naive"))
+    with pytest.raises(HTTPException) as error:
+        asyncio.run(endpoint(_payload(0) | {"ignore_eos": False}))
+    assert error.value.status_code == 400
+    response = asyncio.run(endpoint(_payload(0) | {"ignore_eos": True}))
+    assert response.status_code == 200
+
+
+def test_stats_report_actual_batches_and_settings() -> None:
+    baseline = Baseline(_model(), TinyTokenizer(), mode="static", batch_size=3)
+    baseline.generated_batch_sizes.extend([3, 1])
+    app = make_app(baseline)
+    stats = next(
+        route.endpoint for route in app.routes if getattr(route, "path", "") == "/stats"
+    )
+    result = asyncio.run(stats())
+    assert result["generated_batch_sizes"] == [3, 1]
+    assert result["mode"] == "static" and result["batch_size"] == 3
+    assert result["dtype"] == "torch.float32"
