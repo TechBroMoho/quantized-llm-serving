@@ -84,10 +84,11 @@ def _consume_event(
             _fail(record, "cumulative usage decreased")
             return False
         record.streamed_tokens = counts[1]
-        if window is not None and delta:
+        if window is not None:
             index = window.bin_of(received_at)
             if index is not None:
                 record.window_token_bins[index] += delta
+                record.window_chunks += 1
         return False
     record.usage_events += 1
     if record.usage_events != 1:

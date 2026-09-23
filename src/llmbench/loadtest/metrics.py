@@ -60,6 +60,9 @@ class RequestRecord:
     usage_progress_events: int = 0
     streamed_tokens: int = 0
     window_token_bins: list[int] = field(default_factory=list)
+    # Usage-bearing chunks that arrived inside the window: the client's
+    # parsing load, comparable with its validated chunks/s capacity.
+    window_chunks: int = 0
     error: str | None = None
 
     @property
@@ -277,6 +280,9 @@ def summarize_steady(
             else 0.0
         ),
         "window_token_bins": bins,
+        "chunks_in_window_per_s": (
+            sum(row.window_chunks for row in records) / width if width else 0.0
+        ),
         "half_window_token_deviation": half_deviation,
         "max_half_window_token_deviation": max_half_deviation,
         "steady_state_ok": half_deviation is not None

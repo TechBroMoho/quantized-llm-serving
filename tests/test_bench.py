@@ -239,3 +239,40 @@ def test_checkpoint_verification_catches_changed_and_missing_files(
     result = verify_checkpoint(tmp_path, expected)
     assert not result["passed"]
     assert [m["path"] for m in result["mismatches"]] == ["a.safetensors", "config.json"]
+
+
+def test_process_cpu_is_attributed_to_server_and_clients(tmp_path: Path) -> None:
+    import os
+
+    from llmbench.bench import cores_between, read_process_table
+
+    ticks = os.sysconf("SC_CLK_TCK")
+
+    def write(busy_ticks: int, procs: dict[int, tuple[str, int, int]]) -> dict:
+        (tmp_path / "stat").write_text(f"cpu  {busy_ticks} 0 0 1000 0 0 0 0 0 0\n")
+        for pid, (comm, pgrp, used) in procs.items():
+            (tmp_path / str(pid)).mkdir(exist_ok=True)
+            fields = ["S", "1", str(pgrp)] + ["0"] * 8 + [str(used), "0"]
+            (tmp_path / str(pid) / "stat").write_text(
+                f"{pid} ({comm}) {' '.join(fields)} 0 0\n"
+            )
+        return read_process_table(tmp_path)
+
+    first = write(
+        0, {10: ("vllm api", 10, 0), 11: ("EngineCore", 10, 0), 20: ("python3", 20, 0)}
+    )
+    last = write(
+        4 * ticks,
+        {
+            10: ("vllm api", 10, ticks),
+            11: ("EngineCore", 10, 2 * ticks),
+            20: ("python3", 20, ticks),
+        },
+    )
+    assert first["processes"]["11"][:2] == ["EngineCore", 10]
+    result = cores_between([(0.0, first), (2.0, last)], 0.5, 1.5, server_pgid=10)
+    assert result is not None
+    assert result["server_cores"] == 1.5 and result["client_or_other_cores"] == 0.5
+    assert result["container_busy_cores"] == 2.0
+    assert result["processes"][0]["comm"] == "EngineCore"
+    assert cores_between([(0.0, first)], 0.5, 1.5, 10) is None

@@ -56,6 +56,7 @@ def test_cumulative_usage_is_progress_and_final_must_match() -> None:
     assert ok.status == "ok", ok.error
     assert ok.usage_progress_events == 3 and ok.streamed_tokens == 3
     assert ok.usage_events == 1 and ok.window_tokens == 3
+    assert ok.window_chunks == 3
     # Tokens merged into one chunk still count exactly.
     merged = _stream(
         [
@@ -66,6 +67,7 @@ def test_cumulative_usage_is_progress_and_final_must_match() -> None:
         wide,
     )
     assert merged.status == "ok" and merged.window_tokens == 3
+    assert merged.window_chunks == 2  # two chunks carried the three tokens
     wrong = _stream([*chunks, {"choices": [], "usage": _usage(2)}])
     assert wrong.status == "error" and "streamed usage" in (wrong.error or "")
     backwards = _stream([chunks[1], chunks[0], {"choices": [], "usage": _usage(3)}])

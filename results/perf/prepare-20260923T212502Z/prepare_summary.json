@@ -1,0 +1,107 @@
+{
+  "checkpoints": {
+    "awq": {
+      "bytes_checked": 6114604278,
+      "evidence": "results/quantization/phase4/quantize-awq-20260923T103930Z/summary.json",
+      "evidence_sha256": "9e45ee24c7d236c95e43a129c278e86dd995ec257037186bea12a3566dd290d6",
+      "files_checked": 13,
+      "mismatches": [],
+      "passed": true,
+      "root": "/weights/quantized/Qwen3-8B-awq-b968826d",
+      "seconds": 10.944737213000003,
+      "variant": "awq"
+    },
+    "bf16": {
+      "bytes_checked": 16397461266,
+      "evidence": "results/quantization/phase4/download-20260923T102838Z/manifest.json",
+      "evidence_sha256": "27eef62edfd54295f5a586f6f083f0408d01ec7b87141ae2580f78656ea3b19a",
+      "files_checked": 15,
+      "mismatches": [],
+      "passed": true,
+      "root": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+      "seconds": 23.359487540999996,
+      "variant": "bf16"
+    },
+    "gptq": {
+      "bytes_checked": 6087417885,
+      "evidence": "results/quantization/phase4/quantize-gptq-20260923T121835Z/summary.json",
+      "evidence_sha256": "aefd6c0b0495d19a706ede38b9beeab66e13e94c011eee8994288655606986dd",
+      "files_checked": 13,
+      "mismatches": [],
+      "passed": true,
+      "root": "/weights/quantized/Qwen3-8B-gptq-b968826d",
+      "seconds": 10.405628082,
+      "variant": "gptq"
+    }
+  },
+  "passed": true,
+  "prompts": {
+    "articles_read": 9900,
+    "dataset": "Salesforce/wikitext",
+    "dataset_revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+    "duplicate_windows": 223,
+    "files": [
+      {
+        "bytes": 156987808,
+        "file": "wikitext-103-raw-v1/train-00000-of-00002.parquet"
+      },
+      {
+        "bytes": 157088770,
+        "file": "wikitext-103-raw-v1/train-00001-of-00002.parquet"
+      }
+    ],
+    "license": "CC BY-SA 3.0 / GFDL (text is not redistributed; IDs only)",
+    "lines": 1801350,
+    "path": "/weights/phase6/prompts/wikitext103-b08601e0-50000x512-seed20260923.npy",
+    "pool_sha256": "155f08a3849a11f6c676028635c60075bbb91685684fdabf177e8277776eb07e",
+    "prompt_count": 50000,
+    "prompt_tokens": 512,
+    "sample_decoded": "ok tunnels are not only the largest individual structures on the motorway but they are also the longest tunnels in Croatia . The tunnels separate three distinct climate zones . The Mala Kapela Tunnel spans between the continental climate of the central Croatia and the mountain climate of Lika , while the Sveti Rok Tunnel provides a",
+    "seed": 20260923,
+    "tokenizer": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+    "windows_available": 75000,
+    "windows_needed": 75000
+  },
+  "resources": {
+    "cpu_cores": 2,
+    "gpu": null,
+    "memory_mib": 8192,
+    "startup_timeout_s": 300,
+    "timeout_s": 1200
+  },
+  "run": {
+    "config_sha256": "d06a989aac43193b1150aa6f2181c5a76c654fc47ca42049899cd55f5e851fbc",
+    "git": {
+      "commit": "e34767e2aca58e864e27b6e4a08e5569d267ba32",
+      "dirty": false
+    },
+    "stamp": "20260923T212502Z"
+  },
+  "runtime": {
+    "gpu": {
+      "nvidia_smi": null,
+      "torch_cuda": {
+        "available": false,
+        "device_name": null,
+        "torch_cuda_version": "12.8"
+      }
+    },
+    "logical_cpu_count": 2,
+    "modal_image_id": "im-OM5bX8JQyuhVTe9rEGl3xs",
+    "modal_task_id": "ta-01M382GTYYDBARP6TEAF086RRR",
+    "packages": {
+      "aiohttp": "3.12.15",
+      "fastapi": "0.116.1",
+      "huggingface-hub": "0.34.4",
+      "tokenizers": "0.22.0",
+      "torch": "2.8.0+cu128",
+      "transformers": "4.56.1",
+      "uvicorn": "0.35.0",
+      "vllm": "0.10.2"
+    },
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.35",
+    "python": "3.12.11",
+    "timestamp_utc": "2026-09-23T21:25:24.892931+00:00"
+  },
+  "state": "finished"
+}

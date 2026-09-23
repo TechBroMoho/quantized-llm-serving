@@ -124,6 +124,107 @@ async def wait_idle(base_url: str, kind: str, timeout_s: float) -> dict[str, Any
         await asyncio.sleep(0.5)
 
 
+def read_process_table(root: Path = Path("/proc")) -> dict[str, Any]:
+    """Cumulative CPU seconds of every process, and the host's busy seconds.
+
+    Linux only (`/proc/<pid>/stat` utime + stime, `/proc/stat`); an empty
+    table elsewhere. Used to show which process a benchmark is CPU-bound in.
+    """
+    import os
+
+    if not (root / "stat").exists():
+        return {"processes": {}, "busy_s": None}
+    ticks = os.sysconf("SC_CLK_TCK") if hasattr(os, "sysconf") else 100
+    processes: dict[str, list[Any]] = {}
+    for entry in root.iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            text = (entry / "stat").read_text()
+        except OSError:
+            continue  # the process exited while we were reading
+        comm = text[text.index("(") + 1 : text.rindex(")")]
+        fields = text[text.rindex(")") + 2 :].split()
+        pgrp, utime, stime = int(fields[2]), int(fields[11]), int(fields[12])
+        processes[entry.name] = [comm, pgrp, (utime + stime) / ticks]
+    first = (root / "stat").read_text().splitlines()[0].split()[1:]
+    values = [int(v) for v in first]
+    idle = values[3] + (values[4] if len(values) > 4 else 0)
+    return {"processes": processes, "busy_s": (sum(values[:8]) - idle) / ticks}
+
+
+def cores_between(
+    samples: Sequence[tuple[float, dict[str, Any]]],
+    start: float,
+    end: float,
+    server_pgid: int | None,
+) -> dict[str, Any] | None:
+    """Average CPU cores per process over [start, end], from the samples
+    nearest each edge (taken every ~1 s, so edges are uncertain by ~1 s)."""
+    before = [s for s in samples if s[0] <= start]
+    after = [s for s in samples if s[0] >= end]
+    if not before or not after:
+        return None
+    (t0, first), (t1, last) = before[-1], after[0]
+    span = t1 - t0
+    rows = []
+    for pid, (comm, pgrp, cpu) in last["processes"].items():
+        initial = first["processes"].get(pid)
+        used = cpu - (initial[2] if initial else 0.0)
+        if used / span >= 0.01:
+            rows.append(
+                {
+                    "pid": int(pid),
+                    "comm": comm,
+                    "group": "server" if pgrp == server_pgid else "client_or_other",
+                    "cores": used / span,
+                }
+            )
+    rows.sort(key=lambda row: -row["cores"])
+    busy = (
+        (last["busy_s"] - first["busy_s"]) / span
+        if first["busy_s"] is not None and last["busy_s"] is not None
+        else None
+    )
+    return {
+        "sample_span_s": span,
+        "processes": rows,
+        "server_cores": sum(r["cores"] for r in rows if r["group"] == "server"),
+        "client_or_other_cores": sum(
+            r["cores"] for r in rows if r["group"] != "server"
+        ),
+        "container_busy_cores": busy,
+    }
+
+
+class CpuSampler:
+    """`read_process_table()` every `interval_s` in a thread, for a lifetime."""
+
+    def __init__(self, interval_s: float = 1.0) -> None:
+        import threading
+
+        self.interval_s = interval_s
+        self.samples: list[tuple[float, dict[str, Any]]] = []
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self.enabled = bool(read_process_table()["processes"])
+
+    def _run(self) -> None:
+        while not self._stop.is_set():
+            self.samples.append((time.perf_counter(), read_process_table()))
+            self._stop.wait(self.interval_s)
+
+    def __enter__(self) -> CpuSampler:
+        if self.enabled:
+            self._thread.start()
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self._stop.set()
+        if self.enabled:
+            self._thread.join(timeout=5)
+
+
 class GpuSampler:
     """`nvidia-smi` samples every second into a CSV, for the whole lifetime."""
 
@@ -217,6 +318,8 @@ async def run_points(
     checkpoint: Callable[[], None] = lambda: None,
     index_offset: int = 0,
     max_half_deviation: float = MAX_HALF_WINDOW_DEVIATION,
+    cpu: CpuSampler | None = None,
+    server_pgid: int | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
     """Run each point in order, saving it before the next; returns the offset."""
     results = []
@@ -239,6 +342,18 @@ async def run_points(
             max_half_deviation=max_half_deviation,
         )
         after = await asyncio.to_thread(server_state, base_url, kind)
+        if cpu is not None and cpu.enabled:
+            await asyncio.sleep(1.5 * cpu.interval_s)  # a sample after the window
+        cpu_in_window = (
+            cores_between(
+                list(cpu.samples),
+                summary["window_start_monotonic_s"],
+                summary["window_end_monotonic_s"],
+                server_pgid,
+            )
+            if cpu is not None
+            else None
+        )
         first_index = index_offset
         if summary["max_request_index"] is not None:
             index_offset = int(summary["max_request_index"]) + 1
@@ -257,6 +372,13 @@ async def run_points(
             "server_before": before,
             "server_after": after,
             "prompt_index_range": [first_index, index_offset],
+            # Direct evidence of where CPU goes: the client shards' own
+            # measurement over the exact window, and /proc for every process.
+            "client_shard_cpu_cores": [
+                seconds / summary["window_duration_s"]
+                for seconds in summary["shard_window_process_cpu_seconds"]
+            ],
+            "cpu_in_window": cpu_in_window,
             "failures": failures,
             "warnings": warnings,
             "passed": not failures,
@@ -281,6 +403,8 @@ async def run_points(
                     "half_window_token_deviation",
                     "request_rate_edge_error_bound",
                     "window_process_cpu_cores_average",
+                    "client_shard_cpu_cores",
+                    "cpu_in_window",
                     "ttft_s",
                     "tpot_s",
                     "itl_s",
@@ -405,8 +529,9 @@ async def run_lifetime(
     write_json(out_dir / "lifetime_summary.json", summary | {"state": "starting"})
     started = time.perf_counter()
     process = start_server(command, log_path, env)
+    cpu = CpuSampler()
     try:
-        with GpuSampler(out_dir / "nvidia_smi.csv"):
+        with GpuSampler(out_dir / "nvidia_smi.csv"), cpu:
             summary["health_wait_s"] = await wait_for_health(
                 base_url, process, health_timeout_s
             )
@@ -429,6 +554,8 @@ async def run_lifetime(
                 idle_timeout_s=idle_timeout_s,
                 checkpoint=checkpoint,
                 max_half_deviation=max_half_deviation,
+                cpu=cpu,
+                server_pgid=process.pid,  # start_server makes a new session
             )
             failures.extend(
                 f"{point['label']}: {failure}"
@@ -445,6 +572,13 @@ async def run_lifetime(
         summary["server_returncode_after_stop"] = stop_server(process)
         summary["server_lifetime_s"] = time.perf_counter() - started
         summary["log_excerpts"] = matching_lines(log_path, BENCH_LOG_PATTERNS)
+        summary["cpu_sampler_enabled"] = cpu.enabled
+        if cpu.samples:
+            import gzip
+
+            with gzip.open(out_dir / "cpu_samples.jsonl.gz", "wt") as stream:
+                for at, table in cpu.samples:
+                    stream.write(json.dumps({"at": at, **table}) + "\n")
         summary["failures"] = failures
         summary["passed"] = not failures
         summary["state"] = "finished"
