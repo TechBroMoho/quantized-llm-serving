@@ -351,3 +351,46 @@ def test_static_points_follow_the_measured_batch_time() -> None:
     slow = probe | {"fitted": [{"batch_size": 64, "seconds": 90.0}]}
     (_, slow_c2b), _ = static_points_from_probe(base, slow)
     assert slow_c2b.window_s == 270 and slow_c2b.warmup_s == 245
+
+
+def test_perf_report_takes_medians_of_passed_repeats(tmp_path: Path) -> None:
+    from llmbench.perf_report import headline, load_points
+
+    def point(run: str, label: str, c: int, tps: float, tpot: float, ok=True):
+        d = tmp_path / run / label
+        d.mkdir(parents=True)
+        pct = {"p50": tpot, "p90": tpot, "p95": tpot, "p99": tpot}
+        d.joinpath("summary.json").write_text(
+            json.dumps(
+                {
+                    "config": {"concurrency": c},
+                    "passed": ok,
+                    "failures": [],
+                    "output_token_throughput_per_s": tps,
+                    "request_throughput_per_s": 1.0,
+                    "completed_in_window_requests": 10,
+                    "ttft_s": pct,
+                    "tpot_s": pct,
+                    "itl_s": pct,
+                    "e2e_s": pct,
+                    "half_window_token_deviation": 0.01,
+                }
+            )
+        )
+
+    point("bf16-20260101T000000Z", "c1", 1, 50, 0.020)
+    point("bf16-20260101T000000Z", "c1-r2", 1, 50, 0.022)
+    point("bf16-20260101T000000Z", "c1-r3", 1, 50, 0.021)
+    point("bf16-20260101T000000Z", "c256", 256, 3000, 0.1)
+    point("awq-20260101T000000Z", "c1", 1, 100, 0.010)
+    point("awq-20260101T000000Z", "c256", 256, 2000, 0.1)
+    point("awq-20260101T000000Z", "c256-r2", 256, 9999, 0.1, ok=False)  # excluded
+    point("hf-naive-20260101T000000Z", "c1", 1, 30, 0.03)
+    point("prepare-20260101T000000Z", "x", 1, 1, 1)  # not a lifetime
+    rows = load_points(tmp_path)
+    assert len(rows) == 8
+    head = headline(rows)
+    assert head["single_user_decode"]["bf16"]["tpot"]["median"] == 0.021
+    assert round(head["decode_speedup_vs_bf16"]["awq"], 2) == 2.1
+    assert head["peak_output_tokens_per_s"]["awq"]["median"] == 2000
+    assert head["engine_gain_vllm_bf16_vs_hf"]["naive"] == 100.0

@@ -559,3 +559,9 @@ the 1 TiB/month included.
   from the saved samples, the worker used 0.037 cores, matching its own
   measurement. `modal app logs` also streams forever; poll `modal app list
   --json` from a bounded script instead (macOS has no `timeout`).
+- Phase 6: commit `099f4c9` was made after a `make check` that had one
+  failure (`test_hf_lifetime_on_cpu_cuts_windows_and_waits_for_idle`). I had
+  piped make into `tail`, which hid its exit status. The failure has not
+  reproduced in 15 reruns (14 alone, 1 full suite), and its message was lost
+  to the `tail`. It stays an open flake; the test prints its failure list if
+  it recurs. Commits now check make's real exit status.
