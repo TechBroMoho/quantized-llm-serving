@@ -626,6 +626,13 @@ def main() -> None:
         "awq": "AWQ W4A16-asym (pile-val calib.)",
         "gptq": "GPTQ W4A16-sym (ultrachat calib.)",
     }
+    for name, entry in comparison["variants"].items():
+        if name == comparison["reference"]:
+            continue
+        if entry.get("prompts_identical") is not True:
+            raise SystemExit(f"{name}: prompts differ from the reference")
+        if entry.get("flips_match_delta") is not True:
+            raise SystemExit(f"{name}: per-question results do not match the delta")
     comparison["sources"] = {name: str(path) for name, path in sources.items()}
     comparison["config_sha256"] = configs.pop()
     (args.run_dir / "comparison.json").write_text(
@@ -639,6 +646,12 @@ def main() -> None:
         "Per-subject deltas are noisy: in a 100-question subject one question is "
         "1 pp. The paired test above is the right measure for the overall delta.",
     ]
+    if len({str(path) for path in sources.values()}) > 1:
+        runs = ", ".join(f"{name}: `{path.name}`" for name, path in sources.items())
+        notes.append(
+            f"Variants come from more than one run ({runs}), all with config "
+            f"sha256 `{comparison['config_sha256'][:12]}` and identical prompts."
+        )
     table = render_markdown(comparison, labels, notes)
     (args.run_dir / "accuracy_table.md").write_text(table, encoding="utf-8")
     print(table)

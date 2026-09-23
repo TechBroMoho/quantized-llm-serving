@@ -1,0 +1,13 @@
+{
+  "mmlu_delta_pp": 0.6907847884916718,
+  "prompts_identical": true,
+  "mmlu_questions_lost": 754,
+  "mmlu_questions_gained": 657,
+  "flips_match_delta": true,
+  "mcnemar": {
+    "chi2": 6.531537916371367,
+    "p_value": 0.010597828805191988
+  },
+  "word_perplexity_increase_pct": 2.858102554971409,
+  "note": "GPTQ vs AWQ (reference = AWQ); calibration data differ (ADR-016)"
+}

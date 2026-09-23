@@ -1,5 +1,17 @@
 # Phases 4–6 cost estimate
 
+> **Update after Phase 5 (2026-09-23).** Phase 5 actual: **$10.7004**
+> (prefetches $0.0428, probe $0.2108, full run 1 $7.3972 with ~$1.65 lost to
+> the cancelled GPTQ attempt, GPTQ rerun $3.0496) against a cap raised to
+> $11.63 (ADR-018). The probe predicted $7.94 for a complete three-variant
+> run; the measured per-variant cost was ~$2.8–3.0 (BF16 MMLU 10,200 tokens/s,
+> AWQ −3.5%, GPTQ −1.6% vs BF16). Cumulative actual: **$12.0650**; $12.93
+> remains against the $25 target and about $17.93 of the $30 credit.
+> Phase 6 below is unchanged ($6.72 expected, $9.48 envelope), for a
+> projected total of about $18.8 (envelope $21.5). Phase 6 must re-estimate
+> each run from its own probe, and runs longer than a few minutes should use
+> the spawn pattern.
+
 > **Update after Phase 4 (2026-09-23).** Phase 4 actual: **$1.2671** (prep
 > $0.0242, AWQ $0.3855, GPTQ $0.7261, sanity $0.1313) against $4.16 expected.
 > Measured L40S facts for later phases: vLLM healthy in 46–52 s for 8B

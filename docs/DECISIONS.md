@@ -633,3 +633,47 @@ exceed my ~3.7 GB estimate once allocator caching is included. Full runs use
 the KV cache (~125k tokens) still far exceeds the 8,192 tokens scheduled per
 step, and no score depends on it. The probe is a timing measurement, not a
 result.
+
+**Outcome (2026-09-23).** All three variants were evaluated on every MMLU
+question (14,042) and WikiText-2 document (62) with identical settings and
+byte-identical prompts (equal fingerprints), with 0 truncations:
+
+| Variant | MMLU 5-shot | Δ vs BF16 (pp) | Paired McNemar p | WikiText-2 word ppl |
+| --- | ---: | ---: | ---: | ---: |
+| BF16 | 74.88% ± 0.35 | — | — | 12.742 |
+| AWQ W4A16-asym (pile-val) | 73.93% ± 0.35 | 0.95 | 6.1e-5 | 13.282 |
+| GPTQ W4A16-sym (UltraChat) | 73.24% ± 0.36 | 1.65 | 7e-12 | 13.662 |
+
+The per-variant lm-eval standard errors ignore that all variants answer the
+same questions; the paired McNemar test on per-question outcomes is the
+measure of the difference, and both drops are significant. AWQ vs GPTQ:
+0.69 pp, p = 0.011, confounded by calibration data. The "within 1.5%" resume
+wording holds for AWQ in absolute points (0.95 pp; 1.27% relative) but not
+for GPTQ (1.65 pp; 2.20% relative); final wording is Phase 8 work.
+
+## ADR-018 — Phase 5 budget reallocation and launch-independent runs (2026-09-23)
+
+**Context.** The probe-based full-run estimate (~$7.94) exceeded Phase 5's
+$6 cap, and the first full run lost GPTQ when the laptop went to clamshell
+sleep: the local entrypoint was blocked on `.remote()`, and Modal cancelled
+the input ~100 s after the client went silent, despite `--detach`.
+
+**Decision.**
+- *Budget.* Mohammed moved Phase 4's unused $4.73 and then Phase 3's unused
+  $0.90 to Phase 5, making its cap **$11.63**, on condition that the
+  projected project total (including the Phase 6 estimate) stays under $25.
+  Full 5-shot MMLU was kept; no subsetting or 0-shot shortcut. Phase 5
+  actual: **$10.7004**.
+- *Launch.* Full runs `.spawn()` the Modal function and the entrypoint exits,
+  so the job does not depend on the laptop's client. A single variant runs as
+  `eval_one` (5,400 s timeout) rather than inside the three-variant envelope.
+  The report can combine variants from runs with the same config sha256 and
+  refuses unequal prompt fingerprints or per-question results that do not
+  reproduce the delta.
+- *Verification.* After launching, `modal app list` must still show the app
+  running a few minutes after the entrypoint exits; the GPTQ rerun did.
+
+**Consequences.** BF16 and AWQ come from `full-20260923T142440Z`, GPTQ from
+`full-20260923T175000Z` (same config and package versions). Phase 6's long
+runs should use the same spawn pattern. Remaining against the $25 target:
+$12.93, with Phase 6 estimated at $6.72 (envelope $9.48).

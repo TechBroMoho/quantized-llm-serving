@@ -1,0 +1,214 @@
+{
+  "reference": "bf16",
+  "variants": {
+    "bf16": {
+      "mmlu_questions": 14042,
+      "mmlu_acc": 0.7488249537102977,
+      "mmlu_acc_stderr": 0.0034780730211600376,
+      "mmlu_acc_macro": 0.7682772761201992,
+      "word_perplexity": 12.741751407840102
+    },
+    "awq": {
+      "mmlu_questions": 14042,
+      "mmlu_acc": 0.7392821535393819,
+      "mmlu_acc_stderr": 0.003523971772971358,
+      "mmlu_acc_macro": 0.7591994730534812,
+      "word_perplexity": 13.282235083491033,
+      "mmlu_delta_pp": 0.95428001709158,
+      "mmlu_relative_drop_pct": 1.2743699476937675,
+      "word_perplexity_increase_pct": 4.241831898543924,
+      "category_delta_pp": {
+        "humanities": 0.9776833156216802,
+        "other": 1.2552301255230214,
+        "social_sciences": 0.7474813129671687,
+        "stem": 0.8246114811290783
+      },
+      "largest_drops": [
+        {
+          "subject": "high_school_chemistry",
+          "n": 203,
+          "bf16_acc": 0.7684729064039408,
+          "acc": 0.7142857142857143,
+          "delta_pp": 5.418719211822653
+        },
+        {
+          "subject": "college_mathematics",
+          "n": 100,
+          "bf16_acc": 0.6,
+          "acc": 0.55,
+          "delta_pp": 4.999999999999993
+        },
+        {
+          "subject": "college_physics",
+          "n": 102,
+          "bf16_acc": 0.6568627450980392,
+          "acc": 0.6078431372549019,
+          "delta_pp": 4.90196078431373
+        },
+        {
+          "subject": "high_school_physics",
+          "n": 151,
+          "bf16_acc": 0.7284768211920529,
+          "acc": 0.6821192052980133,
+          "delta_pp": 4.635761589403964
+        },
+        {
+          "subject": "college_computer_science",
+          "n": 100,
+          "bf16_acc": 0.73,
+          "acc": 0.69,
+          "delta_pp": 4.0000000000000036
+        }
+      ],
+      "largest_gains": [
+        {
+          "subject": "econometrics",
+          "n": 114,
+          "bf16_acc": 0.6578947368421053,
+          "acc": 0.6929824561403509,
+          "delta_pp": -3.508771929824561
+        },
+        {
+          "subject": "machine_learning",
+          "n": 112,
+          "bf16_acc": 0.6160714285714286,
+          "acc": 0.6428571428571429,
+          "delta_pp": -2.67857142857143
+        },
+        {
+          "subject": "human_aging",
+          "n": 223,
+          "bf16_acc": 0.7488789237668162,
+          "acc": 0.7713004484304933,
+          "delta_pp": -2.2421524663677084
+        },
+        {
+          "subject": "abstract_algebra",
+          "n": 100,
+          "bf16_acc": 0.57,
+          "acc": 0.59,
+          "delta_pp": -2.0000000000000018
+        },
+        {
+          "subject": "clinical_knowledge",
+          "n": 265,
+          "bf16_acc": 0.7849056603773585,
+          "acc": 0.8,
+          "delta_pp": -1.5094339622641506
+        }
+      ],
+      "prompts_identical": true,
+      "mmlu_questions_lost": 617,
+      "mmlu_questions_gained": 483,
+      "flips_match_delta": true,
+      "mcnemar": {
+        "chi2": 16.080909090909092,
+        "p_value": 6.069281081633349e-05
+      }
+    },
+    "gptq": {
+      "mmlu_questions": 14042,
+      "mmlu_acc": 0.7323743056544652,
+      "mmlu_acc_stderr": 0.0035569085082257047,
+      "mmlu_acc_macro": 0.7521093712276764,
+      "word_perplexity": 13.661854983769599,
+      "mmlu_delta_pp": 1.6450648055832517,
+      "mmlu_relative_drop_pct": 2.196861626248219,
+      "word_perplexity_increase_pct": 7.2211703593852095,
+      "category_delta_pp": {
+        "humanities": 1.5302869287991516,
+        "other": 1.4161570646926358,
+        "social_sciences": 1.4949626259343485,
+        "stem": 2.1883920076117946
+      },
+      "largest_drops": [
+        {
+          "subject": "college_mathematics",
+          "n": 100,
+          "bf16_acc": 0.6,
+          "acc": 0.52,
+          "delta_pp": 7.9999999999999964
+        },
+        {
+          "subject": "global_facts",
+          "n": 100,
+          "bf16_acc": 0.51,
+          "acc": 0.44,
+          "delta_pp": 7.000000000000001
+        },
+        {
+          "subject": "college_physics",
+          "n": 102,
+          "bf16_acc": 0.6568627450980392,
+          "acc": 0.5882352941176471,
+          "delta_pp": 6.8627450980392135
+        },
+        {
+          "subject": "electrical_engineering",
+          "n": 145,
+          "bf16_acc": 0.8,
+          "acc": 0.7517241379310344,
+          "delta_pp": 4.827586206896561
+        },
+        {
+          "subject": "college_medicine",
+          "n": 173,
+          "bf16_acc": 0.8034682080924855,
+          "acc": 0.7572254335260116,
+          "delta_pp": 4.6242774566473965
+        }
+      ],
+      "largest_gains": [
+        {
+          "subject": "international_law",
+          "n": 121,
+          "bf16_acc": 0.7272727272727273,
+          "acc": 0.7603305785123967,
+          "delta_pp": -3.3057851239669422
+        },
+        {
+          "subject": "business_ethics",
+          "n": 100,
+          "bf16_acc": 0.78,
+          "acc": 0.8,
+          "delta_pp": -2.0000000000000018
+        },
+        {
+          "subject": "college_chemistry",
+          "n": 100,
+          "bf16_acc": 0.56,
+          "acc": 0.58,
+          "delta_pp": -1.9999999999999907
+        },
+        {
+          "subject": "human_aging",
+          "n": 223,
+          "bf16_acc": 0.7488789237668162,
+          "acc": 0.7668161434977578,
+          "delta_pp": -1.7937219730941645
+        },
+        {
+          "subject": "professional_accounting",
+          "n": 282,
+          "bf16_acc": 0.574468085106383,
+          "acc": 0.5921985815602837,
+          "delta_pp": -1.773049645390068
+        }
+      ],
+      "prompts_identical": true,
+      "mmlu_questions_lost": 678,
+      "mmlu_questions_gained": 447,
+      "flips_match_delta": true,
+      "mcnemar": {
+        "chi2": 47.022222222222226,
+        "p_value": 7.018637913679256e-12
+      }
+    }
+  },
+  "sources": {
+    "bf16": "results/accuracy/phase5/full-20260923T142440Z",
+    "awq": "results/accuracy/phase5/full-20260923T142440Z",
+    "gptq": "results/accuracy/phase5/full-20260923T175000Z"
+  },
+  "config_sha256": "364e97d9d36af2f8c89f80866ac761368220754fe61bbe1c0f959bfc00ca3e01"
+}

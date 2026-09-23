@@ -2,13 +2,13 @@
 
 ## Status
 
-Phase 5 in progress (2026-09-23). BF16 (MMLU 74.88%, word perplexity 12.742)
-and AWQ (73.93%, 13.282) are complete. GPTQ was cancelled mid-run when the
-Mac slept; the entrypoint now spawns the job so it runs independently of the
-laptop. The GPTQ-only rerun awaits approval. Cumulative spend **$9.0154**
-(dashboard). Before Phase 6 (approved, not yet built): a multi-process load
-tester revalidated in Modal (ADR-013), and `skip_special_tokens=false` with a
-chunk-count check (ADR-014).
+Phase 5 complete (2026-09-23). MMLU 5-shot: BF16 74.88%, AWQ 73.93%
+(−0.95 pp), GPTQ 73.24% (−1.65 pp); WikiText-2 word perplexity 12.742 /
+13.282 / 13.662. Phase 5 actual **$10.7004** (cap $11.63 after
+reallocation); cumulative **$12.0650** (dashboard). `modal app list` shows
+nothing running. Before Phase 6 (approved, not yet built): a multi-process
+load tester revalidated in Modal (ADR-013), and `skip_special_tokens=false`
+with a chunk-count check (ADR-014).
 
 ## Phase log
 
@@ -270,6 +270,42 @@ chunk-count check (ADR-014).
     no longer depends on the laptop; a single variant runs as `eval_one`
     with a 5,400 s timeout.
 
+- **Phase 5, GPTQ rerun (run `full-20260923T175000Z`, $3.0496): passed.**
+  Launched with `--detach` and `.spawn()`; `modal app list` still showed the
+  app running 3 minutes after the entrypoint exited. Same config sha256
+  (`364e97d9d36a`) and package versions as run 1 (commit c300da5 vs 69a80c0:
+  only the launch and report code differ). MMLU scoring 65.0 min, process
+  4,224 s; WikiText 74 s; GPU peak 42,942 MiB; 0 truncations.
+- **Phase 5 results (acceptance: results + table committed).** Table:
+  `results/accuracy/phase5/full-20260923T142440Z/accuracy_table.md`
+  (+ `comparison.json`, `awq_vs_gptq.json`). All 14,042 MMLU questions and
+  all 62 WikiText documents for every variant; identical prompt fingerprints
+  across variants; every check passed.
+
+  | Variant | MMLU 5-shot | Δ vs BF16 (pp) | Lost / gained | McNemar p | WikiText-2 word ppl |
+  | --- | ---: | ---: | ---: | ---: | ---: |
+  | BF16 | 74.88% ± 0.35 | — | — | — | 12.742 |
+  | AWQ W4A16-asym (pile-val) | 73.93% ± 0.35 | +0.95 | 617 / 483 | 6.1e-5 | 13.282 (+4.2%) |
+  | GPTQ W4A16-sym (UltraChat) | 73.24% ± 0.36 | +1.65 | 678 / 447 | 7e-12 | 13.662 (+7.2%) |
+
+  - Both drops are statistically real (paired test); only AWQ's is under
+    1.5 pp. GPTQ is 0.69 pp below AWQ (754 lost / 657 gained, p = 0.011), but
+    the two used different calibration data, so this does not isolate the
+    method.
+  - Category deltas: AWQ 0.75–1.26 pp, evenly spread (STEM +0.82); GPTQ
+    1.42–2.19 pp, largest in STEM (+2.19).
+  - Largest subject drops: AWQ high_school_chemistry +5.42 (203 q),
+    college_mathematics +5.00 (100 q), college_physics +4.90 (102 q); GPTQ
+    college_mathematics +8.00 (100 q), global_facts +7.00 (100 q),
+    college_physics +6.86 (102 q). Single subjects are noisy (1 question =
+    1 pp in a 100-question subject).
+  - Relative drops, secondary: AWQ 1.27%, GPTQ 2.20% of BF16's accuracy.
+  - Reproduce (billable; ADR-017/018): `make eval-prefetch eval-probe
+    eval-full sync-accuracy`, then `make accuracy-table RUN_DIR=...` (for
+    this split run: `uv run python -m llmbench.accuracy --run-dir
+    results/accuracy/phase5/full-20260923T142440Z --variant-dir
+    gptq=results/accuracy/phase5/full-20260923T175000Z`).
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -293,7 +329,14 @@ chunk-count check (ADR-014).
 | 2026-09-23 | 5 | Eval prefetch, CPU, includes eval image build; gate failed on a false package-drift check (`ap-88OReY3mpGKjX70ev99mWR`) | None | n/a | $0.022514 | $1.387079 |
 | 2026-09-23 | 5 | Eval prefetch rerun with the fixed check, passed (`ap-BH19KuquiKpyE9PMWKPgEt`) | None | n/a | $0.020285 | $1.407364 |
 | 2026-09-23 | 5 | Timed probe, BF16, MMLU `--limit 10` + WikiText `--limit 5`, passed (`ap-BDLHfeHEYkcp93cPSBkH2Y`) | L40S | ≈317 | $0.210801 | $1.618165 |
-| 2026-09-23 | 5 | Full run 1: BF16 + AWQ complete; GPTQ cancelled ~42 min into MMLU when the Mac slept (`ap-upiufFw2kJEquSk8ZS6hmT`); cost may still settle | L40S | ≈11,380 | $7.397234 | $9.015399 |
+| 2026-09-23 | 5 | Full run 1: BF16 + AWQ complete; GPTQ cancelled ~42 min into MMLU when the Mac slept (`ap-upiufFw2kJEquSk8ZS6hmT`) | L40S | ≈11,380 | $7.397234 | $9.015399 |
+| 2026-09-23 | 5 | GPTQ-only rerun, spawned, passed (`ap-ZlJlWJBg1CYBkMPungNRD3`) | L40S | ≈4,580 | $3.049610 | $12.065009 |
+
+**Phase 5 actual: $10.7004** against its $11.63 cap ($6 plus Phase 4's
+unused $4.73 and Phase 3's unused $0.90, both reallocated by Mohammed;
+ADR-018). It includes about $1.65 of GPU time lost to the cancelled GPTQ
+attempt. Billing re-read at 12:13 PDT; the report is saved as
+`results/accuracy/phase5/modal_billing_2026-09-23.json`.
 
 Phase 3 amounts are **actual** per-app costs from `modal billing report --for
 today --json` (saved in `results/validation/phase3/modal_billing_2026-09-23.json`),
