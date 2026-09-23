@@ -261,6 +261,21 @@ def paired_flips(reference: str, other: str) -> dict[str, int]:
     return {"lost": lost, "gained": gained}
 
 
+def mcnemar(lost: int, gained: int) -> dict[str, float]:
+    """Paired test of whether two variants differ on the same questions.
+
+    Only discordant questions carry information. Chi-square with continuity
+    correction, 1 degree of freedom: p = erfc(sqrt(chi2 / 2)). The variants'
+    separate lm-eval standard errors ignore the pairing and overstate the
+    uncertainty of the difference.
+    """
+    discordant = lost + gained
+    if discordant == 0:
+        return {"chi2": 0.0, "p_value": 1.0}
+    chi2 = (abs(lost - gained) - 1) ** 2 / discordant if lost != gained else 0.0
+    return {"chi2": chi2, "p_value": math.erfc(math.sqrt(chi2 / 2))}
+
+
 def compare(
     summaries: Mapping[str, Mapping[str, Any]],
     *,
@@ -288,6 +303,10 @@ def compare(
             entry["word_perplexity_increase_pct"] = 100 * (
                 wiki["word_perplexity"] / ref["wikitext"]["word_perplexity"] - 1
             )
+            entry["category_delta_pp"] = {
+                category: 100 * (ref["mmlu"]["categories"][category] - acc)
+                for category, acc in mmlu["categories"].items()
+            }
             subjects = []
             for subject, item in mmlu["subjects"].items():
                 base = ref["mmlu"]["subjects"][subject]
@@ -324,6 +343,7 @@ def compare(
                 # Net lost questions must reproduce the headline delta.
                 expected_net = entry["mmlu_delta_pp"] / 100 * mmlu["questions"]
                 entry["flips_match_delta"] = abs((lost - gained) - expected_net) < 0.5
+                entry["mcnemar"] = mcnemar(lost, gained)
         out["variants"][name] = entry
     return out
 
@@ -337,7 +357,11 @@ def _pct(value: float) -> str:
     return f"{100 * value:.2f}%"
 
 
-def render_markdown(comparison: Mapping[str, Any], labels: Mapping[str, str]) -> str:
+def render_markdown(
+    comparison: Mapping[str, Any],
+    labels: Mapping[str, str],
+    notes: Sequence[str] = (),
+) -> str:
     """The Phase 5 results table (committed next to the raw files)."""
     ref = comparison["reference"]
     lines = [
@@ -363,9 +387,44 @@ def render_markdown(comparison: Mapping[str, Any], labels: Mapping[str, str]) ->
         "points (positive = lower accuracy). Accuracy is lm-eval's size-weighted "
         f"mean over all {questions:,} test questions.",
     ]
-    for name, entry in comparison["variants"].items():
-        if name == ref:
-            continue
+    others = [name for name in comparison["variants"] if name != ref]
+    paired = [name for name in others if "mcnemar" in comparison["variants"][name]]
+    if paired:
+        lines += [
+            "",
+            f"**Paired per-question comparison vs BF16** (same {questions:,} "
+            "prompts; McNemar test with continuity correction)",
+            "",
+            "| Variant | Lost (BF16 right, variant wrong) | Gained | Net lost | "
+            "χ² | p |",
+            "| --- | ---: | ---: | ---: | ---: | ---: |",
+        ]
+        for name in paired:
+            entry = comparison["variants"][name]
+            test = entry["mcnemar"]
+            lost, gained = entry["mmlu_questions_lost"], entry["mmlu_questions_gained"]
+            lines.append(
+                f"| {labels.get(name, name)} | {lost} | {gained} | {lost - gained} | "
+                f"{test['chi2']:.2f} | {test['p_value']:.2g} |"
+            )
+    if others:
+        categories = sorted(comparison["variants"][others[0]]["category_delta_pp"])
+        header = " | ".join(f"{labels.get(name, name)} Δ (pp)" for name in others)
+        lines += [
+            "",
+            "**MMLU category deltas vs BF16** (pp)",
+            "",
+            f"| Category | {header} |",
+            "| --- |" + " ---: |" * len(others),
+        ]
+        for category in categories:
+            cells = " | ".join(
+                f"{comparison['variants'][name]['category_delta_pp'][category]:+.2f}"
+                for name in others
+            )
+            lines.append(f"| {category.replace('_', ' ')} | {cells} |")
+    for name in others:
+        entry = comparison["variants"][name]
         lines += [
             "",
             f"**{labels.get(name, name)}: largest per-subject drops** "
@@ -381,6 +440,8 @@ def render_markdown(comparison: Mapping[str, Any], labels: Mapping[str, str]) ->
                 f"| {row['subject']} | {row['n']} | {_pct(row['bf16_acc'])} | "
                 f"{_pct(row['acc'])} | {row['delta_pp']:+.2f} |"
             )
+    for note in notes:
+        lines += ["", note]
     return "\n".join(lines) + "\n"
 
 
@@ -550,7 +611,15 @@ def main() -> None:
     (args.run_dir / "comparison.json").write_text(
         json.dumps(comparison, indent=2) + "\n", encoding="utf-8"
     )
-    table = render_markdown(comparison, labels)
+    notes = [
+        "AWQ and GPTQ used different calibration data, each following its "
+        "official llm-compressor 0.7.1 example (AWQ: pile-val, 256 x 512 tokens; "
+        "GPTQ: UltraChat, 512 x 2,048 tokens; ADR-016), so an AWQ-vs-GPTQ "
+        "difference mixes the method with its calibration set.",
+        "Per-subject deltas are noisy: in a 100-question subject one question is "
+        "1 pp. The paired test above is the right measure for the overall delta.",
+    ]
+    table = render_markdown(comparison, labels, notes)
     (args.run_dir / "accuracy_table.md").write_text(table, encoding="utf-8")
     print(table)
 

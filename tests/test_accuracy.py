@@ -15,6 +15,7 @@ from llmbench.accuracy import (
     check_results,
     compare,
     lm_eval_command,
+    mcnemar,
     model_args_string,
     package_drift,
     paired_flips,
@@ -296,3 +297,25 @@ def test_eval_stack_leaves_every_vllm_image_package_unchanged() -> None:
         k: (image[k], v) for k, v in resolved.items() if k in image and image[k] != v
     }
     assert changed == {}
+
+
+def test_mcnemar_matches_hand_computation() -> None:
+    # (|617 - 483| - 1)^2 / 1100 = 16.08; p = erfc(sqrt(chi2 / 2))
+    result = mcnemar(617, 483)
+    assert result["chi2"] == pytest.approx(133**2 / 1100)
+    assert result["p_value"] == pytest.approx(6.07e-5, rel=0.01)
+    assert mcnemar(10, 10) == {"chi2": 0.0, "p_value": 1.0}
+    assert mcnemar(0, 0)["p_value"] == 1.0
+
+
+def test_category_deltas_and_notes_render() -> None:
+    summaries = {
+        "bf16": summary({"mmlu_a": 0.8, "mmlu_b": 0.6, "mmlu_c": 0.7}, 10.0),
+        "awq": summary({"mmlu_a": 0.6, "mmlu_b": 0.6, "mmlu_c": 0.75}, 10.5),
+    }
+    result = compare(summaries)
+    assert result["variants"]["awq"]["category_delta_pp"] == pytest.approx(
+        {"stem": 10.0, "other": -5.0}
+    )
+    table = render_markdown(result, {"awq": "AWQ"}, notes=["Calibration differs."])
+    assert "| stem | +10.00 |" in table and table.endswith("Calibration differs.\n")
