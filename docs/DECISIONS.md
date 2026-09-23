@@ -520,3 +520,11 @@ Phase 4 vLLM sanity run is the real load test for AWQ.
 
 **Consequences.** Accuracy and serving numbers apply to this stack only.
 Newer llm-compressor releases are not evaluated.
+
+**Outcome (2026-09-23).** Both recipes passed every structural check on
+L40S: AWQ in 538 s ($0.3855) and GPTQ in 973 s ($0.7261). vLLM 0.10.2 loaded
+both with `MarlinLinearKernel` for `CompressedTensorsWNA16`, as well as the
+BF16 original. On-disk safetensors shrank 62.77% (AWQ) and 62.94% (GPTQ);
+vLLM's model-loading memory shrank 62.61% and 62.78%. These are consistent
+with the ADR-001 analytical estimate and below the 68% placeholder. Details
+are in PROGRESS; the final claims wording is Phase 7/8 work.

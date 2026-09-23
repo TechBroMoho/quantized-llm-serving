@@ -1,0 +1,1427 @@
+Note that running a local entrypoint in detached mode only keeps the last triggered Modal function alive after the parent process has been killed or disconnected.
+✓ Initialized. View run at 
+https://modal.com/apps/mohammedjasim/main/ap-PA7aqlQxiqweqcBW0wJNKj
+✓ Created objects.
+├── 🔨 Created mount PythonPackage:modal_app
+├── 🔨 Created mount PythonPackage:llmbench, PythonPackage:modal_app
+├── 🔨 Created function download_8b.
+├── 🔨 Created function prepare_calibration_data.
+├── 🔨 Created function quantize_awq.
+├── 🔨 Created function quantize_gptq.
+├── 🔨 Created mount /Users/mohammedjasim/code/quantized-llm-serving
+└── 🔨 Created function vllm_sanity.
+2026-09-23T12:19:03.029550+0000 | reset | INFO - Compression lifecycle reset
+2026-09-23T12:19:03.036240+0000 | _create_default_logger | INFO - Logging all LLM Compressor modifier-level logs to sparse_logs/23-09-2026_12.19.03.log
+2026-09-23T12:19:03.037092+0000 | from_modifiers | INFO - Creating recipe from modifiers
+2026-09-23T12:19:03.092439+0000 | initialize | INFO - Compression lifecycle initialized for 1 modifiers
+2026-09-23T12:19:03.092837+0000 | IndependentPipeline | INFO - Inferred `SequentialPipeline` for `GPTQModifier`
+2026-09-23T12:19:16.018514+0000 | compress_modules | INFO - Quantizing model.layers.0.self_attn.q_proj using 512 samples
+2026-09-23T12:19:17.402962+0000 | compress | METRIC - time 1.38s
+2026-09-23T12:19:17.403655+0000 | compress | METRIC - error 6.75
+2026-09-23T12:19:17.404242+0000 | compress | METRIC - GPU 0 | usage: 10.23% | total memory: 48 GB
+2026-09-23T12:19:17.404497+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:19:17.404759+0000 | compress_modules | INFO - Quantizing model.layers.0.self_attn.k_proj using 512 samples
+2026-09-23T12:19:18.381529+0000 | compress | METRIC - time 0.98s
+2026-09-23T12:19:18.382171+0000 | compress | METRIC - error 2.18
+2026-09-23T12:19:18.382709+0000 | compress | METRIC - GPU 0 | usage: 10.23% | total memory: 48 GB
+2026-09-23T12:19:18.383096+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:19:18.383466+0000 | compress_modules | INFO - Quantizing model.layers.0.self_attn.v_proj using 512 samples
+2026-09-23T12:19:19.356954+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:19:19.357858+0000 | compress | METRIC - error 1.63
+2026-09-23T12:19:19.358299+0000 | compress | METRIC - GPU 0 | usage: 10.23% | total memory: 48 GB
+2026-09-23T12:19:19.358501+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:19:19.358773+0000 | compress_modules | INFO - Quantizing model.layers.0.self_attn.o_proj using 512 samples
+2026-09-23T12:19:20.366027+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:19:20.366811+0000 | compress | METRIC - error 16.08
+2026-09-23T12:19:20.367227+0000 | compress | METRIC - GPU 0 | usage: 10.23% | total memory: 48 GB
+2026-09-23T12:19:20.367444+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:19:20.367674+0000 | compress_modules | INFO - Quantizing model.layers.0.mlp.gate_proj using 512 samples
+2026-09-23T12:19:21.472432+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:19:21.473286+0000 | compress | METRIC - error 810.41
+2026-09-23T12:19:21.473636+0000 | compress | METRIC - GPU 0 | usage: 10.23% | total memory: 48 GB
+2026-09-23T12:19:21.473836+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:19:21.474011+0000 | compress_modules | INFO - Quantizing model.layers.0.mlp.up_proj using 512 samples
+2026-09-23T12:19:22.608407+0000 | compress | METRIC - time 1.13s
+2026-09-23T12:19:22.609564+0000 | compress | METRIC - error 690.50
+2026-09-23T12:19:22.610148+0000 | compress | METRIC - GPU 0 | usage: 10.23% | total memory: 48 GB
+2026-09-23T12:19:22.610543+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:19:22.610994+0000 | compress_modules | INFO - Quantizing model.layers.0.mlp.down_proj using 512 samples
+2026-09-23T12:19:25.820194+0000 | compress | METRIC - time 3.21s
+2026-09-23T12:19:25.822241+0000 | compress | METRIC - error 289.21
+2026-09-23T12:19:25.822581+0000 | compress | METRIC - GPU 0 | usage: 11.49% | total memory: 48 GB
+2026-09-23T12:19:25.822755+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:19:42.551254+0000 | compress_modules | INFO - Quantizing model.layers.1.self_attn.q_proj using 512 samples
+2026-09-23T12:19:43.608345+0000 | compress | METRIC - time 1.06s
+2026-09-23T12:19:43.609335+0000 | compress | METRIC - error 22.33
+2026-09-23T12:19:43.609824+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:19:43.610201+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:19:43.610514+0000 | compress_modules | INFO - Quantizing model.layers.1.self_attn.k_proj using 512 samples
+2026-09-23T12:19:44.570982+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:19:44.571644+0000 | compress | METRIC - error 6.51
+2026-09-23T12:19:44.572067+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:19:44.572360+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:19:44.572633+0000 | compress_modules | INFO - Quantizing model.layers.1.self_attn.v_proj using 512 samples
+2026-09-23T12:19:45.556888+0000 | compress | METRIC - time 0.98s
+2026-09-23T12:19:45.557813+0000 | compress | METRIC - error 6.84
+2026-09-23T12:19:45.558294+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:19:45.558630+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:19:45.558945+0000 | compress_modules | INFO - Quantizing model.layers.1.self_attn.o_proj using 512 samples
+2026-09-23T12:19:46.557984+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:19:46.558798+0000 | compress | METRIC - error 28.46
+2026-09-23T12:19:46.559221+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:19:46.559418+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:19:46.559636+0000 | compress_modules | INFO - Quantizing model.layers.1.mlp.gate_proj using 512 samples
+2026-09-23T12:19:47.653808+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:19:47.654295+0000 | compress | METRIC - error 25695.13
+2026-09-23T12:19:47.654786+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:19:47.655129+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:19:47.655466+0000 | compress_modules | INFO - Quantizing model.layers.1.mlp.up_proj using 512 samples
+2026-09-23T12:19:48.786904+0000 | compress | METRIC - time 1.13s
+2026-09-23T12:19:48.787981+0000 | compress | METRIC - error 8291.25
+2026-09-23T12:19:48.788729+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:19:48.788925+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:19:48.789215+0000 | compress_modules | INFO - Quantizing model.layers.1.mlp.down_proj using 512 samples
+2026-09-23T12:19:51.986695+0000 | compress | METRIC - time 3.20s
+2026-09-23T12:19:51.988602+0000 | compress | METRIC - error 221.40
+2026-09-23T12:19:51.989029+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:19:51.989313+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:20:06.968515+0000 | compress_modules | INFO - Quantizing model.layers.2.self_attn.q_proj using 512 samples
+2026-09-23T12:20:08.025309+0000 | compress | METRIC - time 1.06s
+2026-09-23T12:20:08.026451+0000 | compress | METRIC - error 52.04
+2026-09-23T12:20:08.026917+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:08.027283+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:20:08.027545+0000 | compress_modules | INFO - Quantizing model.layers.2.self_attn.k_proj using 512 samples
+2026-09-23T12:20:08.988980+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:20:08.990008+0000 | compress | METRIC - error 15.75
+2026-09-23T12:20:08.990398+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:08.990607+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:20:08.990872+0000 | compress_modules | INFO - Quantizing model.layers.2.self_attn.v_proj using 512 samples
+2026-09-23T12:20:09.954892+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:20:09.955714+0000 | compress | METRIC - error 14.78
+2026-09-23T12:20:09.956216+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:09.956617+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:20:09.956942+0000 | compress_modules | INFO - Quantizing model.layers.2.self_attn.o_proj using 512 samples
+2026-09-23T12:20:10.958514+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:20:10.959552+0000 | compress | METRIC - error 35.91
+2026-09-23T12:20:10.960062+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:10.960405+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:20:10.960733+0000 | compress_modules | INFO - Quantizing model.layers.2.mlp.gate_proj using 512 samples
+2026-09-23T12:20:12.057709+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:20:12.058598+0000 | compress | METRIC - error 44240.64
+2026-09-23T12:20:12.058931+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:12.059182+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:20:12.059373+0000 | compress_modules | INFO - Quantizing model.layers.2.mlp.up_proj using 512 samples
+2026-09-23T12:20:13.152172+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:20:13.153107+0000 | compress | METRIC - error 68552.45
+2026-09-23T12:20:13.153588+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:13.153900+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:20:13.154125+0000 | compress_modules | INFO - Quantizing model.layers.2.mlp.down_proj using 512 samples
+2026-09-23T12:20:16.351612+0000 | compress | METRIC - time 3.20s
+2026-09-23T12:20:16.353773+0000 | compress | METRIC - error 201.98
+2026-09-23T12:20:16.354239+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:20:16.354540+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:20:31.149695+0000 | compress_modules | INFO - Quantizing model.layers.3.self_attn.q_proj using 512 samples
+2026-09-23T12:20:32.169386+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:20:32.170314+0000 | compress | METRIC - error 96.65
+2026-09-23T12:20:32.170653+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:32.170870+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:20:32.171053+0000 | compress_modules | INFO - Quantizing model.layers.3.self_attn.k_proj using 512 samples
+2026-09-23T12:20:33.127444+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:20:33.128166+0000 | compress | METRIC - error 26.95
+2026-09-23T12:20:33.128499+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:33.128683+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:20:33.128875+0000 | compress_modules | INFO - Quantizing model.layers.3.self_attn.v_proj using 512 samples
+2026-09-23T12:20:34.090684+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:20:34.091398+0000 | compress | METRIC - error 27.95
+2026-09-23T12:20:34.091719+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:34.091901+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:20:34.092108+0000 | compress_modules | INFO - Quantizing model.layers.3.self_attn.o_proj using 512 samples
+2026-09-23T12:20:35.088557+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:20:35.089578+0000 | compress | METRIC - error 53.57
+2026-09-23T12:20:35.090017+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:35.090338+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:20:35.090675+0000 | compress_modules | INFO - Quantizing model.layers.3.mlp.gate_proj using 512 samples
+2026-09-23T12:20:36.179421+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:20:36.180449+0000 | compress | METRIC - error 59137.44
+2026-09-23T12:20:36.180972+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:36.181336+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:20:36.181663+0000 | compress_modules | INFO - Quantizing model.layers.3.mlp.up_proj using 512 samples
+2026-09-23T12:20:37.274225+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:20:37.275441+0000 | compress | METRIC - error 19336.45
+2026-09-23T12:20:37.275843+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:37.276073+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:20:37.276277+0000 | compress_modules | INFO - Quantizing model.layers.3.mlp.down_proj using 512 samples
+2026-09-23T12:20:40.483776+0000 | compress | METRIC - time 3.21s
+2026-09-23T12:20:40.486236+0000 | compress | METRIC - error 487.96
+2026-09-23T12:20:40.486800+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:20:40.487179+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:20:55.399682+0000 | compress_modules | INFO - Quantizing model.layers.4.self_attn.q_proj using 512 samples
+2026-09-23T12:20:56.435911+0000 | compress | METRIC - time 1.03s
+2026-09-23T12:20:56.437383+0000 | compress | METRIC - error 191.79
+2026-09-23T12:20:56.437946+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:56.438382+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:20:56.438706+0000 | compress_modules | INFO - Quantizing model.layers.4.self_attn.k_proj using 512 samples
+2026-09-23T12:20:57.439265+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:20:57.440298+0000 | compress | METRIC - error 53.13
+2026-09-23T12:20:57.440783+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:57.441140+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:20:57.441549+0000 | compress_modules | INFO - Quantizing model.layers.4.self_attn.v_proj using 512 samples
+2026-09-23T12:20:58.442701+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:20:58.443918+0000 | compress | METRIC - error 53.23
+2026-09-23T12:20:58.444322+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:58.444528+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:20:58.444736+0000 | compress_modules | INFO - Quantizing model.layers.4.self_attn.o_proj using 512 samples
+2026-09-23T12:20:59.477830+0000 | compress | METRIC - time 1.03s
+2026-09-23T12:20:59.479243+0000 | compress | METRIC - error 89.44
+2026-09-23T12:20:59.479803+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:20:59.480282+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:20:59.480650+0000 | compress_modules | INFO - Quantizing model.layers.4.mlp.gate_proj using 512 samples
+2026-09-23T12:21:00.572881+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:21:00.574278+0000 | compress | METRIC - error 70576.14
+2026-09-23T12:21:00.574831+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:00.575234+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:21:00.575533+0000 | compress_modules | INFO - Quantizing model.layers.4.mlp.up_proj using 512 samples
+2026-09-23T12:21:01.674007+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:21:01.675465+0000 | compress | METRIC - error 22408.75
+2026-09-23T12:21:01.675975+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:01.676338+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:21:01.676660+0000 | compress_modules | INFO - Quantizing model.layers.4.mlp.down_proj using 512 samples
+2026-09-23T12:21:04.878276+0000 | compress | METRIC - time 3.20s
+2026-09-23T12:21:04.880431+0000 | compress | METRIC - error 923.43
+2026-09-23T12:21:04.880915+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:21:04.881286+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:21:19.787335+0000 | compress_modules | INFO - Quantizing model.layers.5.self_attn.q_proj using 512 samples
+2026-09-23T12:21:20.808890+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:21:20.809883+0000 | compress | METRIC - error 205.80
+2026-09-23T12:21:20.810415+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:20.810772+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:21:20.811133+0000 | compress_modules | INFO - Quantizing model.layers.5.self_attn.k_proj using 512 samples
+2026-09-23T12:21:21.775306+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:21:21.776636+0000 | compress | METRIC - error 55.85
+2026-09-23T12:21:21.777287+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:21.777630+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:21:21.777866+0000 | compress_modules | INFO - Quantizing model.layers.5.self_attn.v_proj using 512 samples
+2026-09-23T12:21:22.743317+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:21:22.744307+0000 | compress | METRIC - error 57.51
+2026-09-23T12:21:22.744869+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:22.745247+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:21:22.745624+0000 | compress_modules | INFO - Quantizing model.layers.5.self_attn.o_proj using 512 samples
+2026-09-23T12:21:23.737237+0000 | compress | METRIC - time 0.99s
+2026-09-23T12:21:23.738515+0000 | compress | METRIC - error 140.37
+2026-09-23T12:21:23.738995+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:23.739370+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:21:23.739730+0000 | compress_modules | INFO - Quantizing model.layers.5.mlp.gate_proj using 512 samples
+2026-09-23T12:21:24.838727+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:21:24.840366+0000 | compress | METRIC - error 24422.00
+2026-09-23T12:21:24.840949+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:24.841223+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:21:24.841423+0000 | compress_modules | INFO - Quantizing model.layers.5.mlp.up_proj using 512 samples
+2026-09-23T12:21:25.978123+0000 | compress | METRIC - time 1.14s
+2026-09-23T12:21:25.979431+0000 | compress | METRIC - error 10001.04
+2026-09-23T12:21:25.979978+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:25.980353+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:21:25.980625+0000 | compress_modules | INFO - Quantizing model.layers.5.mlp.down_proj using 512 samples
+2026-09-23T12:21:29.260364+0000 | compress | METRIC - time 3.28s
+2026-09-23T12:21:29.263028+0000 | compress | METRIC - error 1435.14
+2026-09-23T12:21:29.263581+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:21:29.263967+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:21:44.333339+0000 | compress_modules | INFO - Quantizing model.layers.6.self_attn.q_proj using 512 samples
+2026-09-23T12:21:45.345994+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:21:45.346994+0000 | compress | METRIC - error 391.05
+2026-09-23T12:21:45.347541+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:45.347900+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:21:45.348286+0000 | compress_modules | INFO - Quantizing model.layers.6.self_attn.k_proj using 512 samples
+2026-09-23T12:21:46.356651+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:21:46.358012+0000 | compress | METRIC - error 97.55
+2026-09-23T12:21:46.358553+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:46.358916+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:21:46.359205+0000 | compress_modules | INFO - Quantizing model.layers.6.self_attn.v_proj using 512 samples
+2026-09-23T12:21:47.355963+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:21:47.357120+0000 | compress | METRIC - error 122.16
+2026-09-23T12:21:47.357631+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:47.357975+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:21:47.358332+0000 | compress_modules | INFO - Quantizing model.layers.6.self_attn.o_proj using 512 samples
+2026-09-23T12:21:48.365056+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:21:48.366468+0000 | compress | METRIC - error 375.35
+2026-09-23T12:21:48.366875+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:48.367067+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:21:48.367257+0000 | compress_modules | INFO - Quantizing model.layers.6.mlp.gate_proj using 512 samples
+2026-09-23T12:21:49.504980+0000 | compress | METRIC - time 1.14s
+2026-09-23T12:21:49.506339+0000 | compress | METRIC - error 37558.68
+2026-09-23T12:21:49.506869+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:49.507263+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:21:49.507527+0000 | compress_modules | INFO - Quantizing model.layers.6.mlp.up_proj using 512 samples
+2026-09-23T12:21:50.646509+0000 | compress | METRIC - time 1.14s
+2026-09-23T12:21:50.647771+0000 | compress | METRIC - error 11870.29
+2026-09-23T12:21:50.648320+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:21:50.648698+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:21:50.648958+0000 | compress_modules | INFO - Quantizing model.layers.6.mlp.down_proj using 512 samples
+2026-09-23T12:21:53.916800+0000 | compress | METRIC - time 3.27s
+2026-09-23T12:21:53.919421+0000 | compress | METRIC - error 823543.12
+2026-09-23T12:21:53.919973+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:21:53.920355+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:22:08.942858+0000 | compress_modules | INFO - Quantizing model.layers.7.self_attn.q_proj using 512 samples
+2026-09-23T12:22:09.996167+0000 | compress | METRIC - time 1.05s
+2026-09-23T12:22:09.997483+0000 | compress | METRIC - error 946.44
+2026-09-23T12:22:09.997879+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:09.998101+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:22:09.998304+0000 | compress_modules | INFO - Quantizing model.layers.7.self_attn.k_proj using 512 samples
+2026-09-23T12:22:10.996448+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:22:10.997618+0000 | compress | METRIC - error 258.12
+2026-09-23T12:22:10.998149+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:10.998489+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:22:10.998790+0000 | compress_modules | INFO - Quantizing model.layers.7.self_attn.v_proj using 512 samples
+2026-09-23T12:22:11.951576+0000 | compress | METRIC - time 0.95s
+2026-09-23T12:22:11.952498+0000 | compress | METRIC - error 282.16
+2026-09-23T12:22:11.953009+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:11.953368+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:22:11.953777+0000 | compress_modules | INFO - Quantizing model.layers.7.self_attn.o_proj using 512 samples
+2026-09-23T12:22:12.981710+0000 | compress | METRIC - time 1.03s
+2026-09-23T12:22:12.982898+0000 | compress | METRIC - error 355.77
+2026-09-23T12:22:12.983235+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:12.983412+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:22:12.983588+0000 | compress_modules | INFO - Quantizing model.layers.7.mlp.gate_proj using 512 samples
+2026-09-23T12:22:14.079985+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:22:14.081408+0000 | compress | METRIC - error 37716.96
+2026-09-23T12:22:14.081979+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:14.082410+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:22:14.082869+0000 | compress_modules | INFO - Quantizing model.layers.7.mlp.up_proj using 512 samples
+2026-09-23T12:22:15.188424+0000 | compress | METRIC - time 1.11s
+2026-09-23T12:22:15.189569+0000 | compress | METRIC - error 13370.46
+2026-09-23T12:22:15.190115+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:15.190478+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:22:15.190831+0000 | compress_modules | INFO - Quantizing model.layers.7.mlp.down_proj using 512 samples
+2026-09-23T12:22:18.457766+0000 | compress | METRIC - time 3.27s
+2026-09-23T12:22:18.460866+0000 | compress | METRIC - error 2040.54
+2026-09-23T12:22:18.461492+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:22:18.461752+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:22:33.654175+0000 | compress_modules | INFO - Quantizing model.layers.8.self_attn.q_proj using 512 samples
+2026-09-23T12:22:34.680117+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:22:34.681151+0000 | compress | METRIC - error 1446.82
+2026-09-23T12:22:34.681733+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:34.682122+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:22:34.682548+0000 | compress_modules | INFO - Quantizing model.layers.8.self_attn.k_proj using 512 samples
+2026-09-23T12:22:35.653581+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:22:35.654840+0000 | compress | METRIC - error 385.19
+2026-09-23T12:22:35.655302+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:35.655626+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:22:35.655931+0000 | compress_modules | INFO - Quantizing model.layers.8.self_attn.v_proj using 512 samples
+2026-09-23T12:22:36.616643+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:22:36.617942+0000 | compress | METRIC - error 420.59
+2026-09-23T12:22:36.618360+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:36.618618+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:22:36.618908+0000 | compress_modules | INFO - Quantizing model.layers.8.self_attn.o_proj using 512 samples
+2026-09-23T12:22:37.637936+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:22:37.639242+0000 | compress | METRIC - error 556.09
+2026-09-23T12:22:37.639579+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:37.639781+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:22:37.639955+0000 | compress_modules | INFO - Quantizing model.layers.8.mlp.gate_proj using 512 samples
+2026-09-23T12:22:38.734219+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:22:38.735684+0000 | compress | METRIC - error 14729.71
+2026-09-23T12:22:38.736246+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:38.736662+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:22:38.737101+0000 | compress_modules | INFO - Quantizing model.layers.8.mlp.up_proj using 512 samples
+2026-09-23T12:22:39.867329+0000 | compress | METRIC - time 1.13s
+2026-09-23T12:22:39.868639+0000 | compress | METRIC - error 12719.29
+2026-09-23T12:22:39.869168+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:39.869547+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:22:39.869821+0000 | compress_modules | INFO - Quantizing model.layers.8.mlp.down_proj using 512 samples
+2026-09-23T12:22:43.088822+0000 | compress | METRIC - time 3.22s
+2026-09-23T12:22:43.091831+0000 | compress | METRIC - error 3514.27
+2026-09-23T12:22:43.092379+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:22:43.092799+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:22:58.128292+0000 | compress_modules | INFO - Quantizing model.layers.9.self_attn.q_proj using 512 samples
+2026-09-23T12:22:59.145229+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:22:59.146650+0000 | compress | METRIC - error 1887.91
+2026-09-23T12:22:59.147204+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:22:59.147586+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:22:59.147850+0000 | compress_modules | INFO - Quantizing model.layers.9.self_attn.k_proj using 512 samples
+2026-09-23T12:23:00.143976+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:23:00.145122+0000 | compress | METRIC - error 538.78
+2026-09-23T12:23:00.145633+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:00.145855+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:23:00.146071+0000 | compress_modules | INFO - Quantizing model.layers.9.self_attn.v_proj using 512 samples
+2026-09-23T12:23:01.112355+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:23:01.113661+0000 | compress | METRIC - error 548.47
+2026-09-23T12:23:01.114050+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:01.114237+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:23:01.114406+0000 | compress_modules | INFO - Quantizing model.layers.9.self_attn.o_proj using 512 samples
+2026-09-23T12:23:02.135880+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:23:02.137268+0000 | compress | METRIC - error 674.62
+2026-09-23T12:23:02.137857+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:02.138275+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:23:02.138597+0000 | compress_modules | INFO - Quantizing model.layers.9.mlp.gate_proj using 512 samples
+2026-09-23T12:23:03.253530+0000 | compress | METRIC - time 1.11s
+2026-09-23T12:23:03.254851+0000 | compress | METRIC - error 22254.92
+2026-09-23T12:23:03.255392+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:03.255737+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:23:03.255975+0000 | compress_modules | INFO - Quantizing model.layers.9.mlp.up_proj using 512 samples
+2026-09-23T12:23:04.378898+0000 | compress | METRIC - time 1.12s
+2026-09-23T12:23:04.380163+0000 | compress | METRIC - error 16166.37
+2026-09-23T12:23:04.380659+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:04.381006+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:23:04.381333+0000 | compress_modules | INFO - Quantizing model.layers.9.mlp.down_proj using 512 samples
+2026-09-23T12:23:07.654192+0000 | compress | METRIC - time 3.27s
+2026-09-23T12:23:07.656578+0000 | compress | METRIC - error 3952.02
+2026-09-23T12:23:07.657109+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:23:07.657445+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:23:22.638942+0000 | compress_modules | INFO - Quantizing model.layers.10.self_attn.q_proj using 512 samples
+2026-09-23T12:23:23.653672+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:23:23.654751+0000 | compress | METRIC - error 3498.16
+2026-09-23T12:23:23.655268+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:23.655608+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:23:23.655999+0000 | compress_modules | INFO - Quantizing model.layers.10.self_attn.k_proj using 512 samples
+2026-09-23T12:23:24.637716+0000 | compress | METRIC - time 0.98s
+2026-09-23T12:23:24.639125+0000 | compress | METRIC - error 932.32
+2026-09-23T12:23:24.639734+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:24.640134+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:23:24.640523+0000 | compress_modules | INFO - Quantizing model.layers.10.self_attn.v_proj using 512 samples
+2026-09-23T12:23:25.601463+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:23:25.602360+0000 | compress | METRIC - error 993.72
+2026-09-23T12:23:25.602750+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:25.602983+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:23:25.603189+0000 | compress_modules | INFO - Quantizing model.layers.10.self_attn.o_proj using 512 samples
+2026-09-23T12:23:26.630745+0000 | compress | METRIC - time 1.03s
+2026-09-23T12:23:26.632061+0000 | compress | METRIC - error 1032.36
+2026-09-23T12:23:26.632473+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:26.632720+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:23:26.632970+0000 | compress_modules | INFO - Quantizing model.layers.10.mlp.gate_proj using 512 samples
+2026-09-23T12:23:27.765510+0000 | compress | METRIC - time 1.13s
+2026-09-23T12:23:27.766812+0000 | compress | METRIC - error 20008.12
+2026-09-23T12:23:27.767448+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:27.767791+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:23:27.768068+0000 | compress_modules | INFO - Quantizing model.layers.10.mlp.up_proj using 512 samples
+2026-09-23T12:23:28.903465+0000 | compress | METRIC - time 1.14s
+2026-09-23T12:23:28.904869+0000 | compress | METRIC - error 15408.71
+2026-09-23T12:23:28.905392+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:28.905740+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:23:28.906014+0000 | compress_modules | INFO - Quantizing model.layers.10.mlp.down_proj using 512 samples
+2026-09-23T12:23:32.197543+0000 | compress | METRIC - time 3.29s
+2026-09-23T12:23:32.200141+0000 | compress | METRIC - error 3814.81
+2026-09-23T12:23:32.200786+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:23:32.201236+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:23:47.143093+0000 | compress_modules | INFO - Quantizing model.layers.11.self_attn.q_proj using 512 samples
+2026-09-23T12:23:48.159054+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:23:48.160393+0000 | compress | METRIC - error 1724.78
+2026-09-23T12:23:48.160906+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:48.161247+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:23:48.161568+0000 | compress_modules | INFO - Quantizing model.layers.11.self_attn.k_proj using 512 samples
+2026-09-23T12:23:49.163847+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:23:49.165290+0000 | compress | METRIC - error 499.53
+2026-09-23T12:23:49.165844+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:49.166227+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:23:49.166617+0000 | compress_modules | INFO - Quantizing model.layers.11.self_attn.v_proj using 512 samples
+2026-09-23T12:23:50.129409+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:23:50.130736+0000 | compress | METRIC - error 491.85
+2026-09-23T12:23:50.131477+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:50.131756+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:23:50.131977+0000 | compress_modules | INFO - Quantizing model.layers.11.self_attn.o_proj using 512 samples
+2026-09-23T12:23:51.164625+0000 | compress | METRIC - time 1.03s
+2026-09-23T12:23:51.165927+0000 | compress | METRIC - error 869.67
+2026-09-23T12:23:51.166466+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:51.166810+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:23:51.167176+0000 | compress_modules | INFO - Quantizing model.layers.11.mlp.gate_proj using 512 samples
+2026-09-23T12:23:52.260224+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:23:52.261660+0000 | compress | METRIC - error 17936.00
+2026-09-23T12:23:52.262209+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:52.262570+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:23:52.262827+0000 | compress_modules | INFO - Quantizing model.layers.11.mlp.up_proj using 512 samples
+2026-09-23T12:23:53.395513+0000 | compress | METRIC - time 1.13s
+2026-09-23T12:23:53.396803+0000 | compress | METRIC - error 15127.73
+2026-09-23T12:23:53.397376+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:23:53.397760+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:23:53.398030+0000 | compress_modules | INFO - Quantizing model.layers.11.mlp.down_proj using 512 samples
+2026-09-23T12:23:56.684125+0000 | compress | METRIC - time 3.29s
+2026-09-23T12:23:56.687075+0000 | compress | METRIC - error 3826.54
+2026-09-23T12:23:56.687668+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:23:56.688046+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:24:11.678412+0000 | compress_modules | INFO - Quantizing model.layers.12.self_attn.q_proj using 512 samples
+2026-09-23T12:24:12.695139+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:24:12.696501+0000 | compress | METRIC - error 1876.30
+2026-09-23T12:24:12.697018+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:12.697368+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:24:12.697598+0000 | compress_modules | INFO - Quantizing model.layers.12.self_attn.k_proj using 512 samples
+2026-09-23T12:24:13.652983+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:24:13.654305+0000 | compress | METRIC - error 523.10
+2026-09-23T12:24:13.654679+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:13.654924+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:24:13.655205+0000 | compress_modules | INFO - Quantizing model.layers.12.self_attn.v_proj using 512 samples
+2026-09-23T12:24:14.650661+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:24:14.651780+0000 | compress | METRIC - error 562.69
+2026-09-23T12:24:14.652277+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:14.652617+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:24:14.652932+0000 | compress_modules | INFO - Quantizing model.layers.12.self_attn.o_proj using 512 samples
+2026-09-23T12:24:15.693546+0000 | compress | METRIC - time 1.04s
+2026-09-23T12:24:15.694866+0000 | compress | METRIC - error 939.92
+2026-09-23T12:24:15.695394+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:15.695773+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:24:15.696024+0000 | compress_modules | INFO - Quantizing model.layers.12.mlp.gate_proj using 512 samples
+2026-09-23T12:24:16.809885+0000 | compress | METRIC - time 1.11s
+2026-09-23T12:24:16.811074+0000 | compress | METRIC - error 17180.17
+2026-09-23T12:24:16.811660+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:16.812060+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:24:16.812436+0000 | compress_modules | INFO - Quantizing model.layers.12.mlp.up_proj using 512 samples
+2026-09-23T12:24:17.943507+0000 | compress | METRIC - time 1.13s
+2026-09-23T12:24:17.944855+0000 | compress | METRIC - error 15585.35
+2026-09-23T12:24:17.945501+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:17.945948+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:24:17.946355+0000 | compress_modules | INFO - Quantizing model.layers.12.mlp.down_proj using 512 samples
+2026-09-23T12:24:21.217493+0000 | compress | METRIC - time 3.27s
+2026-09-23T12:24:21.220613+0000 | compress | METRIC - error 3901.13
+2026-09-23T12:24:21.221187+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:24:21.221582+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:24:36.223193+0000 | compress_modules | INFO - Quantizing model.layers.13.self_attn.q_proj using 512 samples
+2026-09-23T12:24:37.253569+0000 | compress | METRIC - time 1.03s
+2026-09-23T12:24:37.254961+0000 | compress | METRIC - error 1544.53
+2026-09-23T12:24:37.255509+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:37.255873+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:24:37.256158+0000 | compress_modules | INFO - Quantizing model.layers.13.self_attn.k_proj using 512 samples
+2026-09-23T12:24:38.244001+0000 | compress | METRIC - time 0.99s
+2026-09-23T12:24:38.245272+0000 | compress | METRIC - error 414.67
+2026-09-23T12:24:38.245634+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:38.245853+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:24:38.246112+0000 | compress_modules | INFO - Quantizing model.layers.13.self_attn.v_proj using 512 samples
+2026-09-23T12:24:39.223901+0000 | compress | METRIC - time 0.98s
+2026-09-23T12:24:39.224924+0000 | compress | METRIC - error 440.15
+2026-09-23T12:24:39.225378+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:39.225696+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:24:39.226006+0000 | compress_modules | INFO - Quantizing model.layers.13.self_attn.o_proj using 512 samples
+2026-09-23T12:24:40.226923+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:24:40.227914+0000 | compress | METRIC - error 735.61
+2026-09-23T12:24:40.228467+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:40.228803+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:24:40.229153+0000 | compress_modules | INFO - Quantizing model.layers.13.mlp.gate_proj using 512 samples
+2026-09-23T12:24:41.311844+0000 | compress | METRIC - time 1.08s
+2026-09-23T12:24:41.313343+0000 | compress | METRIC - error 16532.04
+2026-09-23T12:24:41.313834+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:41.314140+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:24:41.314373+0000 | compress_modules | INFO - Quantizing model.layers.13.mlp.up_proj using 512 samples
+2026-09-23T12:24:42.439252+0000 | compress | METRIC - time 1.12s
+2026-09-23T12:24:42.440622+0000 | compress | METRIC - error 16128.74
+2026-09-23T12:24:42.441133+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:24:42.441484+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:24:42.441777+0000 | compress_modules | INFO - Quantizing model.layers.13.mlp.down_proj using 512 samples
+2026-09-23T12:24:45.683481+0000 | compress | METRIC - time 3.24s
+2026-09-23T12:24:45.686190+0000 | compress | METRIC - error 4263.88
+2026-09-23T12:24:45.686720+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:24:45.687065+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:25:00.618761+0000 | compress_modules | INFO - Quantizing model.layers.14.self_attn.q_proj using 512 samples
+2026-09-23T12:25:01.637099+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:25:01.638515+0000 | compress | METRIC - error 2549.03
+2026-09-23T12:25:01.639060+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:01.639446+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:25:01.639752+0000 | compress_modules | INFO - Quantizing model.layers.14.self_attn.k_proj using 512 samples
+2026-09-23T12:25:02.640088+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:25:02.641343+0000 | compress | METRIC - error 680.37
+2026-09-23T12:25:02.641864+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:02.642225+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:25:02.642568+0000 | compress_modules | INFO - Quantizing model.layers.14.self_attn.v_proj using 512 samples
+2026-09-23T12:25:03.612922+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:25:03.613995+0000 | compress | METRIC - error 716.00
+2026-09-23T12:25:03.614476+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:03.614783+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:25:03.615061+0000 | compress_modules | INFO - Quantizing model.layers.14.self_attn.o_proj using 512 samples
+2026-09-23T12:25:04.650763+0000 | compress | METRIC - time 1.04s
+2026-09-23T12:25:04.652066+0000 | compress | METRIC - error 1470.10
+2026-09-23T12:25:04.652557+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:04.652898+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:25:04.653208+0000 | compress_modules | INFO - Quantizing model.layers.14.mlp.gate_proj using 512 samples
+2026-09-23T12:25:05.783178+0000 | compress | METRIC - time 1.13s
+2026-09-23T12:25:05.784560+0000 | compress | METRIC - error 16362.03
+2026-09-23T12:25:05.785065+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:05.785440+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:25:05.785796+0000 | compress_modules | INFO - Quantizing model.layers.14.mlp.up_proj using 512 samples
+2026-09-23T12:25:06.888056+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:25:06.889155+0000 | compress | METRIC - error 16168.95
+2026-09-23T12:25:06.889661+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:06.889978+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:25:06.890338+0000 | compress_modules | INFO - Quantizing model.layers.14.mlp.down_proj using 512 samples
+2026-09-23T12:25:10.116784+0000 | compress | METRIC - time 3.23s
+2026-09-23T12:25:10.119657+0000 | compress | METRIC - error 3994.38
+2026-09-23T12:25:10.120200+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:25:10.120578+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:25:25.060470+0000 | compress_modules | INFO - Quantizing model.layers.15.self_attn.q_proj using 512 samples
+2026-09-23T12:25:26.115387+0000 | compress | METRIC - time 1.05s
+2026-09-23T12:25:26.116663+0000 | compress | METRIC - error 2627.15
+2026-09-23T12:25:26.117227+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:26.117650+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:25:26.117905+0000 | compress_modules | INFO - Quantizing model.layers.15.self_attn.k_proj using 512 samples
+2026-09-23T12:25:27.110456+0000 | compress | METRIC - time 0.99s
+2026-09-23T12:25:27.111676+0000 | compress | METRIC - error 717.80
+2026-09-23T12:25:27.112021+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:27.112220+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:25:27.112399+0000 | compress_modules | INFO - Quantizing model.layers.15.self_attn.v_proj using 512 samples
+2026-09-23T12:25:28.083916+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:25:28.084971+0000 | compress | METRIC - error 720.06
+2026-09-23T12:25:28.085506+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:28.085868+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:25:28.086281+0000 | compress_modules | INFO - Quantizing model.layers.15.self_attn.o_proj using 512 samples
+2026-09-23T12:25:29.088544+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:25:29.089979+0000 | compress | METRIC - error 1189.54
+2026-09-23T12:25:29.090529+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:29.090861+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:25:29.091284+0000 | compress_modules | INFO - Quantizing model.layers.15.mlp.gate_proj using 512 samples
+2026-09-23T12:25:30.227882+0000 | compress | METRIC - time 1.14s
+2026-09-23T12:25:30.229285+0000 | compress | METRIC - error 15363.91
+2026-09-23T12:25:30.229821+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:30.230196+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:25:30.230524+0000 | compress_modules | INFO - Quantizing model.layers.15.mlp.up_proj using 512 samples
+2026-09-23T12:25:31.320661+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:25:31.322306+0000 | compress | METRIC - error 15798.82
+2026-09-23T12:25:31.322865+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:31.323171+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:25:31.323363+0000 | compress_modules | INFO - Quantizing model.layers.15.mlp.down_proj using 512 samples
+2026-09-23T12:25:34.598614+0000 | compress | METRIC - time 3.28s
+2026-09-23T12:25:34.601361+0000 | compress | METRIC - error 3947.74
+2026-09-23T12:25:34.601911+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:25:34.602291+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:25:49.681454+0000 | compress_modules | INFO - Quantizing model.layers.16.self_attn.q_proj using 512 samples
+2026-09-23T12:25:50.692959+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:25:50.693964+0000 | compress | METRIC - error 4549.82
+2026-09-23T12:25:50.694386+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:50.694585+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:25:50.694793+0000 | compress_modules | INFO - Quantizing model.layers.16.self_attn.k_proj using 512 samples
+2026-09-23T12:25:51.688301+0000 | compress | METRIC - time 0.99s
+2026-09-23T12:25:51.689486+0000 | compress | METRIC - error 1171.13
+2026-09-23T12:25:51.689992+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:51.690331+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:25:51.690647+0000 | compress_modules | INFO - Quantizing model.layers.16.self_attn.v_proj using 512 samples
+2026-09-23T12:25:52.647208+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:25:52.648433+0000 | compress | METRIC - error 1318.77
+2026-09-23T12:25:52.648905+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:52.649217+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:25:52.649556+0000 | compress_modules | INFO - Quantizing model.layers.16.self_attn.o_proj using 512 samples
+2026-09-23T12:25:53.680362+0000 | compress | METRIC - time 1.03s
+2026-09-23T12:25:53.681494+0000 | compress | METRIC - error 1497.23
+2026-09-23T12:25:53.682005+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:53.682288+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:25:53.682542+0000 | compress_modules | INFO - Quantizing model.layers.16.mlp.gate_proj using 512 samples
+2026-09-23T12:25:54.813887+0000 | compress | METRIC - time 1.13s
+2026-09-23T12:25:54.815340+0000 | compress | METRIC - error 16698.75
+2026-09-23T12:25:54.815892+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:54.816286+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:25:54.816690+0000 | compress_modules | INFO - Quantizing model.layers.16.mlp.up_proj using 512 samples
+2026-09-23T12:25:55.941772+0000 | compress | METRIC - time 1.12s
+2026-09-23T12:25:55.943109+0000 | compress | METRIC - error 16549.07
+2026-09-23T12:25:55.943469+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:25:55.943703+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:25:55.943917+0000 | compress_modules | INFO - Quantizing model.layers.16.mlp.down_proj using 512 samples
+2026-09-23T12:25:59.244701+0000 | compress | METRIC - time 3.30s
+2026-09-23T12:25:59.247584+0000 | compress | METRIC - error 183211.38
+2026-09-23T12:25:59.248123+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:25:59.248478+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:26:14.280666+0000 | compress_modules | INFO - Quantizing model.layers.17.self_attn.q_proj using 512 samples
+2026-09-23T12:26:15.296518+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:26:15.297584+0000 | compress | METRIC - error 4048.50
+2026-09-23T12:26:15.298123+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:15.298527+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:26:15.298926+0000 | compress_modules | INFO - Quantizing model.layers.17.self_attn.k_proj using 512 samples
+2026-09-23T12:26:16.268453+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:26:16.269454+0000 | compress | METRIC - error 1027.56
+2026-09-23T12:26:16.269925+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:16.270237+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:26:16.270542+0000 | compress_modules | INFO - Quantizing model.layers.17.self_attn.v_proj using 512 samples
+2026-09-23T12:26:17.265831+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:26:17.267105+0000 | compress | METRIC - error 1134.09
+2026-09-23T12:26:17.267432+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:17.267645+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:26:17.267827+0000 | compress_modules | INFO - Quantizing model.layers.17.self_attn.o_proj using 512 samples
+2026-09-23T12:26:18.292068+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:26:18.293309+0000 | compress | METRIC - error 1541.96
+2026-09-23T12:26:18.293631+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:18.293806+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:26:18.293981+0000 | compress_modules | INFO - Quantizing model.layers.17.mlp.gate_proj using 512 samples
+2026-09-23T12:26:19.423239+0000 | compress | METRIC - time 1.13s
+2026-09-23T12:26:19.424649+0000 | compress | METRIC - error 15383.08
+2026-09-23T12:26:19.425213+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:19.425598+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:26:19.425975+0000 | compress_modules | INFO - Quantizing model.layers.17.mlp.up_proj using 512 samples
+2026-09-23T12:26:20.539476+0000 | compress | METRIC - time 1.11s
+2026-09-23T12:26:20.540829+0000 | compress | METRIC - error 15691.05
+2026-09-23T12:26:20.541192+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:20.541390+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:26:20.541566+0000 | compress_modules | INFO - Quantizing model.layers.17.mlp.down_proj using 512 samples
+2026-09-23T12:26:23.858519+0000 | compress | METRIC - time 3.32s
+2026-09-23T12:26:23.861331+0000 | compress | METRIC - error 4370.57
+2026-09-23T12:26:23.861889+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:26:23.862260+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:26:39.082958+0000 | compress_modules | INFO - Quantizing model.layers.18.self_attn.q_proj using 512 samples
+2026-09-23T12:26:40.087141+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:26:40.088609+0000 | compress | METRIC - error 4504.48
+2026-09-23T12:26:40.089162+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:40.089589+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:26:40.089984+0000 | compress_modules | INFO - Quantizing model.layers.18.self_attn.k_proj using 512 samples
+2026-09-23T12:26:41.049971+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:26:41.050980+0000 | compress | METRIC - error 1223.87
+2026-09-23T12:26:41.051338+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:41.051523+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:26:41.051700+0000 | compress_modules | INFO - Quantizing model.layers.18.self_attn.v_proj using 512 samples
+2026-09-23T12:26:42.002628+0000 | compress | METRIC - time 0.95s
+2026-09-23T12:26:42.003965+0000 | compress | METRIC - error 1327.32
+2026-09-23T12:26:42.004317+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:42.004498+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:26:42.004699+0000 | compress_modules | INFO - Quantizing model.layers.18.self_attn.o_proj using 512 samples
+2026-09-23T12:26:42.998499+0000 | compress | METRIC - time 0.99s
+2026-09-23T12:26:42.999453+0000 | compress | METRIC - error 1926.31
+2026-09-23T12:26:42.999957+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:43.000322+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:26:43.000740+0000 | compress_modules | INFO - Quantizing model.layers.18.mlp.gate_proj using 512 samples
+2026-09-23T12:26:44.125487+0000 | compress | METRIC - time 1.12s
+2026-09-23T12:26:44.126745+0000 | compress | METRIC - error 17243.07
+2026-09-23T12:26:44.127305+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:44.127722+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:26:44.128011+0000 | compress_modules | INFO - Quantizing model.layers.18.mlp.up_proj using 512 samples
+2026-09-23T12:26:45.218066+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:26:45.219531+0000 | compress | METRIC - error 17598.47
+2026-09-23T12:26:45.220066+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:26:45.220429+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:26:45.220707+0000 | compress_modules | INFO - Quantizing model.layers.18.mlp.down_proj using 512 samples
+2026-09-23T12:26:48.429908+0000 | compress | METRIC - time 3.21s
+2026-09-23T12:26:48.432225+0000 | compress | METRIC - error 5572.44
+2026-09-23T12:26:48.432752+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:26:48.433121+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:27:03.477378+0000 | compress_modules | INFO - Quantizing model.layers.19.self_attn.q_proj using 512 samples
+2026-09-23T12:27:04.489180+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:27:04.490106+0000 | compress | METRIC - error 9479.20
+2026-09-23T12:27:04.490691+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:04.491054+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:27:04.491463+0000 | compress_modules | INFO - Quantizing model.layers.19.self_attn.k_proj using 512 samples
+2026-09-23T12:27:05.454727+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:27:05.455538+0000 | compress | METRIC - error 2513.65
+2026-09-23T12:27:05.455912+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:05.456241+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:27:05.456512+0000 | compress_modules | INFO - Quantizing model.layers.19.self_attn.v_proj using 512 samples
+2026-09-23T12:27:06.451292+0000 | compress | METRIC - time 0.99s
+2026-09-23T12:27:06.452606+0000 | compress | METRIC - error 2623.26
+2026-09-23T12:27:06.453128+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:06.453483+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:27:06.453825+0000 | compress_modules | INFO - Quantizing model.layers.19.self_attn.o_proj using 512 samples
+2026-09-23T12:27:07.493748+0000 | compress | METRIC - time 1.04s
+2026-09-23T12:27:07.494953+0000 | compress | METRIC - error 2515.42
+2026-09-23T12:27:07.495475+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:07.495814+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:27:07.496144+0000 | compress_modules | INFO - Quantizing model.layers.19.mlp.gate_proj using 512 samples
+2026-09-23T12:27:08.582074+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:27:08.583377+0000 | compress | METRIC - error 19404.76
+2026-09-23T12:27:08.584213+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:08.584470+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:27:08.584867+0000 | compress_modules | INFO - Quantizing model.layers.19.mlp.up_proj using 512 samples
+2026-09-23T12:27:09.717155+0000 | compress | METRIC - time 1.13s
+2026-09-23T12:27:09.718617+0000 | compress | METRIC - error 20044.49
+2026-09-23T12:27:09.719173+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:09.719564+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:27:09.719965+0000 | compress_modules | INFO - Quantizing model.layers.19.mlp.down_proj using 512 samples
+2026-09-23T12:27:12.964045+0000 | compress | METRIC - time 3.24s
+2026-09-23T12:27:12.967388+0000 | compress | METRIC - error 7522.26
+2026-09-23T12:27:12.967904+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:27:12.968324+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:27:28.009883+0000 | compress_modules | INFO - Quantizing model.layers.20.self_attn.q_proj using 512 samples
+2026-09-23T12:27:29.056057+0000 | compress | METRIC - time 1.04s
+2026-09-23T12:27:29.057229+0000 | compress | METRIC - error 8675.90
+2026-09-23T12:27:29.057587+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:29.057803+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:27:29.057993+0000 | compress_modules | INFO - Quantizing model.layers.20.self_attn.k_proj using 512 samples
+2026-09-23T12:27:30.046277+0000 | compress | METRIC - time 0.99s
+2026-09-23T12:27:30.047510+0000 | compress | METRIC - error 2029.79
+2026-09-23T12:27:30.047991+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:30.048317+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:27:30.048651+0000 | compress_modules | INFO - Quantizing model.layers.20.self_attn.v_proj using 512 samples
+2026-09-23T12:27:31.035667+0000 | compress | METRIC - time 0.99s
+2026-09-23T12:27:31.036802+0000 | compress | METRIC - error 2499.93
+2026-09-23T12:27:31.037137+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:31.037302+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:27:31.037488+0000 | compress_modules | INFO - Quantizing model.layers.20.self_attn.o_proj using 512 samples
+2026-09-23T12:27:32.050758+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:27:32.051920+0000 | compress | METRIC - error 2668.69
+2026-09-23T12:27:32.052481+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:32.052839+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:27:32.053198+0000 | compress_modules | INFO - Quantizing model.layers.20.mlp.gate_proj using 512 samples
+2026-09-23T12:27:33.177106+0000 | compress | METRIC - time 1.12s
+2026-09-23T12:27:33.178376+0000 | compress | METRIC - error 20900.27
+2026-09-23T12:27:33.178822+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:33.179034+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:27:33.179293+0000 | compress_modules | INFO - Quantizing model.layers.20.mlp.up_proj using 512 samples
+2026-09-23T12:27:34.269891+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:27:34.271437+0000 | compress | METRIC - error 21814.43
+2026-09-23T12:27:34.271998+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:34.272438+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:27:34.272827+0000 | compress_modules | INFO - Quantizing model.layers.20.mlp.down_proj using 512 samples
+2026-09-23T12:27:37.592922+0000 | compress | METRIC - time 3.32s
+2026-09-23T12:27:37.595837+0000 | compress | METRIC - error 8639.13
+2026-09-23T12:27:37.596390+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:27:37.596767+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:27:52.662567+0000 | compress_modules | INFO - Quantizing model.layers.21.self_attn.q_proj using 512 samples
+2026-09-23T12:27:53.698591+0000 | compress | METRIC - time 1.03s
+2026-09-23T12:27:53.699959+0000 | compress | METRIC - error 11940.41
+2026-09-23T12:27:53.700805+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:53.701023+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:27:53.701342+0000 | compress_modules | INFO - Quantizing model.layers.21.self_attn.k_proj using 512 samples
+2026-09-23T12:27:54.667177+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:27:54.668807+0000 | compress | METRIC - error 2906.39
+2026-09-23T12:27:54.669339+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:54.669680+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:27:54.670127+0000 | compress_modules | INFO - Quantizing model.layers.21.self_attn.v_proj using 512 samples
+2026-09-23T12:27:55.630490+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:27:55.631883+0000 | compress | METRIC - error 3682.23
+2026-09-23T12:27:55.632336+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:55.632652+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:27:55.633004+0000 | compress_modules | INFO - Quantizing model.layers.21.self_attn.o_proj using 512 samples
+2026-09-23T12:27:56.661359+0000 | compress | METRIC - time 1.03s
+2026-09-23T12:27:56.662579+0000 | compress | METRIC - error 3346.35
+2026-09-23T12:27:56.663043+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:56.663402+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:27:56.663769+0000 | compress_modules | INFO - Quantizing model.layers.21.mlp.gate_proj using 512 samples
+2026-09-23T12:27:57.776357+0000 | compress | METRIC - time 1.11s
+2026-09-23T12:27:57.777623+0000 | compress | METRIC - error 25880.86
+2026-09-23T12:27:57.778148+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:57.778495+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:27:57.778846+0000 | compress_modules | INFO - Quantizing model.layers.21.mlp.up_proj using 512 samples
+2026-09-23T12:27:58.871889+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:27:58.873296+0000 | compress | METRIC - error 26660.50
+2026-09-23T12:27:58.874065+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:27:58.874362+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:27:58.874688+0000 | compress_modules | INFO - Quantizing model.layers.21.mlp.down_proj using 512 samples
+2026-09-23T12:28:02.135993+0000 | compress | METRIC - time 3.26s
+2026-09-23T12:28:02.139028+0000 | compress | METRIC - error 12070.94
+2026-09-23T12:28:02.139580+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:28:02.139976+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:28:17.193067+0000 | compress_modules | INFO - Quantizing model.layers.22.self_attn.q_proj using 512 samples
+2026-09-23T12:28:18.241127+0000 | compress | METRIC - time 1.05s
+2026-09-23T12:28:18.242399+0000 | compress | METRIC - error 25278.99
+2026-09-23T12:28:18.242913+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:18.243269+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:28:18.243603+0000 | compress_modules | INFO - Quantizing model.layers.22.self_attn.k_proj using 512 samples
+2026-09-23T12:28:19.210068+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:28:19.211478+0000 | compress | METRIC - error 6119.33
+2026-09-23T12:28:19.211992+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:19.212383+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:28:19.212799+0000 | compress_modules | INFO - Quantizing model.layers.22.self_attn.v_proj using 512 samples
+2026-09-23T12:28:20.179523+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:28:20.180569+0000 | compress | METRIC - error 7783.80
+2026-09-23T12:28:20.181086+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:20.181434+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:28:20.181824+0000 | compress_modules | INFO - Quantizing model.layers.22.self_attn.o_proj using 512 samples
+2026-09-23T12:28:21.215982+0000 | compress | METRIC - time 1.03s
+2026-09-23T12:28:21.217351+0000 | compress | METRIC - error 6065.55
+2026-09-23T12:28:21.217869+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:21.218252+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:28:21.218517+0000 | compress_modules | INFO - Quantizing model.layers.22.mlp.gate_proj using 512 samples
+2026-09-23T12:28:22.321348+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:28:22.322494+0000 | compress | METRIC - error 30620.05
+2026-09-23T12:28:22.323074+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:22.323491+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:28:22.323791+0000 | compress_modules | INFO - Quantizing model.layers.22.mlp.up_proj using 512 samples
+2026-09-23T12:28:23.425225+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:28:23.426822+0000 | compress | METRIC - error 31062.77
+2026-09-23T12:28:23.427349+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:23.427719+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:28:23.428142+0000 | compress_modules | INFO - Quantizing model.layers.22.mlp.down_proj using 512 samples
+2026-09-23T12:28:26.657734+0000 | compress | METRIC - time 3.23s
+2026-09-23T12:28:26.660317+0000 | compress | METRIC - error 20755.62
+2026-09-23T12:28:26.660829+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:28:26.661180+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:28:41.661442+0000 | compress_modules | INFO - Quantizing model.layers.23.self_attn.q_proj using 512 samples
+2026-09-23T12:28:42.699476+0000 | compress | METRIC - time 1.04s
+2026-09-23T12:28:42.700758+0000 | compress | METRIC - error 26980.41
+2026-09-23T12:28:42.701276+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:42.701612+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:28:42.701982+0000 | compress_modules | INFO - Quantizing model.layers.23.self_attn.k_proj using 512 samples
+2026-09-23T12:28:43.661656+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:28:43.662539+0000 | compress | METRIC - error 6233.65
+2026-09-23T12:28:43.662907+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:43.663112+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:28:43.663335+0000 | compress_modules | INFO - Quantizing model.layers.23.self_attn.v_proj using 512 samples
+2026-09-23T12:28:44.620424+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:28:44.621672+0000 | compress | METRIC - error 8746.46
+2026-09-23T12:28:44.622004+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:44.622188+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:28:44.622354+0000 | compress_modules | INFO - Quantizing model.layers.23.self_attn.o_proj using 512 samples
+2026-09-23T12:28:45.597189+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:28:45.598291+0000 | compress | METRIC - error 8642.09
+2026-09-23T12:28:45.598833+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:45.599205+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:28:45.599633+0000 | compress_modules | INFO - Quantizing model.layers.23.mlp.gate_proj using 512 samples
+2026-09-23T12:28:46.712507+0000 | compress | METRIC - time 1.11s
+2026-09-23T12:28:46.713658+0000 | compress | METRIC - error 37112.38
+2026-09-23T12:28:46.714166+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:46.714516+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:28:46.714841+0000 | compress_modules | INFO - Quantizing model.layers.23.mlp.up_proj using 512 samples
+2026-09-23T12:28:47.812224+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:28:47.813529+0000 | compress | METRIC - error 36936.54
+2026-09-23T12:28:47.814065+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:28:47.814420+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:28:47.814880+0000 | compress_modules | INFO - Quantizing model.layers.23.mlp.down_proj using 512 samples
+2026-09-23T12:28:51.117902+0000 | compress | METRIC - time 3.30s
+2026-09-23T12:28:51.120833+0000 | compress | METRIC - error 30862.59
+2026-09-23T12:28:51.121383+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:28:51.121725+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:29:06.156054+0000 | compress_modules | INFO - Quantizing model.layers.24.self_attn.q_proj using 512 samples
+2026-09-23T12:29:07.177837+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:29:07.179303+0000 | compress | METRIC - error 53572.70
+2026-09-23T12:29:07.179791+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:07.180239+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:29:07.180542+0000 | compress_modules | INFO - Quantizing model.layers.24.self_attn.k_proj using 512 samples
+2026-09-23T12:29:08.167345+0000 | compress | METRIC - time 0.99s
+2026-09-23T12:29:08.168500+0000 | compress | METRIC - error 11779.63
+2026-09-23T12:29:08.168979+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:08.169338+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:29:08.169632+0000 | compress_modules | INFO - Quantizing model.layers.24.self_attn.v_proj using 512 samples
+2026-09-23T12:29:09.161021+0000 | compress | METRIC - time 0.99s
+2026-09-23T12:29:09.162302+0000 | compress | METRIC - error 17997.26
+2026-09-23T12:29:09.162765+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:09.163076+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:29:09.163414+0000 | compress_modules | INFO - Quantizing model.layers.24.self_attn.o_proj using 512 samples
+2026-09-23T12:29:10.205025+0000 | compress | METRIC - time 1.04s
+2026-09-23T12:29:10.206217+0000 | compress | METRIC - error 9035.22
+2026-09-23T12:29:10.206744+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:10.207055+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:29:10.207355+0000 | compress_modules | INFO - Quantizing model.layers.24.mlp.gate_proj using 512 samples
+2026-09-23T12:29:11.294809+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:29:11.296022+0000 | compress | METRIC - error 42575.42
+2026-09-23T12:29:11.296594+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:11.297052+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:29:11.297382+0000 | compress_modules | INFO - Quantizing model.layers.24.mlp.up_proj using 512 samples
+2026-09-23T12:29:12.401171+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:29:12.402362+0000 | compress | METRIC - error 42565.78
+2026-09-23T12:29:12.402897+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:12.403258+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:29:12.403579+0000 | compress_modules | INFO - Quantizing model.layers.24.mlp.down_proj using 512 samples
+2026-09-23T12:29:15.672791+0000 | compress | METRIC - time 3.27s
+2026-09-23T12:29:15.675582+0000 | compress | METRIC - error 40395.59
+2026-09-23T12:29:15.676107+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:29:15.676492+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:29:30.691648+0000 | compress_modules | INFO - Quantizing model.layers.25.self_attn.q_proj using 512 samples
+2026-09-23T12:29:31.706316+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:29:31.707552+0000 | compress | METRIC - error 38674.56
+2026-09-23T12:29:31.707981+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:31.708233+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:29:31.708505+0000 | compress_modules | INFO - Quantizing model.layers.25.self_attn.k_proj using 512 samples
+2026-09-23T12:29:32.664874+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:29:32.665996+0000 | compress | METRIC - error 9380.27
+2026-09-23T12:29:32.666352+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:32.666548+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:29:32.666746+0000 | compress_modules | INFO - Quantizing model.layers.25.self_attn.v_proj using 512 samples
+2026-09-23T12:29:33.629401+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:29:33.630524+0000 | compress | METRIC - error 12833.30
+2026-09-23T12:29:33.631010+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:33.631325+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:29:33.631685+0000 | compress_modules | INFO - Quantizing model.layers.25.self_attn.o_proj using 512 samples
+2026-09-23T12:29:34.633398+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:29:34.634502+0000 | compress | METRIC - error 7563.86
+2026-09-23T12:29:34.634877+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:34.635103+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:29:34.635294+0000 | compress_modules | INFO - Quantizing model.layers.25.mlp.gate_proj using 512 samples
+2026-09-23T12:29:35.729514+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:29:35.730687+0000 | compress | METRIC - error 50778.95
+2026-09-23T12:29:35.731190+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:35.731434+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:29:35.731720+0000 | compress_modules | INFO - Quantizing model.layers.25.mlp.up_proj using 512 samples
+2026-09-23T12:29:36.832166+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:29:36.833253+0000 | compress | METRIC - error 50390.67
+2026-09-23T12:29:36.833689+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:36.833983+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:29:36.834268+0000 | compress_modules | INFO - Quantizing model.layers.25.mlp.down_proj using 512 samples
+2026-09-23T12:29:40.034512+0000 | compress | METRIC - time 3.20s
+2026-09-23T12:29:40.038774+0000 | compress | METRIC - error 51116.30
+2026-09-23T12:29:40.039344+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:29:40.039595+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:29:55.124111+0000 | compress_modules | INFO - Quantizing model.layers.26.self_attn.q_proj using 512 samples
+2026-09-23T12:29:56.148534+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:29:56.150191+0000 | compress | METRIC - error 65877.38
+2026-09-23T12:29:56.150934+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:56.151182+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:29:56.151467+0000 | compress_modules | INFO - Quantizing model.layers.26.self_attn.k_proj using 512 samples
+2026-09-23T12:29:57.125983+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:29:57.127135+0000 | compress | METRIC - error 15177.93
+2026-09-23T12:29:57.127532+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:57.127736+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:29:57.127974+0000 | compress_modules | INFO - Quantizing model.layers.26.self_attn.v_proj using 512 samples
+2026-09-23T12:29:58.082851+0000 | compress | METRIC - time 0.95s
+2026-09-23T12:29:58.084074+0000 | compress | METRIC - error 20762.49
+2026-09-23T12:29:58.084494+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:58.084717+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:29:58.084997+0000 | compress_modules | INFO - Quantizing model.layers.26.self_attn.o_proj using 512 samples
+2026-09-23T12:29:59.092780+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:29:59.093967+0000 | compress | METRIC - error 8121.22
+2026-09-23T12:29:59.094457+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:29:59.094756+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:29:59.095076+0000 | compress_modules | INFO - Quantizing model.layers.26.mlp.gate_proj using 512 samples
+2026-09-23T12:30:00.193188+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:30:00.194397+0000 | compress | METRIC - error 62482.50
+2026-09-23T12:30:00.194821+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:00.195019+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:30:00.195360+0000 | compress_modules | INFO - Quantizing model.layers.26.mlp.up_proj using 512 samples
+2026-09-23T12:30:01.288026+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:30:01.289191+0000 | compress | METRIC - error 63139.05
+2026-09-23T12:30:01.289687+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:01.289993+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:30:01.290371+0000 | compress_modules | INFO - Quantizing model.layers.26.mlp.down_proj using 512 samples
+2026-09-23T12:30:04.486998+0000 | compress | METRIC - time 3.20s
+2026-09-23T12:30:04.489808+0000 | compress | METRIC - error 63119.07
+2026-09-23T12:30:04.490327+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:30:04.490635+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:30:19.472756+0000 | compress_modules | INFO - Quantizing model.layers.27.self_attn.q_proj using 512 samples
+2026-09-23T12:30:20.486416+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:30:20.487599+0000 | compress | METRIC - error 81712.83
+2026-09-23T12:30:20.488105+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:20.488434+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:30:20.488817+0000 | compress_modules | INFO - Quantizing model.layers.27.self_attn.k_proj using 512 samples
+2026-09-23T12:30:21.456007+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:30:21.457033+0000 | compress | METRIC - error 18281.71
+2026-09-23T12:30:21.457394+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:21.457589+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:30:21.457775+0000 | compress_modules | INFO - Quantizing model.layers.27.self_attn.v_proj using 512 samples
+2026-09-23T12:30:22.417333+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:30:22.418540+0000 | compress | METRIC - error 26357.49
+2026-09-23T12:30:22.418957+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:22.419211+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:30:22.419507+0000 | compress_modules | INFO - Quantizing model.layers.27.self_attn.o_proj using 512 samples
+2026-09-23T12:30:23.420141+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:30:23.421266+0000 | compress | METRIC - error 10114.02
+2026-09-23T12:30:23.421619+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:23.421807+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:30:23.422041+0000 | compress_modules | INFO - Quantizing model.layers.27.mlp.gate_proj using 512 samples
+2026-09-23T12:30:24.535392+0000 | compress | METRIC - time 1.11s
+2026-09-23T12:30:24.536636+0000 | compress | METRIC - error 72458.34
+2026-09-23T12:30:24.537029+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:24.537233+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:30:24.537516+0000 | compress_modules | INFO - Quantizing model.layers.27.mlp.up_proj using 512 samples
+2026-09-23T12:30:25.647818+0000 | compress | METRIC - time 1.11s
+2026-09-23T12:30:25.648926+0000 | compress | METRIC - error 74462.21
+2026-09-23T12:30:25.649333+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:25.649506+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:30:25.649681+0000 | compress_modules | INFO - Quantizing model.layers.27.mlp.down_proj using 512 samples
+2026-09-23T12:30:28.882832+0000 | compress | METRIC - time 3.23s
+2026-09-23T12:30:28.885692+0000 | compress | METRIC - error 89808.92
+2026-09-23T12:30:28.886252+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:30:28.886531+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:30:44.025897+0000 | compress_modules | INFO - Quantizing model.layers.28.self_attn.q_proj using 512 samples
+2026-09-23T12:30:45.040069+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:30:45.041293+0000 | compress | METRIC - error 92440.77
+2026-09-23T12:30:45.041758+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:45.042110+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:30:45.042534+0000 | compress_modules | INFO - Quantizing model.layers.28.self_attn.k_proj using 512 samples
+2026-09-23T12:30:46.010057+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:30:46.011312+0000 | compress | METRIC - error 22484.19
+2026-09-23T12:30:46.011794+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:46.012105+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:30:46.012469+0000 | compress_modules | INFO - Quantizing model.layers.28.self_attn.v_proj using 512 samples
+2026-09-23T12:30:46.985514+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:30:46.986645+0000 | compress | METRIC - error 28616.98
+2026-09-23T12:30:46.987123+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:46.987431+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:30:46.987794+0000 | compress_modules | INFO - Quantizing model.layers.28.self_attn.o_proj using 512 samples
+2026-09-23T12:30:47.983872+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:30:47.984952+0000 | compress | METRIC - error 15817.81
+2026-09-23T12:30:47.985435+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:47.985652+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:30:47.985867+0000 | compress_modules | INFO - Quantizing model.layers.28.mlp.gate_proj using 512 samples
+2026-09-23T12:30:49.078343+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:30:49.079602+0000 | compress | METRIC - error 84493.84
+2026-09-23T12:30:49.080134+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:49.080420+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:30:49.080612+0000 | compress_modules | INFO - Quantizing model.layers.28.mlp.up_proj using 512 samples
+2026-09-23T12:30:50.185757+0000 | compress | METRIC - time 1.11s
+2026-09-23T12:30:50.186928+0000 | compress | METRIC - error 88680.03
+2026-09-23T12:30:50.187353+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:30:50.187588+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:30:50.187858+0000 | compress_modules | INFO - Quantizing model.layers.28.mlp.down_proj using 512 samples
+2026-09-23T12:30:53.423305+0000 | compress | METRIC - time 3.24s
+2026-09-23T12:30:53.426068+0000 | compress | METRIC - error 132303.03
+2026-09-23T12:30:53.426570+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:30:53.426908+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:31:08.397613+0000 | compress_modules | INFO - Quantizing model.layers.29.self_attn.q_proj using 512 samples
+2026-09-23T12:31:09.442724+0000 | compress | METRIC - time 1.04s
+2026-09-23T12:31:09.443874+0000 | compress | METRIC - error 215357.69
+2026-09-23T12:31:09.444294+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:09.444503+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:31:09.444762+0000 | compress_modules | INFO - Quantizing model.layers.29.self_attn.k_proj using 512 samples
+2026-09-23T12:31:10.409191+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:31:10.410254+0000 | compress | METRIC - error 49168.29
+2026-09-23T12:31:10.410729+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:10.411031+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:31:10.411352+0000 | compress_modules | INFO - Quantizing model.layers.29.self_attn.v_proj using 512 samples
+2026-09-23T12:31:11.368406+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:31:11.369576+0000 | compress | METRIC - error 71789.33
+2026-09-23T12:31:11.370042+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:11.370351+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:31:11.370728+0000 | compress_modules | INFO - Quantizing model.layers.29.self_attn.o_proj using 512 samples
+2026-09-23T12:31:12.388615+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:31:12.389859+0000 | compress | METRIC - error 16787.38
+2026-09-23T12:31:12.390322+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:12.390544+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:31:12.390801+0000 | compress_modules | INFO - Quantizing model.layers.29.mlp.gate_proj using 512 samples
+2026-09-23T12:31:13.499810+0000 | compress | METRIC - time 1.11s
+2026-09-23T12:31:13.501040+0000 | compress | METRIC - error 97072.30
+2026-09-23T12:31:13.501544+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:13.501892+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:31:13.502295+0000 | compress_modules | INFO - Quantizing model.layers.29.mlp.up_proj using 512 samples
+2026-09-23T12:31:14.643157+0000 | compress | METRIC - time 1.14s
+2026-09-23T12:31:14.644296+0000 | compress | METRIC - error 106293.52
+2026-09-23T12:31:14.644789+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:14.645055+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:31:14.645374+0000 | compress_modules | INFO - Quantizing model.layers.29.mlp.down_proj using 512 samples
+2026-09-23T12:31:17.871695+0000 | compress | METRIC - time 3.23s
+2026-09-23T12:31:17.874964+0000 | compress | METRIC - error 149572.66
+2026-09-23T12:31:17.875461+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:31:17.875781+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:31:32.850334+0000 | compress_modules | INFO - Quantizing model.layers.30.self_attn.q_proj using 512 samples
+2026-09-23T12:31:33.865737+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:31:33.866989+0000 | compress | METRIC - error 235734.75
+2026-09-23T12:31:33.867448+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:33.867647+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:31:33.867910+0000 | compress_modules | INFO - Quantizing model.layers.30.self_attn.k_proj using 512 samples
+2026-09-23T12:31:34.828674+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:31:34.829889+0000 | compress | METRIC - error 61364.43
+2026-09-23T12:31:34.830305+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:34.830558+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:31:34.830826+0000 | compress_modules | INFO - Quantizing model.layers.30.self_attn.v_proj using 512 samples
+2026-09-23T12:31:35.795273+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:31:35.796454+0000 | compress | METRIC - error 90732.25
+2026-09-23T12:31:35.796979+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:35.797308+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:31:35.797658+0000 | compress_modules | INFO - Quantizing model.layers.30.self_attn.o_proj using 512 samples
+2026-09-23T12:31:36.799597+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:31:36.800700+0000 | compress | METRIC - error 26520.40
+2026-09-23T12:31:36.801190+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:36.801497+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:31:36.801790+0000 | compress_modules | INFO - Quantizing model.layers.30.mlp.gate_proj using 512 samples
+2026-09-23T12:31:37.902884+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:31:37.904033+0000 | compress | METRIC - error 103357.28
+2026-09-23T12:31:37.904450+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:37.904642+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:31:37.904920+0000 | compress_modules | INFO - Quantizing model.layers.30.mlp.up_proj using 512 samples
+2026-09-23T12:31:39.003197+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:31:39.004363+0000 | compress | METRIC - error 115993.12
+2026-09-23T12:31:39.004710+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:39.004936+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:31:39.005150+0000 | compress_modules | INFO - Quantizing model.layers.30.mlp.down_proj using 512 samples
+2026-09-23T12:31:42.219873+0000 | compress | METRIC - time 3.21s
+2026-09-23T12:31:42.222408+0000 | compress | METRIC - error 199970.56
+2026-09-23T12:31:42.222908+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:31:42.223198+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:31:57.142520+0000 | compress_modules | INFO - Quantizing model.layers.31.self_attn.q_proj using 512 samples
+2026-09-23T12:31:58.157393+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:31:58.158562+0000 | compress | METRIC - error 318239.47
+2026-09-23T12:31:58.159067+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:58.159395+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:31:58.159726+0000 | compress_modules | INFO - Quantizing model.layers.31.self_attn.k_proj using 512 samples
+2026-09-23T12:31:59.121540+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:31:59.122532+0000 | compress | METRIC - error 81465.91
+2026-09-23T12:31:59.122917+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:31:59.123179+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:31:59.123366+0000 | compress_modules | INFO - Quantizing model.layers.31.self_attn.v_proj using 512 samples
+2026-09-23T12:32:00.088231+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:32:00.089205+0000 | compress | METRIC - error 122759.59
+2026-09-23T12:32:00.089572+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:00.089794+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:32:00.090024+0000 | compress_modules | INFO - Quantizing model.layers.31.self_attn.o_proj using 512 samples
+2026-09-23T12:32:01.094688+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:32:01.095858+0000 | compress | METRIC - error 28083.95
+2026-09-23T12:32:01.096356+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:01.096714+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:32:01.097038+0000 | compress_modules | INFO - Quantizing model.layers.31.mlp.gate_proj using 512 samples
+2026-09-23T12:32:02.191251+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:32:02.192373+0000 | compress | METRIC - error 107159.97
+2026-09-23T12:32:02.192773+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:02.193013+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:32:02.193279+0000 | compress_modules | INFO - Quantizing model.layers.31.mlp.up_proj using 512 samples
+2026-09-23T12:32:03.288496+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:32:03.289588+0000 | compress | METRIC - error 124609.83
+2026-09-23T12:32:03.290020+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:03.290337+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:32:03.290635+0000 | compress_modules | INFO - Quantizing model.layers.31.mlp.down_proj using 512 samples
+2026-09-23T12:32:06.527228+0000 | compress | METRIC - time 3.24s
+2026-09-23T12:32:06.529763+0000 | compress | METRIC - error 251125.19
+2026-09-23T12:32:06.530226+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:32:06.530514+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:32:21.467218+0000 | compress_modules | INFO - Quantizing model.layers.32.self_attn.q_proj using 512 samples
+2026-09-23T12:32:22.482773+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:32:22.483927+0000 | compress | METRIC - error 447908.19
+2026-09-23T12:32:22.484341+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:22.484587+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:32:22.484881+0000 | compress_modules | INFO - Quantizing model.layers.32.self_attn.k_proj using 512 samples
+2026-09-23T12:32:23.448331+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:32:23.449518+0000 | compress | METRIC - error 112176.65
+2026-09-23T12:32:23.449996+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:23.450318+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:32:23.450688+0000 | compress_modules | INFO - Quantizing model.layers.32.self_attn.v_proj using 512 samples
+2026-09-23T12:32:24.418361+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:32:24.419353+0000 | compress | METRIC - error 181258.39
+2026-09-23T12:32:24.419755+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:24.420004+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:32:24.420274+0000 | compress_modules | INFO - Quantizing model.layers.32.self_attn.o_proj using 512 samples
+2026-09-23T12:32:25.427777+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:32:25.428782+0000 | compress | METRIC - error 35893.16
+2026-09-23T12:32:25.429300+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:25.429634+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:32:25.429922+0000 | compress_modules | INFO - Quantizing model.layers.32.mlp.gate_proj using 512 samples
+2026-09-23T12:32:26.525283+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:32:26.526481+0000 | compress | METRIC - error 112641.97
+2026-09-23T12:32:26.526898+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:26.527192+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:32:26.527447+0000 | compress_modules | INFO - Quantizing model.layers.32.mlp.up_proj using 512 samples
+2026-09-23T12:32:27.628290+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:32:27.629457+0000 | compress | METRIC - error 133518.80
+2026-09-23T12:32:27.629866+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:27.630142+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:32:27.630424+0000 | compress_modules | INFO - Quantizing model.layers.32.mlp.down_proj using 512 samples
+2026-09-23T12:32:30.853845+0000 | compress | METRIC - time 3.22s
+2026-09-23T12:32:30.856641+0000 | compress | METRIC - error 299879.31
+2026-09-23T12:32:30.857092+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:32:30.857388+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:32:45.828932+0000 | compress_modules | INFO - Quantizing model.layers.33.self_attn.q_proj using 512 samples
+2026-09-23T12:32:46.849148+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:32:46.850383+0000 | compress | METRIC - error 806675.88
+2026-09-23T12:32:46.850781+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:46.850971+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:32:46.851288+0000 | compress_modules | INFO - Quantizing model.layers.33.self_attn.k_proj using 512 samples
+2026-09-23T12:32:47.820641+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:32:47.821703+0000 | compress | METRIC - error 175124.84
+2026-09-23T12:32:47.822136+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:47.822434+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:32:47.822756+0000 | compress_modules | INFO - Quantizing model.layers.33.self_attn.v_proj using 512 samples
+2026-09-23T12:32:48.790572+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:32:48.791626+0000 | compress | METRIC - error 344644.00
+2026-09-23T12:32:48.792091+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:48.792400+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:32:48.792753+0000 | compress_modules | INFO - Quantizing model.layers.33.self_attn.o_proj using 512 samples
+2026-09-23T12:32:49.794615+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:32:49.795714+0000 | compress | METRIC - error 51908.91
+2026-09-23T12:32:49.796067+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:49.796315+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:32:49.796529+0000 | compress_modules | INFO - Quantizing model.layers.33.mlp.gate_proj using 512 samples
+2026-09-23T12:32:50.890398+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:32:50.891531+0000 | compress | METRIC - error 119412.95
+2026-09-23T12:32:50.891946+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:50.892168+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:32:50.892419+0000 | compress_modules | INFO - Quantizing model.layers.33.mlp.up_proj using 512 samples
+2026-09-23T12:32:51.990110+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:32:51.991136+0000 | compress | METRIC - error 143924.70
+2026-09-23T12:32:51.991578+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:32:51.991869+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:32:51.992096+0000 | compress_modules | INFO - Quantizing model.layers.33.mlp.down_proj using 512 samples
+2026-09-23T12:32:55.211290+0000 | compress | METRIC - time 3.22s
+2026-09-23T12:32:55.213898+0000 | compress | METRIC - error 367398.62
+2026-09-23T12:32:55.214377+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:32:55.214664+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:33:10.192091+0000 | compress_modules | INFO - Quantizing model.layers.34.self_attn.q_proj using 512 samples
+2026-09-23T12:33:11.201906+0000 | compress | METRIC - time 1.01s
+2026-09-23T12:33:11.203154+0000 | compress | METRIC - error 653368.56
+2026-09-23T12:33:11.203535+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:11.203730+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:33:11.204073+0000 | compress_modules | INFO - Quantizing model.layers.34.self_attn.k_proj using 512 samples
+2026-09-23T12:33:12.171041+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:33:12.172231+0000 | compress | METRIC - error 155816.16
+2026-09-23T12:33:12.172756+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:12.173077+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:33:12.173468+0000 | compress_modules | INFO - Quantizing model.layers.34.self_attn.v_proj using 512 samples
+2026-09-23T12:33:13.129481+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:33:13.130773+0000 | compress | METRIC - error 288093.03
+2026-09-23T12:33:13.131286+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:13.131703+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:33:13.132110+0000 | compress_modules | INFO - Quantizing model.layers.34.self_attn.o_proj using 512 samples
+2026-09-23T12:33:14.129892+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:33:14.131046+0000 | compress | METRIC - error 80588.34
+2026-09-23T12:33:14.131487+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:14.131796+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:33:14.132147+0000 | compress_modules | INFO - Quantizing model.layers.34.mlp.gate_proj using 512 samples
+2026-09-23T12:33:15.226178+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:33:15.227390+0000 | compress | METRIC - error 140970.12
+2026-09-23T12:33:15.227798+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:15.228091+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:33:15.228428+0000 | compress_modules | INFO - Quantizing model.layers.34.mlp.up_proj using 512 samples
+2026-09-23T12:33:16.331024+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:33:16.332291+0000 | compress | METRIC - error 161458.58
+2026-09-23T12:33:16.332667+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:16.332868+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:33:16.333061+0000 | compress_modules | INFO - Quantizing model.layers.34.mlp.down_proj using 512 samples
+2026-09-23T12:33:19.559122+0000 | compress | METRIC - time 3.23s
+2026-09-23T12:33:19.561970+0000 | compress | METRIC - error 429248.84
+2026-09-23T12:33:19.562437+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:33:19.562762+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:33:34.547606+0000 | compress_modules | INFO - Quantizing model.layers.35.self_attn.q_proj using 512 samples
+2026-09-23T12:33:35.566573+0000 | compress | METRIC - time 1.02s
+2026-09-23T12:33:35.567852+0000 | compress | METRIC - error 271345.62
+2026-09-23T12:33:35.568313+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:35.568531+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:33:35.568829+0000 | compress_modules | INFO - Quantizing model.layers.35.self_attn.k_proj using 512 samples
+2026-09-23T12:33:36.534923+0000 | compress | METRIC - time 0.97s
+2026-09-23T12:33:36.536047+0000 | compress | METRIC - error 69855.76
+2026-09-23T12:33:36.536509+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:36.536691+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:33:36.536889+0000 | compress_modules | INFO - Quantizing model.layers.35.self_attn.v_proj using 512 samples
+2026-09-23T12:33:37.500638+0000 | compress | METRIC - time 0.96s
+2026-09-23T12:33:37.501790+0000 | compress | METRIC - error 100755.36
+2026-09-23T12:33:37.502201+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:37.502500+0000 | compress | METRIC - Compressed module size: 8.486912 MB
+2026-09-23T12:33:37.502806+0000 | compress_modules | INFO - Quantizing model.layers.35.self_attn.o_proj using 512 samples
+2026-09-23T12:33:38.507551+0000 | compress | METRIC - time 1.00s
+2026-09-23T12:33:38.508779+0000 | compress | METRIC - error 75639.44
+2026-09-23T12:33:38.509275+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:38.509493+0000 | compress | METRIC - Compressed module size: 33.947648 MB
+2026-09-23T12:33:38.509728+0000 | compress_modules | INFO - Quantizing model.layers.35.mlp.gate_proj using 512 samples
+2026-09-23T12:33:39.613587+0000 | compress | METRIC - time 1.10s
+2026-09-23T12:33:39.614771+0000 | compress | METRIC - error 223107.70
+2026-09-23T12:33:39.615255+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:39.615552+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:33:39.615926+0000 | compress_modules | INFO - Quantizing model.layers.35.mlp.up_proj using 512 samples
+2026-09-23T12:33:40.711023+0000 | compress | METRIC - time 1.09s
+2026-09-23T12:33:40.712301+0000 | compress | METRIC - error 245876.00
+2026-09-23T12:33:40.712731+0000 | compress | METRIC - GPU 0 | usage: 7.66% | total memory: 48 GB
+2026-09-23T12:33:40.712975+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:33:40.713246+0000 | compress_modules | INFO - Quantizing model.layers.35.mlp.down_proj using 512 samples
+2026-09-23T12:33:43.942470+0000 | compress | METRIC - time 3.23s
+2026-09-23T12:33:43.945163+0000 | compress | METRIC - error 785797.88
+2026-09-23T12:33:43.945611+0000 | compress | METRIC - GPU 0 | usage: 8.91% | total memory: 48 GB
+2026-09-23T12:33:43.945904+0000 | compress | METRIC - Compressed module size: 101.842944 MB
+2026-09-23T12:33:55.544441+0000 | finalize | INFO - Compression lifecycle finalized for 1 modifiers
+2026-09-23T12:33:55.582288+0000 | post_process | WARNING - Optimized model is not saved. To save, please provide`output_dir` as input arg.Ex. `oneshot(..., output_dir=...)`
+2026-09-23T12:33:58.138234+0000 | get_model_compressor | INFO - skip_sparsity_compression_stats set to True. Skipping sparsity compression statistic calculations. No sparsity compressor will be applied.
+{
+  "variant_name": "gptq",
+  "config_sha256": "3d747ed03e486f4d44db28532ecaaae5d0cbdcb864450b608569a010c86a47a0",
+  "git": {
+    "commit": "e7b0b6071ce8748063b5f6886c920cbb0f083ddd",
+    "dirty_tracked": false
+  },
+  "model_manifest": {
+    "download_seconds": 362.105266657,
+    "huggingface_hub": "0.36.2",
+    "local_dir": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+    "model_id": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "stamp": "20260923T102838Z",
+    "total_bytes": 16397461266,
+    "verified": true
+  },
+  "resources": {
+    "gpu": "L40S",
+    "cpu_cores": 4,
+    "memory_mib": 65536,
+    "timeout_s": 4500,
+    "startup_timeout_s": 300
+  },
+  "gpu": {
+    "nvidia_smi": {
+      "returncode": 0,
+      "stdout": "NVIDIA L40S, 580.95.05, 46068 MiB, 8.9",
+      "stderr": ""
+    },
+    "torch_cuda": {
+      "available": true,
+      "torch_cuda_version": "12.8",
+      "device_name": "NVIDIA L40S"
+    }
+  },
+  "state": "finished",
+  "variant": {
+    "method": "gptq",
+    "scheme": "W4A16",
+    "targets": [
+      "Linear"
+    ],
+    "ignore": [
+      "lm_head"
+    ],
+    "expected_group_size": 128,
+    "expected_symmetric": true,
+    "calibration": {
+      "dataset_id": "HuggingFaceH4/ultrachat_200k",
+      "revision": "8049631c405ae6576f93f445c6b8166f76f5505a",
+      "split": "train_sft",
+      "num_samples": 512,
+      "max_seq_length": 2048,
+      "shuffle_seed": 42,
+      "format": "messages",
+      "text_field": "messages"
+    }
+  },
+  "calibration": {
+    "dataset_id": "HuggingFaceH4/ultrachat_200k",
+    "revision": "8049631c405ae6576f93f445c6b8166f76f5505a",
+    "split": "train_sft",
+    "num_samples": 512,
+    "max_seq_length": 2048,
+    "shuffle_seed": 42,
+    "format": "messages",
+    "text_field": "messages"
+  },
+  "load_model_s": 3.1653367370000005,
+  "model_dtype": "torch.bfloat16",
+  "oneshot_s": 893.556118487,
+  "save_s": 25.80447879799999,
+  "total_s": 928.1757800729999,
+  "peak_gpu_memory_nvidia_smi_mib": 4683,
+  "nvidia_smi_samples": 455,
+  "torch_max_memory_allocated_bytes": 3761910272,
+  "torch_max_memory_reserved_bytes": 4318035968,
+  "host_peak_rss_raw": 32342920,
+  "quantization_config": {
+    "config_groups": {
+      "group_0": {
+        "format": "pack-quantized",
+        "input_activations": null,
+        "output_activations": null,
+        "targets": [
+          "Linear"
+        ],
+        "weights": {
+          "actorder": null,
+          "block_structure": null,
+          "dynamic": false,
+          "group_size": 128,
+          "num_bits": 4,
+          "observer": "minmax",
+          "observer_kwargs": {},
+          "strategy": "group",
+          "symmetric": true,
+          "type": "int"
+        }
+      }
+    },
+    "format": "pack-quantized",
+    "global_compression_ratio": null,
+    "ignore": [
+      "lm_head"
+    ],
+    "kv_cache_scheme": null,
+    "quant_method": "compressed-tensors",
+    "quantization_status": "compressed",
+    "sparsity_config": {},
+    "transform_config": {},
+    "version": "0.11.0"
+  },
+  "checkpoint": {
+    "files": [
+      {
+        "path": "added_tokens.json",
+        "bytes": 707,
+        "sha256": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680"
+      },
+      {
+        "path": "chat_template.jinja",
+        "bytes": 4168,
+        "sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8"
+      },
+      {
+        "path": "config.json",
+        "bytes": 2415,
+        "sha256": "1c6d7cfb66a12a2cf0d3b5dc26b5b65da2bbe26079b15acebce9b54563f92743"
+      },
+      {
+        "path": "generation_config.json",
+        "bytes": 214,
+        "sha256": "a11456f04db85ae8010eca3b91c5df7c9a49261571c3e62ae7d88b3189a55c30"
+      },
+      {
+        "path": "merges.txt",
+        "bytes": 1671853,
+        "sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+      },
+      {
+        "path": "model-00001-of-00002.safetensors",
+        "bytes": 4826794352,
+        "sha256": "f
+✓ App completed. View run at 
+https://modal.com/apps/mohammedjasim/main/ap-PA7aqlQxiqweqcBW0wJNKj

@@ -94,3 +94,23 @@ are in `results/validation/phase3/`. These runs are functional checks (L4,
 0.6B model, 16 requests), not performance results. See ADR-012 to ADR-014 for
 the design and the two open findings, and `docs/PHASE4_6_ESTIMATE.md` for the
 next phases' costs.
+
+## Phase 4: AWQ and GPTQ quantization
+
+`configs/phase4_quantize.yaml` pins Qwen3-8B, the llm-compressor 0.7.1
+recipes (AWQ `W4A16_ASYM`, GPTQ `W4A16` group 128, `lm_head` kept in BF16) and
+their calibration sets. The stack matches the vLLM 0.10.2 image's
+compressed-tensors 0.11.0 (ADR-016).
+
+```sh
+make quantize-rehearsal                         # $0: CPU run of the same code on a tiny Qwen3
+uv run modal run --detach -m modal_app.quantize::prepare   # CPU: download + calibration prep
+uv run modal run --detach -m modal_app.quantize::awq       # L40S (billable)
+uv run modal run --detach -m modal_app.quantize::gptq      # L40S (billable)
+uv run modal run --detach -m modal_app.quantize::sanity    # L40S: vLLM load + 5 prompts
+```
+
+Raw results (timings, peak memory, checkpoint manifests, vLLM logs and
+outputs) are in `results/quantization/phase4/`. The checkpoints are on the
+`llmbench-weights` Volume and are never committed. Measured sizes and costs
+are in `PROGRESS.md`; accuracy is Phase 5.

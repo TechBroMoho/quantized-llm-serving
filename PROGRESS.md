@@ -2,12 +2,14 @@
 
 ## Status
 
-Phase 4 in progress (2026-09-23). Approved decisions are recorded as ADR-013/014
-resolutions (multi-process load tester; vLLM `skip_special_tokens=false` plus a
-chunk-count check, both before Phase 6) and ADR-015 (the free credit is a hard
-stop). The quantization stack is pinned and rehearsed on CPU (ADR-016).
-Qwen3-8B and both calibration sets are prepared on the Volume. AWQ passed ($0.3855
-actual). GPTQ and the vLLM sanity run each need their own yes.
+Phase 4 complete (2026-09-23). Three servable variants of Qwen3-8B (BF16, AWQ
+W4A16-asym, GPTQ W4A16) each loaded in vLLM 0.10.2 on L40S and completed the
+5 fixed prompts. Phase 4 actual spend was **$1.2671** of its $6 cap;
+cumulative **$1.3646** (dashboard). `modal app list` shows nothing running.
+Before Phase 6 (approved, not yet built): a multi-process load tester
+revalidated in Modal (ADR-013), and `skip_special_tokens=false` with a
+chunk-count check (ADR-014). The next GPU work (Phase 5) needs an estimate and
+a yes.
 
 ## Phase log
 
@@ -140,6 +142,48 @@ actual). GPTQ and the vLLM sanity run each need their own yes.
     `save_pretrained(save_compressed=True)` afterwards.
   - Not yet loaded in vLLM; that is the sanity run.
 
+- **Phase 4, GPTQ (2026-09-23):** passed on L40S, run
+  `quantize-gptq-20260923T121835Z`.
+  - Time: `oneshot` 893.6 s (37 layers × calibrate/propagate over 512
+    samples), save 25.8 s; function 973.2 s.
+  - Memory: peak GPU 4,683 MiB by `nvidia-smi` (torch peak allocated
+    3,761,910,272 bytes); host peak RSS 32,342,920 KiB.
+  - Checkpoint `/weights/quantized/Qwen3-8B-gptq-b968826d`: `pack-quantized`,
+    4-bit group-128 symmetric, `lm_head` ignored and stored in BF16; no zero
+    points; safetensors 6,071,454,192 bytes.
+  - Actual cost $0.7261 (re-estimate $0.88; the billing report first showed
+    $0.3240 while still settling).
+- **Phase 4, vLLM sanity (2026-09-23):** one L40S lifetime, run
+  `sanity-20260923T124020Z`, vLLM 0.10.2 image, eager mode, max-model-len
+  4096, prefix caching off, `--generation-config vllm`, all flags checked
+  against the pinned `--help`. For all three variants, all 5 prompts completed
+  64 greedy tokens (`finish_reason=length`); outputs are saved verbatim in
+  `*/sanity.json`.
+  - My coherence read: all three correctly answer Paris, write a recursive
+    Fibonacci, give Rayleigh scattering, translate to "Bonjour, comment
+    allez-vous aujourd'hui ?", and list primes 2–11. Continuations then diverge
+    (for example, BF16 repeats "The capital of France is Paris."; AWQ and GPTQ
+    list other capitals). This is a sanity check, not an accuracy measure;
+    accuracy is Phase 5.
+  - Both quantized variants run on `MarlinLinearKernel` for
+    `CompressedTensorsWNA16`.
+  - Measured sizes (single run; weight memory is deterministic for a given
+    stack):
+
+    | Variant | Safetensors on disk (bytes) | vLLM "Model loading took" | GPU KV cache (tokens) |
+    | --- | ---: | ---: | ---: |
+    | BF16 | 16,381,516,776 | 15.2683 GiB | 175,728 |
+    | AWQ | 6,098,617,040 (−62.77%) | 5.7088 GiB (−62.61%) | 245,344 (×1.396) |
+    | GPTQ | 6,071,454,192 (−62.94%) | 5.6835 GiB (−62.78%) | 245,520 (×1.397) |
+
+    These match ADR-001's analytical estimate (6.07–6.10 GB; 62.8–62.9%
+    reduction) and fall short of the 68% placeholder. KV-cache capacity is at
+    `--gpu-memory-utilization 0.90` and max-model-len 4096, with eager mode.
+    Phase 6's CUDA-graph settings will change the absolute token counts.
+  - Reproduce: `uv run modal run --detach -m modal_app.quantize::{prepare,awq,gptq,sanity}`
+    (billable; `configs/phase4_quantize.yaml`). Raw files are in
+    `results/quantization/phase4/`.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -158,6 +202,8 @@ actual). GPTQ and the vLLM sanity run each need their own yes.
 | 2026-09-23 | 3 | HF naive + static smoke, passed (`ap-e1i6lvPAhpupn9WHoeTtW3`) | L4 | ≈94 | $0.027521 | $0.097475 |
 | 2026-09-23 | 4 | Qwen3-8B download + calibration prep, CPU, includes quant image build (`ap-EyzLyIROLh9zFAktXmwkMu`) | None | n/a | $0.024180 | $0.121655 |
 | 2026-09-23 | 4 | AWQ W4A16_ASYM quantization, passed (`ap-bi7KgCITqb40g0uoaypiVe`) | L40S | 538 function | $0.385489 | $0.507144 |
+| 2026-09-23 | 4 | GPTQ W4A16 quantization, passed (`ap-PA7aqlQxiqweqcBW0wJNKj`) | L40S | 973 function | $0.726136 | $1.233280 |
+| 2026-09-23 | 4 | vLLM sanity, BF16 + AWQ + GPTQ, passed (`ap-rbKztZzbSRbnw9hvYsp33H`) | L40S | n/a | $0.131285 | $1.364565 |
 
 Phase 3 amounts are **actual** per-app costs from `modal billing report --for
 today --json` (saved in `results/validation/phase3/modal_billing_2026-09-23.json`),
@@ -202,3 +248,16 @@ the 1 TiB/month included.
   differently.
 - Phase 3: a local wait loop grepped the wrong file and ran for 10 minutes
   after the download had finished. No remote cost; the job itself took ~25 s.
+- Phase 4: compressed-tensors 0.11.0 cannot decompress packed zero points
+  inside transformers, so the rehearsal's HF reload failed for asymmetric AWQ.
+  The rehearsal now checks stored tensors instead, and vLLM (which supports
+  asymmetric WNA16) loaded the real AWQ checkpoint.
+- Phase 4: llm-compressor writes `sparse_logs/` into the working directory.
+  Rehearsal logs slipped into a local commit and were removed before pushing;
+  the directory is now gitignored. Its loguru setup also bypassed our file
+  sink, so the run logs come from the filtered client capture.
+- Phase 4: the billing report lags. GPTQ first read $0.3240, then settled at
+  $0.7261, which matches duration × rate. Always re-read the report before
+  recording a cost.
+- Phase 4: progress-bar output flooded two log monitors, which had to be
+  stopped. The fix is to wait on process exit and read a filtered log.

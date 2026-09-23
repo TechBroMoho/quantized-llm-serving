@@ -1,4 +1,12 @@
-# Phases 4–6 cost estimate (for approval, nothing launched)
+# Phases 4–6 cost estimate
+
+> **Update after Phase 4 (2026-09-23).** Phase 4 actual: **$1.2671** (prep
+> $0.0242, AWQ $0.3855, GPTQ $0.7261, sanity $0.1313) against $4.16 expected.
+> Measured L40S facts for later phases: vLLM healthy in 46–52 s for 8B
+> variants in eager mode (CUDA-graph capture will add some); model load from
+> the Volume took 7–11 s. Phases 5–6 below are unchanged pending the Phase 5
+> timed probe, and are likely conservative on startup. Cumulative actual
+> after Phase 4: **$1.3646**; about $28.64 of the reported $30 credit remains.
 
 Prepared 2026-09-23 at the end of Phase 3. Rates were re-read from
 [Modal pricing](https://modal.com/pricing) on 2026-09-23: L40S $0.000542/s,
@@ -60,10 +68,11 @@ server (see ADR-013).
 | | Expected | Envelope |
 | --- | ---: | ---: |
 | Phase 3 actual (dashboard) | $0.097 | — |
-| Phases 4–6 | $13.47 | $20.68 |
-| Cumulative | **≈ $13.57** | ≈ $20.78 |
+| Phase 4 actual (dashboard) | $1.267 | — |
+| Phases 5–6 (unchanged estimates) | $9.32 | $13.47 |
+| Cumulative | **≈ $10.69** | ≈ $14.83 |
 
-Both are under the $25 target and inside the $30/month Starter credit
-(remaining credit not verified). Items to resolve before Phase 6 (no cost to
+Both are under the $25 target and inside the $30 credit Mohammed reported
+before Phase 3 (no card on file, so the credit is a hard stop; ADR-015). Items to resolve before Phase 6 (no cost to
 decide): ADR-013 (client capacity inside Modal) and ADR-014 (empty vLLM
 chunks), plus the real-text W1 prompt corpus.
