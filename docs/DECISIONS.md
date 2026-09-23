@@ -399,6 +399,16 @@ monotonic clock) and rerun the in-container gate, estimated at under $0.02 CPU;
 (b) measure the real peak chunk rate at c=256 on L40S first, then require 3×
 that rate. Recommended: (a), because it keeps the existing 6,000/s bar.
 
+**Resolution (approved by Mohammed, 2026-09-23).** Option (a). The load
+generator becomes multi-process: worker processes each run the existing
+closed/open-loop client over a disjoint share of the virtual users, record
+timestamps on the same host monotonic clock (`time.perf_counter` is
+system-wide on Linux), and the parent merges records before the unchanged
+summary/window logic. It is revalidated inside the Modal container against
+the **unchanged** 6,000 chunks/s, 30 s, 256-stream, zero-error gate, plus the
+timing gate, for an estimated ~$0.02 of CPU. This must pass before any Phase 6
+run; Phases 4–5 do not use the load tester.
+
 ## ADR-014 — vLLM empty text chunks distort per-request E2E/TPOT (2026-09-23, open)
 
 **Observation.** In the vLLM smoke, 14 of 16 requests had 29–32 text-bearing
@@ -420,3 +430,93 @@ one text-bearing chunk per token. Add a run-level check that fails when
 `text_chunks` is far below `completion_tokens`. Keep ADR-003 unchanged, and
 record the end-of-stream (usage/`[DONE]`) time as a second E2E field for
 diagnosis. The real-text W1 prompts should also reduce this effect.
+
+**Resolution (approved by Mohammed, 2026-09-23).** Requests to vLLM set
+`skip_special_tokens: false`, so both servers decode and stream special tokens
+the same way. The HF server accepts that field only with the value `false`
+(it already decodes with `skip_special_tokens=False`). A run fails if any
+completed request's text-bearing chunk count falls well short of its
+`usage.completion_tokens`; the exact threshold is fixed in code and tests
+before Phase 6 and recorded here. ADR-003's metric definitions are unchanged.
+Implementation and a CPU test land before Phase 6.
+
+## ADR-015 — Budget hard stop from free credits (2026-09-23)
+
+**Context.** Mohammed reports that no payment card is on file with Modal and
+that the account showed $30 of Starter credit before Phase 3.
+
+**Decision.** No Modal workspace budget is configured: without a card, the
+free credit is a hard stop. The project rules are unchanged: $25 cumulative
+target, per-phase caps, and an explicit estimate and yes before each GPU run.
+The balance before Phase 3 comes from Mohammed's report; Claude has not read
+it from the dashboard.
+
+**Consequences.** Remaining credit is about $30 − $0.0975 = **$29.90** by our
+ledger. A job that hits the credit limit could be stopped mid-run, so long jobs
+keep saving results incrementally to the Volume.
+
+## ADR-016 — Phase 4 quantization stack and procedure (2026-09-23)
+
+**Context.** ADR-002 left the llm-compressor version and exact recipes to be
+fixed before Phase 4. The checkpoints must load in the pinned
+`vllm/vllm-openai:v0.10.2`, whose `compressed-tensors` is 0.11.0.
+
+**Options.** llm-compressor 0.7.1 pins `compressed-tensors==0.11.0`
+(transformers ≤4.55.2, torch ≤2.8.0). 0.8.x writes with compressed-tensors
+0.12.x, a format version vLLM 0.10.2 was not built against. 0.9+ also moves
+torch/transformers. The 0.7.1.x post-releases (2026-07) carry the same pins.
+
+**Decision.**
+- Pin `llmcompressor==0.7.1`, `compressed-tensors==0.11.0`, torch 2.8.0,
+  transformers 4.55.2, datasets 4.0.0, accelerate 1.10.0
+  (`requirements/quantize.in`; resolved Linux set in
+  `requirements/quantize-linux.txt`). This runs in its own Modal image and a
+  local `.cache/quant-venv`, because the serving stack needs transformers 4.56.
+- Model `Qwen/Qwen3-8B@b968826d…` (16,397,461,266 bytes), downloaded CPU-only
+  and verified file-by-file against the Hub's LFS sha256.
+- Recipes follow the official **0.7.1** examples exactly
+  (`configs/phase4_quantize.yaml`):
+  - **AWQ:** `AWQModifier(targets=[Linear], scheme=W4A16_ASYM,
+    ignore=[lm_head])`, calibrated on `mit-han-lab/pile-val-backup@2f5e46ae…`
+    `validation[:256]` at max 512 tokens, each text wrapped as one user turn.
+  - **GPTQ:** `GPTQModifier(targets=Linear, scheme=W4A16, ignore=[lm_head])`
+    (symmetric, group 128), calibrated on
+    `HuggingFaceH4/ultrachat_200k@80496310…` `train_sft[:512]` at max 2048
+    tokens.
+  - **Both:** `shuffle(seed=42)` after slicing, as in the examples, and
+    `add_special_tokens=False`. The two methods keep their own official
+    calibration sets rather than a shared one, so the comparison is "each
+    method as recommended". Any accuracy difference therefore mixes method and
+    calibration data; RESULTS must say so.
+- Qwen3's chat template renders assistant turns with an empty
+  `<think>\n\n</think>` block (visible in the saved decoded prefix). That is
+  the template's behavior, left as is. `pile-val-backup` has no license on its
+  card; it is used only for calibration and never redistributed.
+- **Deviation from the AWQ example:** preprocessing (template + tokenization)
+  runs ahead of time on CPU, and `oneshot` receives token IDs, as in the GPTQ
+  example. It is equivalent because the Qwen tokenizer adds no special tokens.
+  The saved calibration records sample counts, token totals and an input-ID
+  sha256.
+- **Procedure:** AWQ runs first (L40S, 4 cores / 48 GiB, 60 min timeout). Its
+  actual cost is reconciled, then GPTQ is re-estimated (64 GiB for its larger
+  activation cache). The checkpoint is written in place; a verified manifest,
+  written last, is the only completion marker. A verified checkpoint is never
+  overwritten.
+- **Checks after saving:** compressed-tensors `pack-quantized`, 4 bits, group
+  128, the expected symmetry, `lm_head` ignored and stored in BF16, packed
+  q_proj tensors, and zero points if and only if asymmetric.
+- **Recorded measurements:** wall time per stage, torch peak allocated/reserved
+  memory, peak `nvidia-smi` memory (2 s sampling), host peak RSS, the full
+  package set, and every file's size/sha256.
+
+**CPU rehearsal.** `make quantize-rehearsal` runs the same functions and both
+recipes on a tiny random Qwen3 with the real Qwen3-8B tokenizer. Both passed
+(`results/validation/phase4/rehearsal/rehearsal.json`). compressed-tensors
+0.11.0 cannot decompress packed zero points inside transformers
+("Decompression of packed zero points is currently not supported"), so only
+the symmetric checkpoint gets an HF reload/forward check. The vLLM 0.10.2
+source registers `weight_zero_point` for asymmetric WNA16 schemes, and the
+Phase 4 vLLM sanity run is the real load test for AWQ.
+
+**Consequences.** Accuracy and serving numbers apply to this stack only.
+Newer llm-compressor releases are not evaluated.

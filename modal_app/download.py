@@ -34,6 +34,12 @@ app = modal.App("llmbench-download")
     **DOWNLOAD_RESOURCES.function_kwargs(),
 )
 def download_model(model_id: str, revision: str, stamp: str) -> dict[str, Any]:
+    return download_and_verify(model_id, revision, stamp)
+
+
+def download_and_verify(
+    model_id: str, revision: str, stamp: str, phase: str = "phase3"
+) -> dict[str, Any]:
     """Download one immutable revision and verify it against Hub metadata."""
     import hashlib
     import time
@@ -92,7 +98,7 @@ def download_model(model_id: str, revision: str, stamp: str) -> dict[str, Any]:
         manifest_file.parent.mkdir(parents=True, exist_ok=True)
         manifest_file.write_text(text)
     WEIGHTS.commit()
-    result_file = Path(RESULTS_PATH) / "phase3" / f"download-{stamp}" / "manifest.json"
+    result_file = Path(RESULTS_PATH) / phase / f"download-{stamp}" / "manifest.json"
     result_file.parent.mkdir(parents=True, exist_ok=True)
     result_file.write_text(text)
     RESULTS.commit()

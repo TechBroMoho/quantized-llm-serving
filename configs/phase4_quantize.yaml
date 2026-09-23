@@ -1,0 +1,66 @@
+# Phase 4: W4A16 quantization of Qwen3-8B with llm-compressor 0.7.1.
+# Recipes and calibration follow the official 0.7.1 examples for each method
+# (examples/awq/llama_example.py, examples/quantization_w4a16/llama3_example.py).
+name: phase4-quantize
+gpu: L40S
+model:
+  id: Qwen/Qwen3-8B
+  revision: b968826d9c46dd6066d109eabc6255188de91218  # resolved 2026-09-23
+stack: requirements/quantize.in  # llmcompressor 0.7.1, compressed-tensors 0.11.0
+variants:
+  awq:
+    method: awq
+    scheme: W4A16_ASYM  # asymmetric, as in the official AWQ example
+    targets: [Linear]
+    ignore: [lm_head]
+    expected_group_size: 128
+    expected_symmetric: false
+    calibration:
+      dataset_id: mit-han-lab/pile-val-backup
+      revision: 2f5e46ae6a69cf0dce4b12f78241c408936ca0e4
+      split: validation
+      num_samples: 256
+      max_seq_length: 512
+      shuffle_seed: 42
+      format: user_text  # example wraps each text as one user message
+      text_field: text
+  gptq:
+    method: gptq
+    scheme: W4A16  # symmetric, group size 128, as in the official GPTQ example
+    targets: [Linear]
+    ignore: [lm_head]
+    expected_group_size: 128
+    expected_symmetric: true
+    calibration:
+      dataset_id: HuggingFaceH4/ultrachat_200k
+      revision: 8049631c405ae6576f93f445c6b8166f76f5505a
+      split: train_sft
+      num_samples: 512
+      max_seq_length: 2048
+      shuffle_seed: 42
+      format: messages
+      text_field: messages
+sanity:
+  # Phase 4 acceptance: each variant loads in vLLM and completes 5 fixed prompts.
+  max_model_len: 4096
+  max_tokens: 64
+  engine_args:
+    - --dtype
+    - bfloat16
+    - --max-model-len
+    - "4096"
+    - --gpu-memory-utilization
+    - "0.90"
+    - --seed
+    - "0"
+    - --enforce-eager  # sanity only; Phase 6 performance runs use CUDA graphs
+    - --no-enable-prefix-caching
+    - --generation-config
+    - vllm
+    - --disable-uvicorn-access-log
+  prompts:
+    - "The capital of France is"
+    - "def fibonacci(n):\n    \"\"\"Return the n-th Fibonacci number.\"\"\"\n"
+    - "Explain in one sentence why the sky is blue:"
+    - "Translate to French: Good morning, how are you today?\nFrench:"
+    - "The first five prime numbers are"

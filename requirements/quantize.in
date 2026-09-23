@@ -1,0 +1,15 @@
+# Phase 4 quantization stack (Modal image + local CPU rehearsal).
+# llm-compressor 0.7.1 is the release that pins compressed-tensors 0.11.0, the
+# exact version inside vllm/vllm-openai:v0.10.2, so our checkpoints are
+# written and read by the same compressed-tensors format code.
+llmcompressor==0.7.1
+compressed-tensors==0.11.0
+torch==2.8.0
+transformers==4.55.2
+datasets==4.0.0
+accelerate==1.10.0
+safetensors==0.6.2
+huggingface-hub==0.36.2
+hf-xet==1.6.0
+pyyaml==6.0.2
+zstandard==0.23.0  # datasets reads pile-val's .jsonl.zst

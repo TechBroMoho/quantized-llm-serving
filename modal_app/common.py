@@ -64,6 +64,14 @@ HF_IMAGE = (
     .add_local_python_source("llmbench", "modal_app")
 )
 
+# Phase 4 quantization stack (llm-compressor 0.7.1 needs transformers 4.55.2).
+QUANT_IMAGE = (
+    modal.Image.debian_slim(python_version="3.12")
+    .uv_pip_install(requirements=[str(REPO / "requirements" / "quantize.in")])
+    .env({"PYTHONUNBUFFERED": "1"})
+    .add_local_python_source("llmbench", "modal_app")
+)
+
 DOWNLOAD_IMAGE = (
     modal.Image.debian_slim(python_version="3.12")
     .uv_pip_install("huggingface-hub==0.36.2", "hf-xet==1.6.0", "pyyaml==6.0.3")
@@ -102,6 +110,13 @@ VLLM_CHECK_RESOURCES = Resources(None, 4, 4096, 180, 300)
 HF_CHECK_RESOURCES = Resources(None, 1, 2048, 120, 300)
 VLLM_SMOKE_RESOURCES = Resources("L4", 4, 16384, 900, 300)
 HF_SMOKE_RESOURCES = Resources("L4", 4, 8192, 600, 300)
+# Phase 4. Host memory: AWQ holds the 16.4 GB BF16 model plus ~1 GiB of cached
+# 256x512 activations; GPTQ's 512x2048 calibration caches ~8 GiB more.
+DOWNLOAD_LARGE_RESOURCES = Resources(None, 2, 4096, 1500, 300)
+QUANT_PREP_RESOURCES = Resources(None, 2, 8192, 1500, 300)
+QUANTIZE_AWQ_RESOURCES = Resources("L40S", 4, 49152, 3600, 300)
+QUANTIZE_GPTQ_RESOURCES = Resources("L40S", 4, 65536, 4500, 300)
+SANITY_RESOURCES = Resources("L40S", 4, 32768, 1800, 300)
 
 
 def load_config(name: str) -> tuple[dict[str, Any], str]:

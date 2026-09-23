@@ -1,0 +1,106 @@
+{
+  "awq": {
+    "calibration_samples": 8,
+    "calibration_tokens_max": 64,
+    "elapsed_s": 4.503672874998301,
+    "quantization_config": {
+      "config_groups": {
+        "group_0": {
+          "format": "pack-quantized",
+          "input_activations": null,
+          "output_activations": null,
+          "targets": [
+            "Linear"
+          ],
+          "weights": {
+            "actorder": null,
+            "block_structure": null,
+            "dynamic": false,
+            "group_size": 128,
+            "num_bits": 4,
+            "observer": "minmax",
+            "observer_kwargs": {},
+            "strategy": "group",
+            "symmetric": false,
+            "type": "int"
+          }
+        }
+      },
+      "format": "pack-quantized",
+      "global_compression_ratio": null,
+      "ignore": [
+        "lm_head"
+      ],
+      "kv_cache_scheme": null,
+      "quant_method": "compressed-tensors",
+      "quantization_status": "compressed",
+      "sparsity_config": {},
+      "transform_config": {},
+      "version": "0.11.0"
+    },
+    "reload_forward_finite": null,
+    "safetensors_bytes": 77953672,
+    "structural_failures": [],
+    "tensors": {
+      "failures": [],
+      "lm_head_dtype": "BF16",
+      "packed_q_proj_layers": 2,
+      "tensor_count": 67,
+      "zero_point_tensors": 14
+    },
+    "wrong_symmetry_rejected": true
+  },
+  "gptq": {
+    "calibration_samples": 8,
+    "calibration_tokens_max": 33,
+    "elapsed_s": 1.6294591670157388,
+    "quantization_config": {
+      "config_groups": {
+        "group_0": {
+          "format": "pack-quantized",
+          "input_activations": null,
+          "output_activations": null,
+          "targets": [
+            "Linear"
+          ],
+          "weights": {
+            "actorder": null,
+            "block_structure": null,
+            "dynamic": false,
+            "group_size": 128,
+            "num_bits": 4,
+            "observer": "minmax",
+            "observer_kwargs": {},
+            "strategy": "group",
+            "symmetric": true,
+            "type": "int"
+          }
+        }
+      },
+      "format": "pack-quantized",
+      "global_compression_ratio": null,
+      "ignore": [
+        "lm_head"
+      ],
+      "kv_cache_scheme": null,
+      "quant_method": "compressed-tensors",
+      "quantization_status": "compressed",
+      "sparsity_config": {},
+      "transform_config": {},
+      "version": "0.11.0"
+    },
+    "reload_forward_finite": true,
+    "safetensors_bytes": 77950968,
+    "structural_failures": [],
+    "tensors": {
+      "failures": [],
+      "lm_head_dtype": "BF16",
+      "packed_q_proj_layers": 2,
+      "tensor_count": 53,
+      "zero_point_tensors": 0
+    },
+    "wrong_symmetry_rejected": true
+  },
+  "model": "tiny random Qwen3 (2 layers, hidden 128)",
+  "passed": true
+}

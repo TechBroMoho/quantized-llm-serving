@@ -7,12 +7,12 @@ setup:
 	uv sync --dev
 
 fmt:
-	uv run --dev ruff format src tests modal_app
-	uv run --dev ruff check --fix src tests modal_app
+	uv run --dev ruff format src tests modal_app scripts
+	uv run --dev ruff check --fix src tests modal_app scripts
 
 lint:
-	uv run --dev ruff check src tests modal_app
-	uv run --dev ruff format --check src tests modal_app
+	uv run --dev ruff check src tests modal_app scripts
+	uv run --dev ruff format --check src tests modal_app scripts
 
 typecheck:
 	uv run --dev mypy --strict src
@@ -55,3 +55,13 @@ smoke: smoke-vllm smoke-hf
 
 sync-results:  # $0: copy Phase 3 results from the results Volume
 	uv run modal volume get llmbench-results phase3 results/validation --force
+
+# --- Phase 4 quantization ---
+QUANT_VENV = .cache/quant-venv
+.PHONY: quantize-env quantize-rehearsal
+quantize-env:  # isolated env: llm-compressor needs transformers 4.55.2
+	uv venv -q --allow-existing --python 3.12 $(QUANT_VENV)
+	VIRTUAL_ENV=$(QUANT_VENV) uv pip install -q -r requirements/quantize.in
+
+quantize-rehearsal: quantize-env  # $0: CPU run of the exact quantization code
+	PYTHONPATH=src $(QUANT_VENV)/bin/python scripts/quantize_rehearsal.py

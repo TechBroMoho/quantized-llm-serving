@@ -19,3 +19,4 @@ htmlcov/
 *.onnx
 models/
 checkpoints/
+sparse_logs/

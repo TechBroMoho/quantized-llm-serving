@@ -37,6 +37,11 @@ python_version = "3.12"
 strict = true
 mypy_path = "src"
 
+# The quantization stack lives in its own pinned env (requirements/quantize.in).
+[[tool.mypy.overrides]]
+module = ["llmcompressor", "llmcompressor.*", "datasets"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
