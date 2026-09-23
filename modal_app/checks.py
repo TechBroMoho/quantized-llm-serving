@@ -2,10 +2,15 @@
 
     uv run modal run --detach -m modal_app.checks::vllm_env
     uv run modal run --detach -m modal_app.checks::hf_env
+    uv run modal run --detach -m modal_app.checks::loadtest
 
 `vllm_env` builds the Dockerfile image, records versions, verifies every
 configured engine flag against the pinned server's own `--help`, and reruns
 the Phase 1 mock timing/capacity validation inside that container.
+
+`loadtest` reruns the timing gates and the 2-process capacity gate inside the
+vLLM image with the Phase 6 container's CPU count (ADR-013). It must pass
+before any Phase 6 benchmark.
 """
 
 from __future__ import annotations
@@ -18,6 +23,7 @@ import modal
 from modal_app.common import (
     HF_CHECK_RESOURCES,
     HF_IMAGE,
+    LOADTEST_CHECK_RESOURCES,
     RESULTS,
     RESULTS_PATH,
     VLLM_CHECK_RESOURCES,
@@ -160,6 +166,78 @@ def hf_env_check(stamp: str) -> dict[str, Any]:
     if not summary["passed"]:
         raise RuntimeError(f"HF environment check failed: {summary}")
     return summary
+
+
+@app.function(
+    image=VLLM_IMAGE,
+    volumes={RESULTS_PATH: RESULTS},
+    **LOADTEST_CHECK_RESOURCES.function_kwargs(),
+)
+def loadtest_check(stamp: str) -> dict[str, Any]:
+    from pathlib import Path
+
+    from llmbench.smoke import runtime_metadata, write_json
+
+    out = Path(RESULTS_PATH) / "phase6" / f"loadtest-check-{stamp}"
+    out.mkdir(parents=True, exist_ok=True)
+    summary: dict[str, Any] = {
+        "resources": LOADTEST_CHECK_RESOURCES.as_dict(),
+        "runtime": runtime_metadata(),
+    }
+    write_json(out / "check_summary.json", summary | {"state": "starting"})
+    RESULTS.commit()
+    validation = _run(
+        [
+            "python3",
+            "-m",
+            "llmbench.loadtest.validation",
+            "--output-dir",
+            str(out),
+            "--processes",
+            "2",
+        ],
+        540,
+    )
+    (out / "validation_stdout.txt").write_text(
+        validation["stdout"] + validation["stderr"]
+    )
+    summary["validation_returncode"] = validation["returncode"]
+    for name in ("timing_accuracy", "timing_multiprocess"):
+        path = out / f"{name}_summary.json"
+        if path.exists():
+            timing = json.loads(path.read_text())
+            summary[name] = {"passed": timing.get("passed"), "gate": timing.get("gate")}
+    capacity_file = out / "capacity_summary.json"
+    if capacity_file.exists():
+        capacity = json.loads(capacity_file.read_text())
+        summary["capacity"] = {
+            key: capacity.get(key)
+            for key in (
+                "measured_text_chunks_per_s",
+                "capacity_threshold_multiple",
+                "client_processes",
+                "client_process_cpu_cores_average",
+                "shard_window_process_cpu_seconds",
+                "mock_server_cpu_cores_average",
+                "errored_or_cancelled_requests",
+                "rejected_requests",
+                "late_completed_requests",
+                "process_clock_check",
+            )
+        }
+    summary["passed"] = validation["returncode"] == 0
+    summary["state"] = "finished"
+    write_json(out / "check_summary.json", summary)
+    RESULTS.commit()
+    if not summary["passed"]:
+        raise RuntimeError(f"load tester check failed: {summary}")
+    return summary
+
+
+@app.local_entrypoint()
+def loadtest() -> None:
+    result = loadtest_check.remote(run_stamp())
+    print(json.dumps(result, indent=2, sort_keys=True))
 
 
 @app.local_entrypoint()

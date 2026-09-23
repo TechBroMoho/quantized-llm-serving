@@ -13,7 +13,7 @@ from typing import Any
 
 from llmbench.loadtest.io import write_results
 from llmbench.loadtest.runner import run_load
-from llmbench.loadtest.workloads import completions_payload
+from llmbench.loadtest.workloads import TextPayloads
 from llmbench.mock.server import MockConfig, serve
 
 
@@ -42,6 +42,9 @@ def _mock_arguments(parser: argparse.ArgumentParser) -> None:
 def _load_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--url", required=True)
     parser.add_argument("--concurrency", type=int, default=1)
+    parser.add_argument(
+        "--processes", type=int, default=1, help="client processes (ADR-013)"
+    )
     parser.add_argument("--mode", choices=("closed", "open"), default="closed")
     parser.add_argument("--duration", type=float)
     parser.add_argument("--requests", type=int)
@@ -73,6 +76,7 @@ async def _run_load(args: argparse.Namespace) -> dict[str, Any]:
         "workload": args.workload,
         "mode": args.mode,
         "concurrency": args.concurrency,
+        "processes": args.processes,
         "duration_s": args.duration,
         "request_count": args.requests,
         "rate_per_s": args.rate,
@@ -99,9 +103,8 @@ async def _run_load(args: argparse.Namespace) -> dict[str, Any]:
         concurrency=args.concurrency,
         timeout_s=args.timeout,
         drain_s=args.drain_time,
-        payload_factory=lambda index: completions_payload(
+        payload_factory=TextPayloads(
             prompt=args.prompt,
-            request_index=index,
             output_tokens=args.output_tokens,
             seed=args.seed,
             model=args.model,
@@ -112,6 +115,7 @@ async def _run_load(args: argparse.Namespace) -> dict[str, Any]:
         rate_per_s=args.rate,
         warmup_requests=args.warmup_requests,
         seed=args.seed,
+        processes=args.processes,
     )
     measured_cpu = float(summary["window_process_cpu_seconds"])
     duration = summary["window_duration_s"]
@@ -167,5 +171,9 @@ def main() -> None:
         return
     summary = asyncio.run(_run_load(args))
     print(json.dumps(summary, indent=2, sort_keys=True))
-    if summary["errored_or_cancelled_requests"] or summary["rejected_requests"]:
+    if (
+        summary["errored_or_cancelled_requests"]
+        or summary["rejected_requests"]
+        or summary.get("text_chunk_shortfall_requests")
+    ):
         raise SystemExit(1)

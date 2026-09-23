@@ -7,6 +7,7 @@ import asyncio
 import aiohttp
 from aiohttp.test_utils import TestServer
 
+from llmbench.loadtest import client
 from llmbench.loadtest.client import stream_request
 from llmbench.loadtest.validation import measure_timing_accuracy
 from llmbench.loadtest.workloads import completions_payload
@@ -19,13 +20,48 @@ def test_mock_timing_accuracy() -> None:
         f"median TTFT={summary['median_ttft_s']:.6f}s "
         f"(client/server error={summary['ttft_relative_error']:.1%}); "
         f"median ITL={summary['median_itl_s']:.6f}s "
-        f"(error={summary['itl_relative_error']:.1%})"
+        f"(error={summary['itl_relative_error']:.1%}); "
+        f"structural_ok={summary['structural_ok']}; failing gate entries: "
+        + str({k: v for k, v in summary["gate"].items() if not v["passed"]})
+        + "; over-tolerance observations: "
+        + str(
+            {
+                o["request_id"]: o["over_tolerance"]
+                for o in summary["paired_observations"]
+                if o["over_tolerance"]
+            }
+        )
     )
-    assert len(rows) == 5
+    assert len(rows) == 10
     assert all(row.status == "ok" for row in rows)
     assert all(row.empty_text_chunks == 1 for row in rows)
     assert all(row.usage_events == 1 for row in rows)
-    assert all(row.completion_tokens == 4 for row in rows)
+    assert all(row.completion_tokens == 21 for row in rows)
+    assert summary["gate"]["itl_s"]["samples"] == 200
+
+
+def test_mock_timing_accuracy_through_worker_process() -> None:
+    # Half the requests come from a spawned process; the server clock is here.
+    summary, rows = asyncio.run(measure_timing_accuracy(processes=2))
+    assert summary["passed"], summary["gate"]
+    assert sorted(row.request_id for row in rows) == [
+        f"request-{i:09d}" for i in range(10)
+    ]
+
+
+def test_timing_gate_catches_empty_chunk_timed_as_text(monkeypatch) -> None:
+    # ADR-010's mutation: the leading empty chunk sets TTFT.
+    original = client._consume_event
+
+    def broken(record, data, received_at):
+        if '"text":""' in data:
+            record.add_text(received_at)
+        return original(record, data, received_at)
+
+    monkeypatch.setattr(client, "_consume_event", broken)
+    summary, _ = asyncio.run(measure_timing_accuracy())
+    assert not summary["passed"]
+    assert summary["gate"]["ttft_s"]["p50_relative_error"] > 0.5
 
 
 def test_single_token_has_no_tpot_or_inter_chunk_latency() -> None:

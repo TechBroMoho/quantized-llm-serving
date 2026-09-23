@@ -282,6 +282,18 @@ def test_api_accepts_ignore_eos_true_and_rejects_false() -> None:
     assert response.status_code == 200
 
 
+@pytest.mark.parametrize("value", [True, None, 0, "false"])
+def test_api_accepts_only_skip_special_tokens_false(value) -> None:
+    from fastapi import HTTPException
+
+    endpoint = _completion_endpoint(Baseline(_model(), TinyTokenizer(), mode="naive"))
+    with pytest.raises(HTTPException) as error:
+        asyncio.run(endpoint(_payload(0) | {"skip_special_tokens": value}))
+    assert error.value.status_code == 400
+    response = asyncio.run(endpoint(_payload(0) | {"skip_special_tokens": False}))
+    assert response.status_code == 200
+
+
 def test_stats_report_actual_batches_and_settings() -> None:
     baseline = Baseline(_model(), TinyTokenizer(), mode="static", batch_size=3)
     baseline.generated_batch_sizes.extend([3, 1])

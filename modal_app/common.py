@@ -129,6 +129,9 @@ class Resources:
 
 DOWNLOAD_RESOURCES = Resources(None, 2, 4096, 600, 300)
 VLLM_CHECK_RESOURCES = Resources(None, 4, 4096, 180, 300)
+# ADR-013 in-container revalidation: 2 client + 2 mock processes. 8 cores is
+# the CPU shape planned for the Phase 6 benchmark container (vLLM + client).
+LOADTEST_CHECK_RESOURCES = Resources(None, 8, 4096, 600, 300)
 HF_CHECK_RESOURCES = Resources(None, 1, 2048, 120, 300)
 VLLM_SMOKE_RESOURCES = Resources("L4", 4, 16384, 900, 300)
 HF_SMOKE_RESOURCES = Resources("L4", 4, 8192, 600, 300)

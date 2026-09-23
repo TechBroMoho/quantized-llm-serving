@@ -51,6 +51,15 @@ def test_token_payload_is_unchanged_and_requests_ignore_eos() -> None:
     assert payload["prompt"] is not prompt
     assert payload["ignore_eos"] is True
     assert payload["max_tokens"] == 32
+    assert "skip_special_tokens" not in payload
+    kept = completions_payload(
+        prompt=prompt,
+        request_index=3,
+        output_tokens=32,
+        seed=1,
+        skip_special_tokens=False,
+    )
+    assert kept["skip_special_tokens"] is False
     text = completions_payload(prompt="p", request_index=3, output_tokens=1, seed=1)
     assert text["prompt"] == "p\n[request 3]"
     assert "ignore_eos" not in text

@@ -1,0 +1,25 @@
+run 1: 100 passed in 38.32s
+run 2: 100 passed in 38.56s
+run 3: 100 passed in 38.10s
+run 4: 100 passed in 38.77s
+run 5: 100 passed in 39.04s
+run 6: 100 passed in 38.99s
+run 7: 100 passed in 42.06s
+run 8: 100 passed in 39.82s
+run 9: 100 passed in 39.02s
+run 10: 100 passed in 38.61s
+run 11: 100 passed in 39.52s
+run 12: 100 passed in 38.61s
+run 13: 100 passed in 48.09s
+run 14: 100 passed in 41.79s
+run 15: 100 passed in 42.89s
+run 16: 100 passed in 39.83s
+run 17: 100 passed in 38.57s
+run 18: 1 failed, 99 passed in 38.82s
+run 19: 1 failed, 99 passed in 39.31s
+run 20: 1 failed, 99 passed in 38.97s
+run 21: 100 passed in 38.20s
+run 22: 100 passed in 38.45s
+run 23: 100 passed in 38.09s
+run 24: 100 passed in 38.06s
+run 25: 100 passed in 37.75s

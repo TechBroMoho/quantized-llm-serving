@@ -1,0 +1,23 @@
+uv run python -m llmbench.loadtest.validation --output-dir results/validation/multiprocess-local
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/mohammedjasim/code/quantized-llm-serving/src/llmbench/loadtest/validation.py", line 521, in <module>
+    main()
+  File "/Users/mohammedjasim/code/quantized-llm-serving/src/llmbench/loadtest/validation.py", line 516, in main
+    asyncio.run(_measure(args.output_dir, args.processes))
+  File "/Users/mohammedjasim/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/mohammedjasim/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mohammedjasim/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/Users/mohammedjasim/code/quantized-llm-serving/src/llmbench/loadtest/validation.py", line 373, in _measure
+    raise RuntimeError(f"{name} validation failed")
+RuntimeError: timing_accuracy validation failed
+timing_accuracy (1 client process(es)): ttft_s (n=200) p50 0.32% p99 0.40%, e2e_s (n=200) p50 0.23% p99 0.27%, tpot_s (n=200) p50 0.33% p99 0.26%, itl_s (n=4000) p50 0.16% p99 6.21%
+make: *** [mock-validate] Error 1
+make mock-validate MOCK_VALIDATE_DIR=results/validation/multiprocess-local  0.62s user 0.16s system 4% cpu 16.291 total

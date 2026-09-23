@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import random
 from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 from hashlib import sha256
 from typing import Any
 
@@ -17,12 +18,17 @@ def completions_payload(
     seed: int,
     model: str = "mock-model",
     ignore_eos: bool = False,
+    skip_special_tokens: bool | None = None,
 ) -> dict[str, Any]:
     """Create one request with explicit greedy generation parameters.
 
     Text prompts get a request-index suffix so they are unique. Token-ID
     prompts are sent unchanged: their uniqueness comes from `TokenPromptPool`,
     and an appended suffix would break the exact input length.
+
+    `skip_special_tokens=False` makes vLLM stream special tokens as text, as
+    the HF baseline does, so every generated token yields a text-bearing
+    chunk (ADR-014). None omits the field.
     """
     payload: dict[str, Any] = {
         "model": model,
@@ -45,6 +51,8 @@ def completions_payload(
         # vLLM's extension; the HF baseline accepts it because it always
         # enforces min_new_tokens == max_new_tokens.
         payload["ignore_eos"] = True
+    if skip_special_tokens is not None:
+        payload["skip_special_tokens"] = skip_special_tokens
     return payload
 
 
@@ -110,3 +118,68 @@ class TokenPromptPool:
                 str(index): position for index, position in self.issued.items()
             },
         }
+
+
+@dataclass(frozen=True)
+class TextPayloads:
+    """Picklable payload factory for a text prompt made unique per request.
+
+    Multi-process load runs (ADR-013) send the factory to worker processes,
+    so it must be a module-level class rather than a lambda.
+    """
+
+    prompt: str
+    output_tokens: int
+    seed: int
+    model: str = "mock-model"
+
+    def __call__(self, request_index: int) -> dict[str, Any]:
+        return completions_payload(
+            prompt=self.prompt,
+            request_index=request_index,
+            output_tokens=self.output_tokens,
+            seed=self.seed,
+            model=self.model,
+        )
+
+
+@dataclass(frozen=True)
+class PoolPayloads:
+    """Picklable factory giving each request index its own pool prompt.
+
+    `TokenPromptPool.take` issues prompts in call order, so separate client
+    processes holding copies would reuse prompts. Here the prompt is a pure
+    function of the request index: warmup index -k uses prompt k-1 and
+    measured index i uses prompt `warmup_requests + i`. The runner never
+    repeats an index, so no prompt is sent twice.
+    """
+
+    pool: TokenPromptPool
+    warmup_requests: int
+    output_tokens: int
+    seed: int
+    model: str
+    ignore_eos: bool = True
+    skip_special_tokens: bool | None = False
+
+    def position(self, request_index: int) -> int:
+        if request_index < 0:
+            position = -request_index - 1
+            if position >= self.warmup_requests:
+                raise IndexError(f"warmup index {request_index} has no prompt")
+            return position
+        position = self.warmup_requests + request_index
+        if position >= len(self.pool.prompts):
+            raise IndexError("prompt pool exhausted; prompts are never reused")
+        return position
+
+    def __call__(self, request_index: int) -> dict[str, Any]:
+        return completions_payload(
+            prompt=self.pool.prompts[self.position(request_index)],
+            request_index=request_index,
+            output_tokens=self.output_tokens,
+            seed=self.seed,
+            model=self.model,
+            ignore_eos=self.ignore_eos,
+            skip_special_tokens=self.skip_special_tokens,
+        )

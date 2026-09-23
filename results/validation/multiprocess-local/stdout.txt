@@ -1,0 +1,5 @@
+uv run python -m llmbench.loadtest.validation --output-dir results/validation/multiprocess-local
+timing_accuracy (1 client process(es)): ttft_s (n=200) p50 0.12% p99 0.12%, e2e_s (n=200) p50 0.04% p99 0.05%, tpot_s (n=200) p50 0.02% p99 0.00%, itl_s (n=4000) p50 0.09% p99 0.42%
+timing_multiprocess (2 client process(es)): ttft_s (n=200) p50 0.11% p99 0.14%, e2e_s (n=200) p50 0.05% p99 0.04%, tpot_s (n=200) p50 0.03% p99 0.02%, itl_s (n=4000) p50 0.08% p99 0.39%
+capacity: 88246.5 chunks/s (14.71x threshold), client CPU: 1.94 cores over 2 processes, mock CPU: 0.74, 0.74
+make mock-validate MOCK_VALIDATE_DIR=$D  102.22s user 23.33s system 52% cpu 3:57.28 total

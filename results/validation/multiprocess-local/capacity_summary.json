@@ -1,0 +1,112 @@
+{
+  "capacity_concurrency": 256,
+  "capacity_headroom_multiple": 44.12325,
+  "capacity_margin_chunks_per_s": 82246.5,
+  "capacity_threshold_chunks_per_s": 6000,
+  "capacity_threshold_multiple": 14.70775,
+  "capacity_window_s": 30.0,
+  "client_cpu_core_limit": 2.0,
+  "client_process_cpu_cores_average": 1.9371429999999998,
+  "client_process_cpu_seconds": 58.11429,
+  "client_processes": 2,
+  "config": {
+    "concurrency": 256,
+    "drain_s": 0.5,
+    "duration_s": 30.0,
+    "mock_server": {
+      "itl_s": 0,
+      "output_tokens": 3,
+      "processes": 2,
+      "ttft_s": 0
+    },
+    "mode": "closed",
+    "processes": 2,
+    "rate_per_s": null,
+    "request_count": null,
+    "seed": 0,
+    "timeout_s": 5,
+    "warmup_requests": 0
+  },
+  "config_sha256": "82bf07c944a6e35ac1417a6b6213c87b99075721007e6d7ce6959cef3a0fa556",
+  "drain_duration_s": 0.5,
+  "e2e_s": {
+    "p50": 0.007947834033984691,
+    "p90": 0.010725442180410027,
+    "p95": 0.011893292015884072,
+    "p99": 0.01401719685876742
+  },
+  "error_rate": 0.0,
+  "errored_or_cancelled_requests": 0,
+  "gpu_name": null,
+  "host": {
+    "logical_cpu_count": 10,
+    "mock_server_processes": 2,
+    "mock_server_separate_process": true,
+    "platform": "macOS-26.5-arm64-arm-64bit",
+    "python": "3.12.13"
+  },
+  "in_flight_at_deadline": 256,
+  "itl_s": {
+    "p50": 3.1249946914613247e-06,
+    "p90": 3.4580007195472717e-06,
+    "p95": 3.958004526793957e-06,
+    "p99": 9.500014130026102e-06
+  },
+  "late_completed_requests": 256,
+  "measured_text_chunks_per_s": 88246.5,
+  "measurement_text_chunks": 2647395,
+  "min_text_chunks_per_token": 0.5,
+  "mock_server_cpu_cores_average": [
+    0.7415933718855057,
+    0.7400340279072911
+  ],
+  "offered_requests": 882721,
+  "on_time_completed_requests": 882465,
+  "output_token_throughput_per_s": 88246.5,
+  "process_clock_check": {
+    "passed": true,
+    "results_received_at": 439950.230737625,
+    "start_sent_at": 439918.927158,
+    "worker_start_received_at": [
+      439918.927685958
+    ]
+  },
+  "raw_results_path": "results/validation/multiprocess-local/capacity_requests.jsonl.gz",
+  "rejected_requests": 0,
+  "request_throughput_per_s": 29415.5,
+  "shard_users": [
+    128,
+    128
+  ],
+  "shard_window_process_cpu_seconds": [
+    29.048777,
+    29.065513
+  ],
+  "text_chunk_shortfall_examples": [],
+  "text_chunk_shortfall_requests": 0,
+  "timestamp_utc": "2026-09-23T20:35:18.938419+00:00",
+  "tpot_s": {
+    "p50": 3.0625087674707174e-06,
+    "p90": 3.4580007195472717e-06,
+    "p95": 3.6460114642977715e-06,
+    "p99": 1.208350295200944e-05
+  },
+  "ttft_s": {
+    "p50": 0.007941292016766965,
+    "p90": 0.010717833007220179,
+    "p95": 0.011885666789021343,
+    "p99": 0.01400969685986638
+  },
+  "validation": "phase1_client_capacity",
+  "versions": {
+    "aiohttp": "3.14.3",
+    "llmbench": "0.1.0",
+    "modal": "1.3.3"
+  },
+  "warmup_requests_completed": 0,
+  "window_duration_s": 30.0,
+  "window_end_monotonic_s": 439949.177158,
+  "window_process_cpu_cores_average": 1.9371429999999998,
+  "window_process_cpu_seconds": 58.11429,
+  "window_start_monotonic_s": 439919.177158
+}

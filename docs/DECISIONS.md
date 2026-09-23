@@ -409,6 +409,44 @@ the **unchanged** 6,000 chunks/s, 30 s, 256-stream, zero-error gate, plus the
 timing gate, for an estimated ~$0.02 of CPU. This must pass before any Phase 6
 run; Phases 4–5 do not use the load tester.
 
+**Implementation (2026-09-23, $0; in-container run pending approval).**
+- `run_load(processes=P)`: the parent runs shard 0 and spawns P−1 worker
+  processes (`spawn` context). Shard p gets an even share of users, warmups,
+  request count and open-loop rate (independent seeds `"{seed}/{p}"`).
+  Measured indices are p, p+P, …; warmup indices −(1+p), −(1+p+P), …, so the
+  indices never collide and a request-count run covers exactly 0..N−1. In
+  open-loop mode the admission cap (rejections) applies per shard, to its
+  share of `concurrency`; independent Poisson streams sum to the total rate.
+- After every shard's warmup, the parent picks one window start 0.25 s ahead
+  and sends it to the workers. Workers return their records; the parent
+  merges them, relabels late completions against the common window end and
+  calls the unchanged `summarize`. Duplicate request IDs are an error.
+- Clock check: each worker records `perf_counter()` when the start message
+  arrives. It must lie between the parent's send time and its receipt of the
+  results, or the run fails. A per-process clock would fall outside.
+- The timing gate now also runs through two processes with the mock in the
+  parent, so a worker's timestamps are compared with the parent's server
+  write timestamps.
+- CPU is summed over all client processes. The capacity gate uses **2 client
+  processes**: each is single-threaded, so the 2-core limit holds by
+  construction, and the question is only the chunk rate. Each client process
+  gets its own mock process so the mock is not the bottleneck; mock CPU is
+  recorded (descriptive).
+- Payload factories must be picklable (`TextPayloads`, `PoolPayloads`).
+  `TokenPromptPool.take` issues prompts in call order, so copies in several
+  processes would reuse prompts; `PoolPayloads` maps each request index to
+  its own prompt instead.
+
+**Local revalidation** (`make mock-validate
+MOCK_VALIDATE_DIR=results/validation/multiprocess-local`, final code):
+**88,246.5 chunks/s (14.71×)** with 2 client processes at 1.94 cores in
+total, mock processes at 0.74 cores each, 0 errors or rejections, 256 late
+completions reported separately. The full timing gate (ADR-019) passed with
+1 and 2 client processes (ITL p99 0.42% / 0.39% over 4,000 gaps). The 46.1 MB
+raw request file stays local (gitignored, sha256 `4751c849…917912`); the
+summaries are committed. An earlier run of this commit's code, before the
+final timing plan, gave 88,943.0 chunks/s.
+
 ## ADR-014 — vLLM empty text chunks distort per-request E2E/TPOT (2026-09-23, open)
 
 **Observation.** In the vLLM smoke, 14 of 16 requests had 29–32 text-bearing
@@ -439,6 +477,32 @@ completed request's text-bearing chunk count falls well short of its
 `usage.completion_tokens`; the exact threshold is fixed in code and tests
 before Phase 6 and recorded here. ADR-003's metric definitions are unchanged.
 Implementation and a CPU test land before Phase 6.
+
+**Implementation (2026-09-23).**
+- Checked in the pinned source (v0.10.2): `CompletionRequest` has
+  `skip_special_tokens: bool = True` (`entrypoints/openai/protocol.py`,
+  passed to `SamplingParams`). The smoke driver and `PoolPayloads` send
+  `false`. The HF server rejects any value other than `false` (including
+  `true`, `null` and `0`); omitting it stays valid.
+- **Threshold: at least 0.5 text-bearing chunks per usage completion token**
+  for every completed request (`ok` or `late_completion`), in
+  `metrics.MIN_TEXT_CHUNKS_PER_TOKEN`. Reason: healthy Phase 3 rows had ≥
+  29/32 (0.91) and the broken rows 1–2/32 (≤ 0.06). vLLM's
+  `RequestOutputCollector` (`v1/engine/output_processor.py`) merges deltas
+  when the API server falls behind the engine, so under load one chunk can
+  carry several tokens without distorting E2E. 0.5 tolerates an average of
+  two tokens per chunk. A failure message gives the empty-chunk count, so
+  merging (few empty chunks) can be told apart from text-less tokens (many).
+- Checked by `smoke.validate_run`, reported in every summary
+  (`text_chunk_shortfall_requests`), and it makes `llmbench load` exit
+  non-zero. Each record also stores `stream_end_s` (start to `[DONE]`) for
+  diagnosis only.
+- Tests: the unit boundary (exactly 0.5 passes); a mock that streams the last
+  3 of 4 tokens as empty text fails the smoke, although every record is `ok`
+  by usage; and a threshold-0 mutation makes both tests fail.
+- **Risk for Phase 6:** if vLLM merges more than two tokens per chunk at
+  c=256, this check fails that sweep point. The results are still saved, and
+  the empty-chunk counts will show which case it was.
 
 ## ADR-015 — Budget hard stop from free credits (2026-09-23)
 
@@ -677,3 +741,75 @@ the input ~100 s after the client went silent, despite `--detach`.
 `full-20260923T175000Z` (same config and package versions). Phase 6's long
 runs should use the same spawn pattern. Remaining against the $25 target:
 $12.93, with Phase 6 estimated at $6.72 (envelope $9.48).
+
+## ADR-019 — Timing gates: strict medians, a tail bound sized to the sample (2026-09-23)
+
+**Context.** `test_mock_timing_accuracy` failed in 2 of 25 full-suite runs
+(0 of 6 alone). The gate required every paired TTFT, E2E, TPOT and ITL to be
+within ±5% of the mock's own write timestamps, on 5 requests × 4 tokens;
+medians were computed but not gated. With a 20 ms mock ITL, ±5% is 1 ms.
+
+**Cause: host CPU contention, not the client.** Scratch probes, laptop with
+10 cores (`results/validation/timing-investigation/`):
+- A large heap is not the cause: with 6.3M live objects (torch and
+  transformers imported), 30/30 runs passed, with no gen-2 GC during
+  measurement. Four instrumented full-suite runs also logged no GC pause over
+  0.5 ms during any timing test.
+- Contention is. Old gate: 0/30 failures quiet, 3/30 with 2 cores spinning,
+  7/30 with 6, and 30/30 with all 10. Failing gaps were off by 5–92% (up to
+  18.5 ms); the worst TTFT miss was 16.7% (33 ms, 6 cores spinning). Medians
+  stayed within 0.6% with up to 6 cores busy.
+- The per-chunk delivery delay (client receipt − server write, same clock)
+  was 0.1–0.2 ms at p50 and 0.5–0.9 ms at p99, never negative, with
+  occasional 2.5–6.4 ms spikes. A spike stretches one gap and shrinks the
+  next by the same amount. That is the process being descheduled between the
+  mock's write and the client's read: attribution and the clock are right.
+
+**First attempt, rejected.** p50 and p99 at ±5% on 10 × 21. With 10
+requests, a p99 of TTFT/E2E/TPOT is just the maximum, so this was still the
+every-request rule for those metrics. It failed 3 of 25 full-suite runs (plus
+1 of 6 in an earlier loop) while the laptop was busy (load average ~7.7).
+
+**Decision: two gates, each sized to what its sample supports.**
+- **Unit gate** (`make check`; `TIMING_UNIT`, 10 sequential requests × 21
+  tokens): structural completeness; the client's **p50** of TTFT, E2E, TPOT
+  and ITL within **±5%** of the paired server references (unchanged
+  tolerance, now actually gated); and **every** paired observation within
+  **50 ms** absolute. The bound is absolute because scheduling delays are
+  absolute time, not proportional to the interval: the same spikes hit 20 ms
+  gaps and 200 ms TTFTs. 50 ms is 1.5× the worst delay measured under
+  artificial heavy contention (33 ms), and half the 100 ms corruption that the
+  audit regression test injects.
+- **Full gate** (`make mock-validate` and the in-Modal check; `TIMING_FULL`,
+  200 sequential requests × 21 tokens, i.e. 200 TTFT/E2E/TPOT and 4,000 ITL
+  samples per run): structural completeness; client **p50 and p99** of all
+  four metrics within **±5%**. It refuses to gate a p99 on fewer than 100
+  samples. It runs twice: 1 client process, and 2 (one stream each).
+- The full plan uses one stream per client process. A first run with 8
+  concurrent streams failed ITL p99 at 6.21% (p50 0.16%): the mock shares the
+  client's event loop, so its writes for other streams delay the client's
+  reads. A real server is a separate process. Kept in
+  `results/validation/multiprocess-local/failed-8-streams-in-process/`.
+
+**What this gives up, and what still fails.** In the unit gate a single
+paired observation may now be off by up to 50 ms instead of 5%; systematic
+errors are caught by the strict medians, and tail distortion by the full
+gate's p99. The unit gate still fails on:
+- a 1.2 ms bias on every gap (median);
+- one gap 60 ms off, or one request 100 ms late (tail bound);
+- the ADR-010 mutation, an empty chunk timed as text (TTFT median > 50% off);
+- the unchanged audit regression, one corrupted request.
+
+The full gate fails on 4 ms delays on 10% of gaps (p99, median passing) and
+passes one isolated 6.4 ms spike (`tests/test_timing_gate.py`).
+
+**Evidence** (`make mock-validate
+MOCK_VALIDATE_DIR=results/validation/multiprocess-local`, final code): 1
+process, ITL p99 0.42% (4,000 gaps), TTFT/E2E/TPOT ≤ 0.12% at p50 and p99; 2
+processes, ITL p99 0.39%. The final unit gate was not repeated in a loop (the
+repeats were stopped because the laptop was overheating); its flake rate is
+not measured beyond single `make check` runs.
+
+**Consequences.** SPEC Phase 1 wording is updated. The earlier timing
+summaries (ADR-010, audit, Phase 3) used the old sample and rule and stay as
+they were. The in-Modal check runs the full gate.

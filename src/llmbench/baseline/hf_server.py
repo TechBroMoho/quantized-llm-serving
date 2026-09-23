@@ -216,6 +216,7 @@ def make_app(baseline: Baseline) -> FastAPI:
             "seed",
             "stop",
             "ignore_eos",
+            "skip_special_tokens",
         }
         if unsupported := body.keys() - allowed:
             raise HTTPException(400, f"unsupported settings: {sorted(unsupported)}")
@@ -252,6 +253,9 @@ def make_app(baseline: Baseline) -> FastAPI:
         if body.get("ignore_eos", True) is not True:
             # min_new_tokens == max_new_tokens always suppresses EOS here.
             raise HTTPException(400, "ignore_eos=false is unsupported")
+        if body.get("skip_special_tokens", False) is not False:
+            # Tokens are always decoded with skip_special_tokens=False (ADR-014).
+            raise HTTPException(400, "only skip_special_tokens=false is supported")
         job = Job(prompt=prompt, max_new_tokens=maximum)
         await baseline.pending.put(job)
 

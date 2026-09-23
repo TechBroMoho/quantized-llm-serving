@@ -38,7 +38,7 @@ def _port() -> int:
         return int(listener.getsockname()[1])
 
 
-def _mock_command(port: int, tokens: int) -> list[str]:
+def _mock_command(port: int, tokens: int, empty_text_tokens: int = 0) -> list[str]:
     return [
         sys.executable,
         "-m",
@@ -51,10 +51,14 @@ def _mock_command(port: int, tokens: int) -> list[str]:
         "1",
         "--tokens",
         str(tokens),
+        "--empty-text-tokens",
+        str(empty_text_tokens),
     ]
 
 
-def _run_mock(tmp_path: Path, tokens: int) -> dict[str, Any]:
+def _run_mock(
+    tmp_path: Path, tokens: int, empty_text_tokens: int = 0
+) -> dict[str, Any]:
     from llmbench.loadtest.workloads import TokenPromptPool
 
     port = _port()
@@ -67,7 +71,7 @@ def _run_mock(tmp_path: Path, tokens: int) -> dict[str, Any]:
     return asyncio.run(
         run_server_smoke(
             label="mock",
-            command=_mock_command(port, tokens),
+            command=_mock_command(port, tokens, empty_text_tokens),
             base_url=f"http://127.0.0.1:{port}",
             model_name="mock-model",
             pool=pool,
@@ -100,6 +104,22 @@ def test_smoke_driver_fails_on_short_output_but_still_saves(tmp_path: Path) -> N
     assert any("completion_tokens 3 != max_tokens 4" in f for f in summary["failures"])
     saved = json.loads((tmp_path / "smoke_summary.json").read_text())
     assert saved["state"] == "finished" and not saved["passed"]
+
+
+def test_smoke_driver_fails_when_tokens_stream_without_text(tmp_path: Path) -> None:
+    # The Phase 3 vLLM rows: exact usage, but trailing tokens had empty text.
+    summary = _run_mock(tmp_path, tokens=WORKLOAD.output_tokens, empty_text_tokens=3)
+    assert not summary["passed"]
+    shortfalls = [f for f in summary["failures"] if "text chunks" in f]
+    assert len(shortfalls) == WORKLOAD.measured_requests, summary["failures"]
+    # 3 empty token chunks plus the mock's usual leading empty chunk.
+    assert "1 text chunks (4 empty) for 4 completion tokens" in shortfalls[0]
+    rows = [
+        json.loads(line)
+        for line in (tmp_path / "load_summary.jsonl").read_text().splitlines()
+    ]
+    assert all(row["status"] == "ok" for row in rows)  # usage alone looks fine
+    assert all(row["stream_end_s"] > row["e2e_s"] for row in rows)
 
 
 def test_smoke_driver_reports_server_that_exits_before_health(tmp_path: Path) -> None:

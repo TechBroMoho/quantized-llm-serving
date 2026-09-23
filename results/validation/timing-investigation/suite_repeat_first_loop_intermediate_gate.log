@@ -1,0 +1,6 @@
+run 1: 100 passed in 39.08s
+run 2: 100 passed in 38.27s
+run 3: 100 passed in 38.40s
+run 4: 100 passed in 38.18s
+run 5: 100 passed in 37.61s
+run 6: 1 failed, 99 passed in 38.02s

@@ -23,6 +23,9 @@ class MockConfig:
     send_empty_chunk: bool = True
     include_usage: bool = True
     hold_open_s: float = 0.0
+    # Stream the last N tokens with empty text, as vLLM does for special
+    # tokens under skip_special_tokens=true (ADR-014 failure reproduction).
+    empty_text_tokens: int = 0
     timestamp_sink: Callable[[str, str, float], None] | None = None
 
 
@@ -63,15 +66,16 @@ async def completion(request: web.Request) -> web.StreamResponse:
         for index in range(config.output_tokens):
             if index:
                 await _wait_for_delay(config.itl_s)
+            is_text = index < config.output_tokens - config.empty_text_tokens
             await response.write(
                 _event(
                     {
-                        "choices": [{"text": "x"}],
+                        "choices": [{"text": "x" if is_text else ""}],
                         "usage": None,
                     }
                 )
             )
-            if config.timestamp_sink is not None:
+            if is_text and config.timestamp_sink is not None:
                 config.timestamp_sink(request_id, "text", time.perf_counter())
         if config.include_usage:
             await response.write(
@@ -102,12 +106,18 @@ async def health(_: web.Request) -> web.Response:
     return web.json_response({"status": "ok"})
 
 
+async def stats(_: web.Request) -> web.Response:
+    """Report this process's CPU time (capacity runs check the mock's load)."""
+    return web.json_response({"process_cpu_seconds": time.process_time()})
+
+
 def make_app(config: MockConfig | None = None) -> web.Application:
     """Create an app whose timings can be controlled by a test."""
     app = web.Application()
     app[CONFIG_KEY] = config or MockConfig()
     app.router.add_post("/v1/completions", completion)
     app.router.add_get("/health", health)
+    app.router.add_get("/stats", stats)
     return app
 
 
@@ -130,6 +140,7 @@ def main() -> None:
     parser.add_argument("--ttft-ms", type=float, default=200)
     parser.add_argument("--itl-ms", type=float, default=20)
     parser.add_argument("--tokens", type=int, default=3)
+    parser.add_argument("--empty-text-tokens", type=int, default=0)
     args = parser.parse_args()
     asyncio.run(
         serve(
@@ -139,6 +150,7 @@ def main() -> None:
                 ttft_s=args.ttft_ms / 1000,
                 itl_s=args.itl_ms / 1000,
                 output_tokens=args.tokens,
+                empty_text_tokens=args.empty_text_tokens,
             ),
         )
     )

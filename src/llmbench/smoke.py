@@ -31,7 +31,7 @@ from typing import Any
 import aiohttp
 
 from llmbench.loadtest.io import write_results
-from llmbench.loadtest.metrics import RequestRecord
+from llmbench.loadtest.metrics import RequestRecord, text_chunk_shortfalls
 from llmbench.loadtest.runner import run_load
 from llmbench.loadtest.workloads import (
     TokenPromptPool,
@@ -319,6 +319,7 @@ async def run_workload(
             seed=workload.seed,
             model=model,
             ignore_eos=True,
+            skip_special_tokens=False,
         ),
         mode="closed",
         request_count=workload.measured_requests,
@@ -360,6 +361,7 @@ def validate_run(
             problems.append("no text chunks")
         if problems:
             failures.append(f"{row.request_id}: " + "; ".join(problems))
+    failures.extend(text_chunk_shortfalls(records))
     return failures
 
 

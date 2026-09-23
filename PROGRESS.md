@@ -2,13 +2,16 @@
 
 ## Status
 
-Phase 5 complete (2026-09-23). MMLU 5-shot: BF16 74.88%, AWQ 73.93%
-(−0.95 pp), GPTQ 73.24% (−1.65 pp); WikiText-2 word perplexity 12.742 /
-13.282 / 13.662. Phase 5 actual **$10.7004** (cap $11.63 after
-reallocation); cumulative **$12.0650** (dashboard). `modal app list` shows
-nothing running. Before Phase 6 (approved, not yet built): a multi-process
-load tester revalidated in Modal (ADR-013), and `skip_special_tokens=false`
-with a chunk-count check (ADR-014).
+Phase 6 prerequisites done locally ($0, 2026-09-23): ADR-014
+(`skip_special_tokens=false` plus a ≥ 0.5 text-chunks-per-token check),
+ADR-013 (multi-process load tester; 88,246.5 chunks/s locally with 2
+processes at 1.94 cores), and ADR-019 (the flaky timing test was host CPU
+contention; strict medians everywhere, a 50 ms tail bound in the unit test,
+a real p99 in the evidence runs). Phase 5 results are unchanged: MMLU 5-shot BF16 74.88%,
+AWQ 73.93% (−0.95 pp), GPTQ 73.24% (−1.65 pp). Cumulative spend **$12.0650**;
+`modal app list` showed nothing running at the end of Phase 5. Next, pending
+Mohammed's yes: the CPU-only in-Modal load tester check (~$0.04), then
+building the Phase 6 benchmark (estimate $7.34, envelope $9.99).
 
 ## Phase log
 
@@ -306,6 +309,49 @@ with a chunk-count check (ADR-014).
     results/accuracy/phase5/full-20260923T142440Z --variant-dir
     gptq=results/accuracy/phase5/full-20260923T175000Z`).
 
+- **Phase 6 prerequisites (2026-09-23, $0, local only).**
+  - *ADR-014.* The smoke driver and the new `PoolPayloads` send
+    `skip_special_tokens: false` (verified in vLLM v0.10.2's
+    `CompletionRequest`). The HF server accepts only `false`. Every completed
+    request must have ≥ 0.5 text-bearing chunks per usage token
+    (`MIN_TEXT_CHUNKS_PER_TOKEN`); the ratio is 0.5 rather than ~0.9 because
+    vLLM's `RequestOutputCollector` merges deltas under load. A mock that
+    streams the last 3 of 4 tokens as empty text now fails the smoke, and a
+    threshold-0 mutation fails both new tests. Records gain a diagnostic
+    `stream_end_s`.
+  - *ADR-013.* `run_load(processes=P)` runs shard 0 in the parent and P−1
+    spawned workers. The shards have disjoint users and request indices,
+    share one window start on `perf_counter`, and pass a clock check (the
+    worker's receipt of the start lies between the parent's send and its
+    receipt of the results). Records are merged before the unchanged summary.
+    `make mock-validate MOCK_VALIDATE_DIR=results/validation/multiprocess-local`
+    (3 min 57 s): full timing gate passed with 1 and 2 client processes (ITL
+    p99 0.42% / 0.39% over 4,000 gaps; TTFT/E2E/TPOT ≤ 0.14%); capacity
+    **88,246.5 chunks/s (14.71×)** with 2 client processes at 1.94 cores,
+    mocks 0.74 cores each, 0 errors or rejections, 256 late completions
+    reported separately. The raw capacity file (46.1 MB, sha256
+    `4751c849…917912`) is gitignored; the summaries are committed. New `make
+    modal-loadtest-check` (CPU, 8 cores, 600 s timeout) runs the same gates
+    inside the vLLM image. **Not run yet.**
+  - *ADR-019, the flaky timing test.* Cause: host CPU contention. The
+    process is descheduled for 2.5–6.4 ms (worst seen 33 ms) between the
+    mock's write and the client's read, which stretches one gap and shrinks
+    the next; medians stay within 0.6%. GC is not the cause (no gen-2 pause
+    during any timing test, with a 6.3M-object heap or in the suite).
+    - A first fix (p50 + p99 on 10 × 21) was still the every-request rule for
+      the 10-sample metrics. It failed 3 of 25 suite runs.
+    - Final: the unit test gates strict ±5% medians plus a 50 ms bound on
+      every paired observation.
+    - The evidence runs (200 × 21, sequential) gate strict medians plus
+      p99 ±5%. A first evidence run with 8 in-process streams failed ITL p99
+      at 6.21%, because the mock shares the client's event loop; it is kept.
+    - Probes and logs: `results/validation/timing-investigation/`. The final
+      unit gate was not loop-tested (the laptop was overheating).
+  - Payload factories must now be picklable (`TextPayloads`, `PoolPayloads`);
+    `llmbench load --processes N` is available.
+  - `make check` (once, final code): Ruff, strict mypy (16 files), 103
+    tests passed, instruction-file comparison.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -410,3 +456,10 @@ the 1 TiB/month included.
   gaps exceed ±5% (~1 ms at 20 ms ITL) under suite load, while the medians are
   within 0.5%. The test and gate are unchanged; a separate investigation is
   proposed.
+
+- Phase 6 prerequisites: my first fix for the timing flake (a p99 over 10
+  samples) was still the old every-request rule in disguise, and it failed 3
+  of 25 suite runs. My first 25× loop also kept only each run's last line, so
+  one failure could not be attributed. Then the first full-gate evidence run
+  failed ITL p99 at 6.21% with 8 concurrent streams sharing the mock's event
+  loop; the evidence runs now use one stream per process.

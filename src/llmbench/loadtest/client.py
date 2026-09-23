@@ -90,7 +90,9 @@ async def stream_request(
                     elif not line and data_lines:
                         data = "\n".join(data_lines)
                         data_lines.clear()
-                        if _consume_event(record, data, time.perf_counter()):
+                        received_at = time.perf_counter()
+                        if _consume_event(record, data, received_at):
+                            record.stream_end_s = received_at - started_at
                             done_received = True
                             break
                 if not done_received and record.status == "ok":

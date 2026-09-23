@@ -23,3 +23,6 @@ sparse_logs/
 
 # lm-eval per-sample outputs stay on the Modal Volume (see scripts/sync_accuracy.py)
 results/**/samples_*.jsonl
+
+# Laptop capacity raw records are ~46 MB; the summary and its sha256 are kept
+results/validation/multiprocess-local/capacity_requests.jsonl.gz

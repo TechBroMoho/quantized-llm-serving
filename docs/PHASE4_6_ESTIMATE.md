@@ -1,5 +1,32 @@
 # Phases 4–6 cost estimate
 
+> **Phase 6 re-estimate (2026-09-23, before any Phase 6 spend).** The
+> benchmark function is not built yet; these are planning assumptions, and
+> each GPU run will be re-announced with its own estimate. Rates as below;
+> the L40S container (8 cores, 32 GiB) costs $0.04307/min ($2.584/h).
+> Assumed per sweep point: 30 s time-based warmup, then a 120 s window at
+> c ≤ 16 or 180 s at c ≥ 64, then a drain of up to one E2E. Assumed vLLM
+> lifetime startup: 2.5 min (Phase 4 measured 46–52 s to healthy in eager
+> mode; CUDA-graph capture and compile add more). Headline repeats run in the
+> same server lifetime.
+>
+> | Step | Resources | Expected | Envelope (timeout) |
+> | --- | --- | ---: | ---: |
+> | In-Modal load tester check (ADR-013) + image layer build | CPU 8 cores / 4 GiB, 5 min (10) | $0.039 | $0.078 |
+> | Checkpoint sha256 check vs Phase 4 + W1 real-text prompts | CPU 2 cores / 8 GiB, 10 min (20) | $0.026 | $0.053 |
+> | L40S probe: AWQ startup, short c=1 and c=256 windows | L40S, 8 min (12) | $0.345 | $0.517 |
+> | vLLM BF16: sweep {1,4,16,64,128,256} + 2 repeats at c=1 and peak | L40S, 35 min (47) | $1.507 | $2.024 |
+> | vLLM AWQ: sweep + 2 repeats + `vllm bench serve` × 3 | L40S, 44 min (60) | $1.895 | $2.584 |
+> | vLLM GPTQ: sweep | L40S, 22 min (30) | $0.948 | $1.292 |
+> | Max-batch: AWQ c=256, `--max-num-seqs` 16 and 64 (256 = main sweep) | L40S, 16 min (20) | $0.689 | $0.861 |
+> | HF naive {1,4,16} + static (OOM probe, sweep, 2 repeats of each peak) | L40S, 44 min (60) | $1.895 | $2.584 |
+> | **Phase 6 total** | 169 GPU min (229) | **$7.34** | **$9.99** |
+>
+> Cumulative: $12.065 actual + $7.34 = **$19.41 expected** ($22.06
+> envelope), under the $25 target. The envelope is only $0.01 under the
+> $10 Phase 6 cap. The probe replaces the E2E and startup
+> assumptions with measurements before the sweeps are approved.
+
 > **Update after Phase 5 (2026-09-23).** Phase 5 actual: **$10.7004**
 > (prefetches $0.0428, probe $0.2108, full run 1 $7.3972 with ~$1.65 lost to
 > the cancelled GPTQ attempt, GPTQ rerun $3.0496) against a cap raised to

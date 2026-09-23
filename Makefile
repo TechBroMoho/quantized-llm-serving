@@ -23,8 +23,9 @@ test:
 check: lint typecheck test
 	cmp CLAUDE.md AGENTS.md
 
-mock-validate:
-	uv run python -m llmbench.loadtest.validation --output-dir results/validation
+MOCK_VALIDATE_DIR ?= results/validation
+mock-validate:  # $0: timing (1 and 2 client processes) + 2-process capacity gate
+	uv run python -m llmbench.loadtest.validation --output-dir $(MOCK_VALIDATE_DIR)
 
 # --- Docker (local, $0) ---
 .PHONY: docker-check
@@ -55,6 +56,14 @@ smoke: smoke-vllm smoke-hf
 
 sync-results:  # $0: copy Phase 3 results from the results Volume
 	uv run modal volume get llmbench-results phase3 results/validation --force
+
+# --- Phase 6 prerequisites ---
+.PHONY: modal-loadtest-check sync-loadtest-check
+modal-loadtest-check:  # CPU only (BILLABLE, tiny): ADR-013 gate in the vLLM image
+	$(MODAL_RUN) modal_app.checks::loadtest
+
+sync-loadtest-check:  # $0: copy the in-container load tester checks
+	uv run modal volume get llmbench-results phase6 results/validation --force
 
 # --- Phase 4 quantization ---
 QUANT_VENV = .cache/quant-venv

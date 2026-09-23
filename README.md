@@ -21,6 +21,12 @@ make mock-validate
 GPU experiments are outside the local workflow and require a separate cost
 estimate and explicit approval before each run.
 
+`make mock-validate` runs the timing gate with one and with two client
+processes, then the capacity gate with two client processes, each with its own
+mock (ADR-013, ADR-019). Pass `MOCK_VALIDATE_DIR=...` to keep earlier evidence;
+the Phase 6 prerequisite run is in `results/validation/multiprocess-local/`.
+`llmbench load --processes N` shards a load test across N client processes.
+
 ## CPU Hugging Face baseline
 
 The baseline has `naive` (one generation at a time) and `static` (short

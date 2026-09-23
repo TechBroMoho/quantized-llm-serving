@@ -5,6 +5,15 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+# ADR-014: every completed request must stream at least this many text-bearing
+# chunks per usage completion token. With skip_special_tokens=false a healthy
+# stream has about one text chunk per token (Phase 3 smoke: >= 29 of 32).
+# vLLM merges deltas when its API server falls behind the engine, so under load
+# one chunk may carry several tokens; 0.5 allows up to two tokens per chunk on
+# average. The failure it guards against, text-less trailing tokens that cut
+# the last-text E2E short, gave 1-2 text chunks for 32 tokens.
+MIN_TEXT_CHUNKS_PER_TOKEN = 0.5
+
 
 @dataclass
 class RequestRecord:
@@ -23,6 +32,9 @@ class RequestRecord:
     text_chunks: int = 0
     empty_text_chunks: int = 0
     usage_events: int = 0
+    # Diagnostic only (not a metric): request start to the [DONE] event. A gap
+    # after e2e_s means tokens arrived without text (ADR-014).
+    stream_end_s: float | None = None
     error: str | None = None
 
     def add_text(self, received_at: float) -> None:
@@ -39,6 +51,29 @@ class RequestRecord:
     def as_dict(self) -> dict[str, Any]:
         """Return a JSON serializable record."""
         return asdict(self)
+
+
+def text_chunk_shortfalls(
+    records: list[RequestRecord], minimum: float = MIN_TEXT_CHUNKS_PER_TOKEN
+) -> list[str]:
+    """Completed requests whose text chunks fall well short of usage tokens.
+
+    Any entry makes the run invalid: its last-text E2E and TPOT may end before
+    the last generated token. Empty-chunk counts are included so a failure can
+    be told apart from vLLM merging several tokens into one chunk.
+    """
+    problems = []
+    for row in records:
+        if row.status not in {"ok", "late_completion"} or not row.completion_tokens:
+            continue
+        if row.text_chunks < minimum * row.completion_tokens:
+            problems.append(
+                f"{row.request_id}: {row.text_chunks} text chunks "
+                f"({row.empty_text_chunks} empty) for "
+                f"{row.completion_tokens} completion tokens, below "
+                f"{minimum:g} per token"
+            )
+    return problems
 
 
 def percentile(values: list[float], p: float) -> float | None:
@@ -94,6 +129,7 @@ def summarize(
     e2e = [row.e2e_s for row in on_time if row.e2e_s is not None]
     itl = [gap for row in on_time for gap in row.itl_s]
     errors = [row for row in records if row.status not in {"ok", "late_completion"}]
+    shortfalls = text_chunk_shortfalls(records)
     return {
         "window_start_monotonic_s": window_start,
         "window_end_monotonic_s": window_end,
@@ -107,6 +143,9 @@ def summarize(
         "in_flight_at_deadline": in_flight_at_deadline,
         "errored_or_cancelled_requests": len(errors),
         "error_rate": len(errors) / max(1, len(records) + rejected_requests),
+        "min_text_chunks_per_token": MIN_TEXT_CHUNKS_PER_TOKEN,
+        "text_chunk_shortfall_requests": len(shortfalls),
+        "text_chunk_shortfall_examples": shortfalls[:10],
         "request_throughput_per_s": len(on_time) / width if width > 0 else 0.0,
         "output_token_throughput_per_s": sum(
             row.completion_tokens or 0 for row in on_time

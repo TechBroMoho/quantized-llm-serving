@@ -2,7 +2,13 @@
 
 from math import isclose
 
-from llmbench.loadtest.metrics import RequestRecord, percentile, summarize
+from llmbench.loadtest.metrics import (
+    MIN_TEXT_CHUNKS_PER_TOKEN,
+    RequestRecord,
+    percentile,
+    summarize,
+    text_chunk_shortfalls,
+)
 
 
 def test_text_chunks_define_timing_not_empty_or_usage_events() -> None:
@@ -36,3 +42,25 @@ def test_late_completions_do_not_count_toward_window_throughput() -> None:
     assert result["late_completed_requests"] == 1
     assert result["in_flight_at_deadline"] == 2
     assert result["request_throughput_per_s"] == 1.0
+
+
+def _counted(request_id: str, status: str, text: int, empty: int, tokens: int):
+    row = RequestRecord(request_id, status, 0.0, completion_tokens=tokens)
+    row.text_chunks, row.empty_text_chunks = text, empty
+    return row
+
+
+def test_text_chunk_check_flags_streams_that_end_without_text() -> None:
+    records = [
+        _counted("healthy", "ok", 32, 0, 32),
+        _counted("merged-2x", "ok", 16, 0, 32),  # exactly 0.5 per token: allowed
+        _counted("skipped-specials", "ok", 2, 30, 32),  # the Phase 3 vLLM rows
+        _counted("late-short", "late_completion", 15, 0, 32),
+        _counted("errored", "error", 0, 0, 32),  # already invalid; not counted
+    ]
+    problems = text_chunk_shortfalls(records)
+    assert [p.split(":")[0] for p in problems] == ["skipped-specials", "late-short"]
+    assert "2 text chunks (30 empty) for 32 completion tokens" in problems[0]
+    summary = summarize(records, window_start=0.0, window_end=1.0)
+    assert summary["text_chunk_shortfall_requests"] == 2
+    assert summary["min_text_chunks_per_token"] == MIN_TEXT_CHUNKS_PER_TOKEN == 0.5
