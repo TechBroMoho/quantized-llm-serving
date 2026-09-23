@@ -2,8 +2,12 @@
 
 ## Status
 
-Phases 0–2 audited and corrected before Phase 3. No GPU or Modal function has run. The next phase
-needs an explicit cost estimate and approval before any remote execution.
+Phase 3 complete (2026-09-23). The L4 smokes passed for vLLM (served from our
+Dockerfile image) and for the HF baseline (naive and static). Actual Modal
+spend: **$0.0975** of the $1 Phase 3 cap. `modal app list` shows no running
+apps. Two findings block Phase 6 but not Phase 4: in-container client capacity
+(ADR-013) and empty vLLM text chunks (ADR-014). The Phases 4–6 estimate is in
+`docs/PHASE4_6_ESTIMATE.md`, and no Phase 4 work has been approved.
 
 ## Phase log
 
@@ -71,17 +75,65 @@ needs an explicit cost estimate and approval before any remote execution.
   analytical estimates. The Phase 3 plan is in `docs/PHASE3_PLAN.md`.
   No Modal commands, image builds, downloads or functions ran during this audit.
 
+- **Phase 3 (2026-09-23):** Modal plumbing, the Docker image and L4 smokes
+  (ADR-012). The Dockerfile pins `vllm/vllm-openai:v0.10.2@sha256:607442e4…`;
+  `make docker-check` passes (hadolint 2.15.1 reported no findings; `docker
+  compose config` is valid). Local `make check`: Ruff, strict mypy (12 source
+  files), 47 tests, instruction-file comparison. CPU rehearsals drive the exact
+  smoke code path against the mock and a real HF server subprocess.
+  Remote steps, in order:
+  - The CPU download of `Qwen/Qwen3-0.6B@c1899de2…` (1,519,209,243 bytes, 10
+    files) matched the Hub's sha256 for every LFS file.
+  - The in-image CPU check recorded vLLM 0.10.2, torch 2.8.0+cu128 and
+    transformers 4.56.1. Timing validation passed; the **capacity gate failed
+    at 3,786.1 chunks/s (0.63×)** (ADR-013).
+  - The HF image check recorded torch 2.8.0 (CUDA 12.8) and transformers
+    4.56.2.
+  - **The vLLM L4 smoke passed** (run `smoke-20260923T095423Z`): NVIDIA L4
+    (driver 580.95.05); all configured flags were found in the pinned `vllm
+    serve --help`; `/health` after 59.1 s; 4/4 warmups and 16/16 requests
+    with `usage` 512/32 on every record, zero errors/rejections/late
+    completions; server counters 10,240 prompt / 640 generated tokens (= 20
+    requests); prefix-cache queries and hits both 0. The log shows "Model
+    loading took 1.1201 GiB" and "GPU KV cache size: 159,840 tokens". Two
+    records have misleading E2E/TPOT because of empty chunks (ADR-014).
+  - **The HF L4 smoke passed** (run `smoke-20260923T100540Z`): bf16, SDPA,
+    cuda:0; the same prompt pool SHA-256 as vLLM. Naive `generate()` batches
+    were `[1]×20`, static (B=4, 50 ms) `[4]×5`; every record was 512/32 with
+    32 text chunks; zero errors.
+  Raw files are in `results/validation/phase3/`; billing is in
+  `modal_billing_2026-09-23.json`. The smokes' `git.dirty=true` came only
+  from untracked synced result files; the recorded commits (1439224 for vLLM,
+  7e16306 for HF) contain all code. Reproduce with `make modal-download
+  modal-checks smoke sync-results` (billable; see README). These are
+  functional checks on L4 with a 0.6B model, not performance numbers.
+
 ## Spend log
 
-| Date | Phase | Activity | GPU | Seconds | Estimate | Running total |
+| Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
 | --- | --- | --- | --- | ---: | ---: | ---: |
 | 2026-09-23 | 0 | Local setup and read-only account checks | None | 0 | $0.00 | $0.00 |
 | 2026-09-23 | 1 | Mock, tests, timing and capacity validation, CLI smoke | None | 0 | $0.00 | $0.00 |
 | 2026-09-23 | 2 | HF baseline, CPU integration and local load runs | None | 0 | $0.00 | $0.00 |
 | 2026-09-23 | Audit | Local regression and mock revalidation | None | 0 | $0.00 | $0.00 |
+| 2026-09-23 | 3 | Local plumbing, CPU rehearsals, lint | None | 0 | $0.00 | $0.00 |
+| 2026-09-23 | 3 | Qwen3-0.6B download (CPU, `ap-xHIXkmtbBrUnz0xwBBkRs9`) | None | ≈20 | $0.000705 | $0.000705 |
+| 2026-09-23 | 3 | vLLM env check, failed Python detection; includes image builds (`ap-5JIms1ZiZW6cas7KanUpFl`) | None | n/a | $0.005496 | $0.006200 |
+| 2026-09-23 | 3 | vLLM env check + in-container mock validation (`ap-Dsss0oKkfcbF1FyX3ZhXnY`) | None | ≈112 | $0.006870 | $0.013071 |
+| 2026-09-23 | 3 | HF env check (`ap-Gz7DnyqOIrQW8FZmA2mkky`) | None | ≈75 | $0.001320 | $0.014390 |
+| 2026-09-23 | 3 | vLLM smoke, aborted at the flag pre-flight (`ap-eDYO92BJ50vQOAKBpmJ6oK`) | L4 | ≈50 | $0.015520 | $0.029910 |
+| 2026-09-23 | 3 | vLLM smoke, passed (`ap-zTOJ6QYPv3WGEcInqkulAL`) | L4 | ≈129 | $0.040044 | $0.069953 |
+| 2026-09-23 | 3 | HF naive + static smoke, passed (`ap-e1i6lvPAhpupn9WHoeTtW3`) | L4 | ≈94 | $0.027521 | $0.097475 |
 
-The account's remaining Modal credit has not been verified. No billable
-Modal work has been requested in this session.
+Phase 3 amounts are **actual** per-app costs from `modal billing report --for
+today --json` (saved in `results/validation/phase3/modal_billing_2026-09-23.json`),
+not estimates. The first read, a few minutes after the HF run, showed
+$0.022840 for that app; the report lags, so the later value is used. Seconds
+are derived as cost ÷ the function's envelope rate. The dashboard reports cost,
+not seconds, and derived values also absorb any build charges. Phase 3 planned
+$0.35 (worst case $0.81) against the $1 cap; actual: **$0.0975**. Remaining
+Starter credit is not verified. Volume storage (~1.5 GiB of weights) is within
+the 1 TiB/month included.
 
 ## Things that went wrong
 
@@ -100,3 +152,19 @@ Modal work has been requested in this session.
 - The audit exposed Transformers model defaults overriding explicit-looking
   config values; a fresh GenerationConfig alone was insufficient. Local socket
   tests needed sandbox network access; no remote compute was involved.
+
+- Phase 3: Modal rejected the vLLM image ("unable to determine the version of
+  Python"): the base has only `python3`. A `python` symlink fixed it.
+- Phase 3: `vllm serve --help` crashes without a GPU in 0.10.2 ("Failed to
+  infer device type"), so flag verification moved to the GPU host, before the
+  server starts. There, `--help=all` turned out to be a keyword filter and
+  every flag looked missing. The pre-flight aborted the run for $0.0155
+  instead of starting a misconfigured server. Fixed with plain `--help`.
+- Phase 3: inside Modal, the single-process client managed 3,786 chunks/s,
+  about a tenth of the laptop rate: gVisor plus one saturated core (ADR-013).
+- Phase 3: two vLLM requests streamed 30–31 empty chunks (probably skipped
+  special tokens after EOS was ignored), which truncates their last-text E2E
+  (ADR-014). The HF server keeps special tokens, so the engines chunk
+  differently.
+- Phase 3: a local wait loop grepped the wrong file and ran for 10 minutes
+  after the download had finished. No remote cost; the job itself took ~25 s.

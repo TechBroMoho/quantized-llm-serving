@@ -65,4 +65,32 @@ requests after saving the raw run.
 
 The current CLI's `synthetic` workload uses variable-length text. It is for
 functional checks, not the future 512/256-token controlled performance claims.
-See [the pending Phase 3 plan and itemized budget](docs/PHASE3_PLAN.md).
+
+## Phase 3: Docker and Modal smoke tests
+
+`docker/Dockerfile` extends the digest-pinned `vllm/vllm-openai:v0.10.2`
+image with this repo's load tester. Modal builds that file directly; Compose
+runs the same image on a local NVIDIA GPU:
+
+```sh
+make docker-check                          # hadolint + docker compose config ($0)
+MODEL=Qwen/Qwen3-0.6B docker compose up --build   # needs a local NVIDIA GPU
+```
+
+Reproducing the Modal smoke is **billable** (Phase 3 actual total: $0.0975;
+see `PROGRESS.md`). Every run is detached and bounded by timeouts and
+CPU/memory limits (`modal_app/common.py`):
+
+```sh
+make modal-download   # CPU: verified Qwen3-0.6B snapshot into the weights Volume
+make modal-checks     # CPU: build images, versions, in-container mock validation
+make smoke            # L4: vLLM smoke, then HF naive + static smoke
+make sync-results     # copy phase3/ results into results/validation/
+uv run modal app list # confirm nothing is still running
+```
+
+The config is `configs/phase3_smoke.yaml`. Raw results and the billing report
+are in `results/validation/phase3/`. These runs are functional checks (L4,
+0.6B model, 16 requests), not performance results. See ADR-012 to ADR-014 for
+the design and the two open findings, and `docs/PHASE4_6_ESTIMATE.md` for the
+next phases' costs.

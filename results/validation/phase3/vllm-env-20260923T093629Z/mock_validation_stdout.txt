@@ -1,0 +1,23 @@
+timing: TTFT 0.2025s (server 0.2012s), ITL 0.0215s (server 0.0215s)
+capacity: 3786.1 chunks/s (0.63x threshold), CPU: 1.00 cores
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/opt/llmbench/src/llmbench/loadtest/validation.py", line 395, in <module>
+    main()
+  File "/opt/llmbench/src/llmbench/loadtest/validation.py", line 390, in main
+    asyncio.run(_measure(args.output_dir))
+  File "/usr/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/opt/llmbench/src/llmbench/loadtest/validation.py", line 364, in _measure
+    check_capacity(summary)
+  File "/opt/llmbench/src/llmbench/loadtest/validation.py", line 381, in check_capacity
+    raise RuntimeError(f"capacity {rate:.1f}/s is below threshold")
+RuntimeError: capacity 3786.1/s is below threshold

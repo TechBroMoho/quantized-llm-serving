@@ -1,0 +1,39 @@
+INFO 09-23 02:46:40 [__init__.py:216] Automatically detected platform cuda.
+
+Parameters matching 'all':
+--allow-credentials, --no-allow-credentials
+--allowed-headers ALLOWED_HEADERS
+--allowed-local-media-path ALLOWED_LOCAL_MEDIA_PATH
+--allowed-methods ALLOWED_METHODS
+--allowed-origins ALLOWED_ORIGINS
+--data-parallel-address DATA_PARALLEL_ADDRESS, -dpa DATA_PARALLEL_ADDRESS
+                        Address of data parallel cluster head-node. (default:
+                        None)
+--data-parallel-backend DATA_PARALLEL_BACKEND, -dpb DATA_PARALLEL_BACKEND
+                        Backend for data parallel, either "mp" or "ray".
+                        (default: mp)
+--data-parallel-hybrid-lb, --no-data-parallel-hybrid-lb
+--data-parallel-rank DATA_PARALLEL_RANK, -dpn DATA_PARALLEL_RANK
+                        Data parallel rank of this instance. When set, enables
+                        external load balancer mode. (default: None)
+--data-parallel-rpc-port DATA_PARALLEL_RPC_PORT, -dpp DATA_PARALLEL_RPC_PORT
+                        Port for data parallel RPC communication. (default:
+                        None)
+--data-parallel-size DATA_PARALLEL_SIZE, -dp DATA_PARALLEL_SIZE
+--data-parallel-size-local DATA_PARALLEL_SIZE_LOCAL, -dpl DATA_PARALLEL_SIZE_LOCAL
+                        Number of data parallel replicas to run on this node.
+                        (default: None)
+--data-parallel-start-rank DATA_PARALLEL_START_RANK, -dpr DATA_PARALLEL_START_RANK
+                        Starting data parallel rank for secondary nodes.
+                        (default: None)
+--decode-context-parallel-size DECODE_CONTEXT_PARALLEL_SIZE, -dcp DECODE_CONTEXT_PARALLEL_SIZE
+--disable-custom-all-reduce, --no-disable-custom-all-reduce
+--enable-expert-parallel, --no-enable-expert-parallel
+--enable-multimodal-encoder-data-parallel
+--guided-decoding-disable-fallback, --no-guided-decoding-disable-fallback
+--max-parallel-loading-workers MAX_PARALLEL_LOADING_WORKERS
+--pipeline-parallel-size PIPELINE_PARALLEL_SIZE, -pp PIPELINE_PARALLEL_SIZE
+--tensor-parallel-size TENSOR_PARALLEL_SIZE, -tp TENSOR_PARALLEL_SIZE
+--tool-call-parser {deepseek_v3,deepseek_v31,glm45,granite-20b-fc,granite,hermes,hunyuan_a13b,internlm,jamba,kimi_k2,llama4_pythonic,llama4_json,llama3_json,minimax,mistral,openai,phi4_mini_json,pythonic,qwen3_coder,seed_oss,step3,xlam} or name registered in --tool-parser-plugin
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]

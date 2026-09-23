@@ -1,4 +1,11 @@
-# Phase 3 plan — pending approval, no remote execution
+# Phase 3 plan — executed 2026-09-23
+
+> **Status:** approved and executed. Actual spend was $0.0975 of the $1 cap;
+> see `PROGRESS.md` (Phase log, Spend log) and ADR-012 to ADR-014. The text
+> below is the plan as approved, kept unchanged. The pre-run wording ("not a
+> claim…", "cumulative spend remains $0") describes the state before execution.
+> Deviations: vLLM flags were verified on the GPU host, not on CPU (ADR-012);
+> one extra CPU HF-image check ran; one vLLM smoke retry after a flag-check bug.
 
 The audit is local and complete; this is a proposed execution plan, not a
 claim that Docker or Modal have been validated. Phase 3's total cap is $1.

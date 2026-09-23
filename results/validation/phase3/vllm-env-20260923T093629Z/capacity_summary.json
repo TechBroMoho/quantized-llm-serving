@@ -1,0 +1,83 @@
+{
+  "capacity_concurrency": 256,
+  "capacity_headroom_multiple": 1.8930500000000003,
+  "capacity_margin_chunks_per_s": -2213.899999999999,
+  "capacity_threshold_chunks_per_s": 6000,
+  "capacity_threshold_multiple": 0.6310166666666668,
+  "capacity_window_s": 30.0,
+  "client_cpu_core_limit": 2.0,
+  "client_process_cpu_cores_average": 0.9953333333333335,
+  "client_process_cpu_seconds": 29.86,
+  "config": {
+    "concurrency": 256,
+    "drain_s": 0.5,
+    "duration_s": 30.0,
+    "mock_server": {
+      "itl_s": 0,
+      "output_tokens": 3,
+      "ttft_s": 0
+    },
+    "mode": "closed",
+    "rate_per_s": null,
+    "request_count": null,
+    "seed": 0,
+    "timeout_s": 5,
+    "warmup_requests": 0
+  },
+  "config_sha256": "c12191f794641e69f2ab098e41c5c2019b0adf152c0f8de04cebbda5efa7509f",
+  "drain_duration_s": 0.5,
+  "e2e_s": {
+    "p50": 0.1604783740000002,
+    "p90": 0.3869836259999957,
+    "p95": 0.4046224209999991,
+    "p99": 0.42514678099999803
+  },
+  "error_rate": 0.0,
+  "errored_or_cancelled_requests": 0,
+  "gpu_name": null,
+  "host": {
+    "logical_cpu_count": 4,
+    "mock_server_separate_process": true,
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.35",
+    "python": "3.12.11"
+  },
+  "in_flight_at_deadline": 256,
+  "itl_s": {
+    "p50": 1.1643000000560733e-05,
+    "p90": 2.3424099995850103e-05,
+    "p95": 2.969795000495878e-05,
+    "p99": 5.702890000975452e-05
+  },
+  "late_completed_requests": 256,
+  "measured_text_chunks_per_s": 3786.100000000001,
+  "measurement_text_chunks": 113583,
+  "offered_requests": 38117,
+  "on_time_completed_requests": 37861,
+  "output_token_throughput_per_s": 3786.100000000001,
+  "raw_results_path": "/results/phase3/vllm-env-20260923T093629Z/capacity_requests.jsonl.gz",
+  "rejected_requests": 0,
+  "request_throughput_per_s": 1262.0333333333335,
+  "timestamp_utc": "2026-09-23T09:37:48.523215+00:00",
+  "tpot_s": {
+    "p50": 1.2684499999693344e-05,
+    "p90": 2.068499999907658e-05,
+    "p95": 2.7092499998104813e-05,
+    "p99": 4.82081999990675e-05
+  },
+  "ttft_s": {
+    "p50": 0.16044425799999829,
+    "p90": 0.386937832000001,
+    "p95": 0.4045889470000006,
+    "p99": 0.42511456939999737
+  },
+  "validation": "phase1_client_capacity",
+  "versions": {
+    "aiohttp": "3.12.15"
+  },
+  "warmup_requests_completed": 0,
+  "window_duration_s": 29.999999999999993,
+  "window_end_monotonic_s": 75.662475264,
+  "window_process_cpu_cores_average": 0.9953333333333335,
+  "window_process_cpu_seconds": 29.86,
+  "window_start_monotonic_s": 45.662475264
+}

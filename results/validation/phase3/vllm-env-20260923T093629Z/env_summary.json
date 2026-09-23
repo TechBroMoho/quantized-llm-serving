@@ -1,0 +1,82 @@
+{
+  "capacity": {
+    "capacity_threshold_multiple": 0.6310166666666668,
+    "client_process_cpu_cores_average": 0.9953333333333335,
+    "errored_or_cancelled_requests": 0,
+    "late_completed_requests": 256,
+    "measured_text_chunks_per_s": 3786.100000000001,
+    "rejected_requests": 0
+  },
+  "flags_checked": [
+    "--disable-uvicorn-access-log",
+    "--dtype",
+    "--enforce-eager",
+    "--generation-config",
+    "--gpu-memory-utilization",
+    "--host",
+    "--max-model-len",
+    "--max-num-seqs",
+    "--no-enable-prefix-caching",
+    "--port",
+    "--seed",
+    "--served-model-name"
+  ],
+  "flags_missing": [
+    "--disable-uvicorn-access-log",
+    "--dtype",
+    "--enforce-eager",
+    "--generation-config",
+    "--gpu-memory-utilization",
+    "--host",
+    "--max-model-len",
+    "--max-num-seqs",
+    "--no-enable-prefix-caching",
+    "--port",
+    "--seed",
+    "--served-model-name"
+  ],
+  "help_returncode": 1,
+  "image": "vllm/vllm-openai:v0.10.2@sha256:607442e407b0fea97f8a132a78b787c121a996dd4de181fa08e8da06e71ec2db",
+  "mock_validation_returncode": 1,
+  "passed": false,
+  "resources": {
+    "cpu_cores": 4,
+    "gpu": null,
+    "memory_mib": 4096,
+    "startup_timeout_s": 300,
+    "timeout_s": 180
+  },
+  "runtime": {
+    "gpu": {
+      "nvidia_smi": null,
+      "torch_cuda": {
+        "available": false,
+        "device_name": null,
+        "torch_cuda_version": "12.8"
+      }
+    },
+    "logical_cpu_count": 4,
+    "modal_image_id": "im-KPEF6fyXWCify6GdsSiiYd",
+    "modal_task_id": "ta-01M36SZD315TD36EE7XQ3XFF5R",
+    "packages": {
+      "aiohttp": "3.12.15",
+      "fastapi": "0.116.1",
+      "huggingface-hub": "0.34.4",
+      "tokenizers": "0.22.0",
+      "torch": "2.8.0+cu128",
+      "transformers": "4.56.1",
+      "uvicorn": "0.35.0",
+      "vllm": "0.10.2"
+    },
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.35",
+    "python": "3.12.11",
+    "timestamp_utc": "2026-09-23T09:36:35.628607+00:00"
+  },
+  "timing": {
+    "median_itl_s": 0.021522259000001043,
+    "median_server_itl_s": 0.021496940000005793,
+    "median_server_ttft_s": 0.2012003630000052,
+    "median_ttft_s": 0.20253297999999376,
+    "passed": true
+  }
+}

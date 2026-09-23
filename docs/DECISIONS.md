@@ -320,3 +320,103 @@ numbers lack the matching retained raw run and are not accepted evidence.
 No GPU performance, accuracy, or exact 512/256-token workload has been validated.
 The present CLI still constructs variable-length text prompts; pinned,
 unique token-ID workload construction must be implemented before GPU comparisons.
+
+## ADR-012 — Modal and Docker plumbing for Phase 3 (2026-09-23)
+
+**Context.** Phase 3 must prove that the vLLM image built from our Dockerfile
+and the HF baseline image both serve on a Modal GPU, with bounded cost, before
+any L40S spend.
+
+**Decision.**
+- *Image.* `docker/Dockerfile` is `FROM vllm/vllm-openai:v0.10.2@sha256:607442e4…`
+  (the multi-arch index digest resolved on 2026-09-23). Our `src/llmbench` is
+  copied and put on `PYTHONPATH` rather than pip-installed, so the image's CUDA
+  torch (2.8.0+cu128) and vLLM's resolved dependencies are untouched. The image
+  therefore runs its own versions (transformers 4.56.1, aiohttp 3.12.15), which
+  differ from the local lock (4.56.2, 3.14.3); every result records the
+  versions it actually ran. The base ships only `python3`. Modal failed with
+  "unable to determine the version of Python", so the Dockerfile adds a
+  `python` symlink, the same step Modal's `add_python` images perform. Modal
+  clears the inherited `api_server` ENTRYPOINT with `.entrypoint([])`; Compose
+  keeps it. The HF image is `debian_slim` Python 3.12 with the local pins
+  (torch 2.8.0's default Linux wheel is CUDA 12.8).
+- *Volumes.* `llmbench-weights` (revision-pinned snapshots plus verified
+  manifests), `llmbench-results`, and `llmbench-vllm-cache` mounted at
+  `/root/.cache/vllm`. The eager smoke claims no cache reuse.
+- *Bounded functions.* Every function sets CPU and memory as request == limit
+  (billing uses max(request, actual), so the limit caps it), an execution
+  timeout, a 300 s startup timeout, `retries=0`, `max_containers=1` and no
+  deploy. Runs use `modal run --detach`. Downloads run CPU-only with the HF
+  secret; GPU functions get no secret and run with `HF_HUB_OFFLINE=1`. The
+  local entrypoint refuses to request a GPU unless a verified weights manifest
+  exists (every file's sha256 is checked against the Hub's LFS metadata).
+- *Smoke driver.* `llmbench.smoke.run_server_smoke` is the one code path for
+  Modal and the CPU rehearsals (mock server; tiny on-disk GPT-2 through the
+  real HF server subprocess). It starts the server in its own process group,
+  waits for `/health`, runs warmup plus fixed closed-loop requests, saves raw
+  records and the log, validates, and always kills the group in `finally`.
+- *Workload.* A seeded pool of distinct 512-token prompts sampled uniformly
+  from the tokenizer's base vocabulary minus special IDs. Each prompt is used
+  once per server lifetime, and each system gets the same pool (the SHA-256 is
+  recorded). This is a functional workload; the real-text W1 corpus remains
+  Phase 6 work. The same payload goes to both engines: `ignore_eos: true` is
+  vLLM's extension; the HF server accepts it (it always enforces
+  `min_new_tokens == max_new_tokens`) and rejects `false`, which it could not
+  honor.
+- *Engine flags.* `--no-enable-prefix-caching`, `--generation-config vllm`
+  (model sampling defaults ignored), and `--enforce-eager` (smoke only).
+  vLLM 0.10.2 cannot build its CLI parser on a CPU host (`DeviceConfig` raises
+  "Failed to infer device type"), so flags are verified on the GPU host against
+  the pinned `vllm serve --help` before the server starts. `--help=<word>` is a
+  keyword filter in 0.10.2 (`--help=all` matched only names containing "all");
+  the unfiltered `--help` is used. HF static batches are read from the server's
+  own `/stats` counter of real `generate()` calls.
+
+**Consequences.** Both smokes passed on L4 (see PROGRESS). The smoke numbers
+are functional evidence only: L4, a 0.6B model, eager vLLM, 16 requests, and
+no repeats. They must not be compared or quoted as performance.
+
+## ADR-013 — In-container client capacity is below the gate (2026-09-23, open)
+
+**Context.** ADR-005 requires revalidating the 6,000 text-chunks/s client
+capacity inside the Modal container before performance comparisons.
+
+**Observation.** The unchanged Phase 1 validation ran CPU-only inside our vLLM
+image (gVisor, 4 cores requested, `os.cpu_count()` = 4; the mock server ran as
+a separate process in the same container). Timing passed: TTFT 0.20253 s vs
+server 0.20120 s, ITL 0.021522 s vs 0.021497 s. **Capacity failed: 3,786.1
+chunks/s (0.63× the 6,000/s gate)**, with the client process at 0.995 cores,
+zero errors/rejections, and 256 late completions reported separately. The laptop
+reached 36,538/s. The single-process asyncio client is CPU-bound on this host.
+Raw files: `results/validation/phase3/vllm-env-20260923T093629Z/`.
+
+**Decision.** The gate is not relaxed. Phase 3's own smokes run at
+concurrency 4 with only a few hundred chunks/s, so they are unaffected. **This
+blocks the Phase 6 concurrency-128/256 comparisons** until resolved. Options
+for Mohammed:
+(a) shard the load generator across worker processes (merging records on one
+monotonic clock) and rerun the in-container gate, estimated at under $0.02 CPU;
+(b) measure the real peak chunk rate at c=256 on L40S first, then require 3×
+that rate. Recommended: (a), because it keeps the existing 6,000/s bar.
+
+## ADR-014 — vLLM empty text chunks distort per-request E2E/TPOT (2026-09-23, open)
+
+**Observation.** In the vLLM smoke, 14 of 16 requests had 29–32 text-bearing
+chunks for 32 usage tokens. Two had only 2 and 1 text chunks, followed by 30–31
+empty-text chunks. ADR-003 ends E2E at the last text-bearing chunk, so those
+two records show E2E 0.066/0.059 s and TPOT 0.0012/0.0 s, while the other
+requests took about 0.79–0.83 s. The HF server returned 32 text chunks for
+every request. Usage counts were exact in both engines, so the functional smoke
+is valid, but these per-request latencies are wrong for those rows.
+
+**Likely cause (not yet verified).** Greedy decoding with `ignore_eos` on
+random-token prompts keeps generating special tokens, which vLLM's default
+`skip_special_tokens=true` turns into empty text. The HF server decodes with
+`skip_special_tokens=False`.
+
+**Proposal before Phase 6 (needs approval).** Send `skip_special_tokens:
+false` to vLLM and accept only `false` in the HF server, so both engines stream
+one text-bearing chunk per token. Add a run-level check that fails when
+`text_chunks` is far below `completion_tokens`. Keep ADR-003 unchanged, and
+record the end-of-stream (usage/`[DONE]`) time as a second E2E field for
+diagnosis. The real-text W1 prompts should also reduce this effect.
