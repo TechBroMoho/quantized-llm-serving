@@ -1,0 +1,19 @@
+{
+  "calibration": {
+    "dataset_id": "HuggingFaceH4/ultrachat_200k",
+    "revision": "8049631c405ae6576f93f445c6b8166f76f5505a",
+    "split": "train_sft",
+    "num_samples": 512,
+    "max_seq_length": 2048,
+    "shuffle_seed": 42,
+    "format": "messages",
+    "text_field": "messages"
+  },
+  "samples": 512,
+  "tokens_total": 572273,
+  "tokens_min": 277,
+  "tokens_max": 2048,
+  "input_ids_sha256": "a59d53f21b3c0d28cbd479e95cd2de59fb54166a981e255ed029268ed05a2e7b",
+  "first_sample_decoded_prefix": "<|im_start|>user\nCreate a JavaScript program that accepts an input of a positive integer and generates a list of Fibonacci numbers up to and including that number. The program should output the list in an ordered and readable format, and should handle invalid inputs gracefully by providing appropriate error messages. Additionally, the program should only use a single function to generate the list of Fibonacci numbers.<|im_end|>\n<|im_start|>assistant\nHere's an example of a JavaScript program that meets your requirements:\n\n```javascript\nfunction generateF",
+  "path": "/weights/calibration/gptq-b968826d-8049631c"
+}

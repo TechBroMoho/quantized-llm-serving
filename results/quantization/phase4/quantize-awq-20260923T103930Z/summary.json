@@ -1,0 +1,359 @@
+{
+  "calibration": {
+    "dataset_id": "mit-han-lab/pile-val-backup",
+    "format": "user_text",
+    "max_seq_length": 512,
+    "num_samples": 256,
+    "revision": "2f5e46ae6a69cf0dce4b12f78241c408936ca0e4",
+    "shuffle_seed": 42,
+    "split": "validation",
+    "text_field": "text"
+  },
+  "checkpoint": {
+    "files": [
+      {
+        "bytes": 707,
+        "path": "added_tokens.json",
+        "sha256": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680"
+      },
+      {
+        "bytes": 4168,
+        "path": "chat_template.jinja",
+        "sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8"
+      },
+      {
+        "bytes": 2416,
+        "path": "config.json",
+        "sha256": "cf0da1b805445009c7b4a6fedc9a1399543bb7c38e95705f33bb774896dba383"
+      },
+      {
+        "bytes": 214,
+        "path": "generation_config.json",
+        "sha256": "a11456f04db85ae8010eca3b91c5df7c9a49261571c3e62ae7d88b3189a55c30"
+      },
+      {
+        "bytes": 1671853,
+        "path": "merges.txt",
+        "sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+      },
+      {
+        "bytes": 4853957200,
+        "path": "model-00001-of-00002.safetensors",
+        "sha256": "cebd8008fe6a4b57166045a9f65dbd26206d5d7d0e257bc8c37e1bbb3e7a018b"
+      },
+      {
+        "bytes": 1244659840,
+        "path": "model-00002-of-00002.safetensors",
+        "sha256": "20c2d6366ab85c90786ccdd829cd2b9e7d30ef3b2ebbb998280e7e4014b542ff"
+      },
+      {
+        "bytes": 101823,
+        "path": "model.safetensors.index.json",
+        "sha256": "c970b3e6b437056e21778023243c8858e57e96681cc48c6e906f0f455fe4215c"
+      },
+      {
+        "bytes": 553,
+        "path": "recipe.yaml",
+        "sha256": "6b1aa71ca3fe46c69ac9258a47e772214269823f5ebee986fd1861329eae9156"
+      },
+      {
+        "bytes": 613,
+        "path": "special_tokens_map.json",
+        "sha256": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd"
+      },
+      {
+        "bytes": 11422654,
+        "path": "tokenizer.json",
+        "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+      },
+      {
+        "bytes": 5404,
+        "path": "tokenizer_config.json",
+        "sha256": "443bfa629eb16387a12edbf92a76f6a6f10b2af3b53d87ba1550adfcf45f7fa0"
+      },
+      {
+        "bytes": 2776833,
+        "path": "vocab.json",
+        "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+      }
+    ],
+    "safetensors_bytes": 6098617040,
+    "total_bytes": 6114604278
+  },
+  "checkpoint_path": "/weights/quantized/Qwen3-8B-awq-b968826d",
+  "config": {
+    "gpu": "L40S",
+    "model": {
+      "id": "Qwen/Qwen3-8B",
+      "revision": "b968826d9c46dd6066d109eabc6255188de91218"
+    },
+    "name": "phase4-quantize",
+    "sanity": {
+      "engine_args": [
+        "--dtype",
+        "bfloat16",
+        "--max-model-len",
+        "4096",
+        "--gpu-memory-utilization",
+        "0.90",
+        "--seed",
+        "0",
+        "--enforce-eager",
+        "--no-enable-prefix-caching",
+        "--generation-config",
+        "vllm",
+        "--disable-uvicorn-access-log"
+      ],
+      "max_model_len": 4096,
+      "max_tokens": 64,
+      "prompts": [
+        "The capital of France is",
+        "def fibonacci(n):\n    \"\"\"Return the n-th Fibonacci number.\"\"\"\n",
+        "Explain in one sentence why the sky is blue:",
+        "Translate to French: Good morning, how are you today?\nFrench:",
+        "The first five prime numbers are"
+      ]
+    },
+    "stack": "requirements/quantize.in",
+    "variants": {
+      "awq": {
+        "calibration": {
+          "dataset_id": "mit-han-lab/pile-val-backup",
+          "format": "user_text",
+          "max_seq_length": 512,
+          "num_samples": 256,
+          "revision": "2f5e46ae6a69cf0dce4b12f78241c408936ca0e4",
+          "shuffle_seed": 42,
+          "split": "validation",
+          "text_field": "text"
+        },
+        "expected_group_size": 128,
+        "expected_symmetric": false,
+        "ignore": [
+          "lm_head"
+        ],
+        "method": "awq",
+        "scheme": "W4A16_ASYM",
+        "targets": [
+          "Linear"
+        ]
+      },
+      "gptq": {
+        "calibration": {
+          "dataset_id": "HuggingFaceH4/ultrachat_200k",
+          "format": "messages",
+          "max_seq_length": 2048,
+          "num_samples": 512,
+          "revision": "8049631c405ae6576f93f445c6b8166f76f5505a",
+          "shuffle_seed": 42,
+          "split": "train_sft",
+          "text_field": "messages"
+        },
+        "expected_group_size": 128,
+        "expected_symmetric": true,
+        "ignore": [
+          "lm_head"
+        ],
+        "method": "gptq",
+        "scheme": "W4A16",
+        "targets": [
+          "Linear"
+        ]
+      }
+    }
+  },
+  "config_sha256": "3d747ed03e486f4d44db28532ecaaae5d0cbdcb864450b608569a010c86a47a0",
+  "failures": [],
+  "function_elapsed_s": 538.3443440560001,
+  "git": {
+    "commit": "13d0ea0e0faa3d5ecc54d422637928bd8e0adcd1",
+    "dirty_tracked": false
+  },
+  "gpu": {
+    "nvidia_smi": {
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "NVIDIA L40S, 580.95.05, 46068 MiB, 8.9"
+    },
+    "torch_cuda": {
+      "available": true,
+      "device_name": "NVIDIA L40S",
+      "torch_cuda_version": "12.8"
+    }
+  },
+  "host_peak_rss_raw": 28312344,
+  "load_model_s": 3.046594397,
+  "model_dtype": "torch.bfloat16",
+  "model_manifest": {
+    "download_seconds": 362.105266657,
+    "huggingface_hub": "0.36.2",
+    "local_dir": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+    "model_id": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "stamp": "20260923T102838Z",
+    "total_bytes": 16397461266,
+    "verified": true
+  },
+  "nvidia_smi_samples": 240,
+  "oneshot_s": 459.394654903,
+  "packages": {
+    "Jinja2": "3.1.6",
+    "MarkupSafe": "3.0.3",
+    "PyYAML": "6.0.2",
+    "accelerate": "1.10.0",
+    "aiohappyeyeballs": "2.6.1",
+    "aiohttp": "3.12.7",
+    "aiosignal": "1.3.2",
+    "annotated-types": "0.8.0",
+    "attrs": "25.3.0",
+    "cbor2": "5.7.0",
+    "certifi": "2025.4.26",
+    "charset-normalizer": "3.5.1",
+    "compressed-tensors": "0.11.0",
+    "datasets": "4.0.0",
+    "dill": "0.3.8",
+    "filelock": "4.0.1",
+    "frozendict": "2.4.7",
+    "frozenlist": "1.6.0",
+    "fsspec": "2025.3.0",
+    "grpclib": "0.4.8",
+    "h2": "4.2.0",
+    "hf-xet": "1.6.0",
+    "hpack": "4.1.0",
+    "huggingface_hub": "0.36.2",
+    "hyperframe": "6.1.0",
+    "idna": "3.10",
+    "llmcompressor": "0.7.1",
+    "loguru": "0.7.3",
+    "mpmath": "1.3.0",
+    "multidict": "6.4.4",
+    "multiprocess": "0.70.16",
+    "networkx": "3.7",
+    "numpy": "2.3.2",
+    "nvidia-cublas-cu12": "12.8.4.1",
+    "nvidia-cuda-cupti-cu12": "12.8.90",
+    "nvidia-cuda-nvrtc-cu12": "12.8.93",
+    "nvidia-cuda-runtime-cu12": "12.8.90",
+    "nvidia-cudnn-cu12": "9.10.2.21",
+    "nvidia-cufft-cu12": "11.3.3.83",
+    "nvidia-cufile-cu12": "1.13.1.3",
+    "nvidia-curand-cu12": "10.3.9.90",
+    "nvidia-cusolver-cu12": "11.7.3.90",
+    "nvidia-cusparse-cu12": "12.5.8.93",
+    "nvidia-cusparselt-cu12": "0.7.1",
+    "nvidia-ml-py": "12.575.51",
+    "nvidia-nccl-cu12": "2.27.3",
+    "nvidia-nvjitlink-cu12": "12.8.93",
+    "nvidia-nvtx-cu12": "12.8.90",
+    "packaging": "26.3",
+    "pandas": "3.0.6",
+    "pillow": "10.4.0",
+    "pip": "25.1.1",
+    "propcache": "0.3.1",
+    "protobuf": "6.31.1",
+    "psutil": "7.2.2",
+    "pyarrow": "25.0.1",
+    "pydantic": "2.13.5",
+    "pydantic_core": "2.46.5",
+    "pynvml": "12.0.0",
+    "python-dateutil": "2.9.0.post0",
+    "regex": "2026.9.10",
+    "requests": "2.32.5",
+    "safetensors": "0.6.2",
+    "setuptools": "84.0.0",
+    "six": "1.17.0",
+    "sympy": "1.14.0",
+    "tokenizers": "0.21.4",
+    "torch": "2.8.0",
+    "tqdm": "4.67.1",
+    "transformers": "4.55.2",
+    "triton": "3.4.0",
+    "typing-inspection": "0.4.4",
+    "typing_extensions": "4.13.2",
+    "urllib3": "2.8.0",
+    "uv": "0.7.19",
+    "wheel": "0.45.1",
+    "xxhash": "4.0.1",
+    "yarl": "1.20.0",
+    "zstandard": "0.23.0"
+  },
+  "passed": true,
+  "peak_gpu_memory_nvidia_smi_mib": 8791,
+  "quantization_config": {
+    "config_groups": {
+      "group_0": {
+        "format": "pack-quantized",
+        "input_activations": null,
+        "output_activations": null,
+        "targets": [
+          "Linear"
+        ],
+        "weights": {
+          "actorder": null,
+          "block_structure": null,
+          "dynamic": false,
+          "group_size": 128,
+          "num_bits": 4,
+          "observer": "minmax",
+          "observer_kwargs": {},
+          "strategy": "group",
+          "symmetric": false,
+          "type": "int"
+        }
+      }
+    },
+    "format": "pack-quantized",
+    "global_compression_ratio": null,
+    "ignore": [
+      "lm_head"
+    ],
+    "kv_cache_scheme": null,
+    "quant_method": "compressed-tensors",
+    "quantization_status": "compressed",
+    "sparsity_config": {},
+    "transform_config": {},
+    "version": "0.11.0"
+  },
+  "resources": {
+    "cpu_cores": 4,
+    "gpu": "L40S",
+    "memory_mib": 49152,
+    "startup_timeout_s": 300,
+    "timeout_s": 3600
+  },
+  "save_s": 24.521518625999988,
+  "state": "finished",
+  "tensors": {
+    "failures": [],
+    "lm_head_dtype": "BF16",
+    "packed_q_proj_layers": 36,
+    "tensor_count": 1155,
+    "zero_point_tensors": 252
+  },
+  "torch_max_memory_allocated_bytes": 7785041408,
+  "torch_max_memory_reserved_bytes": 8673820672,
+  "total_s": 494.422454967,
+  "variant": {
+    "calibration": {
+      "dataset_id": "mit-han-lab/pile-val-backup",
+      "format": "user_text",
+      "max_seq_length": 512,
+      "num_samples": 256,
+      "revision": "2f5e46ae6a69cf0dce4b12f78241c408936ca0e4",
+      "shuffle_seed": 42,
+      "split": "validation",
+      "text_field": "text"
+    },
+    "expected_group_size": 128,
+    "expected_symmetric": false,
+    "ignore": [
+      "lm_head"
+    ],
+    "method": "awq",
+    "scheme": "W4A16_ASYM",
+    "targets": [
+      "Linear"
+    ]
+  },
+  "variant_name": "awq"
+}

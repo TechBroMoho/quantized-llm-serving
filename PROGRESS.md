@@ -2,12 +2,12 @@
 
 ## Status
 
-Phase 3 complete (2026-09-23). The L4 smokes passed for vLLM (served from our
-Dockerfile image) and for the HF baseline (naive and static). Actual Modal
-spend: **$0.0975** of the $1 Phase 3 cap. `modal app list` shows no running
-apps. Two findings block Phase 6 but not Phase 4: in-container client capacity
-(ADR-013) and empty vLLM text chunks (ADR-014). The Phases 4–6 estimate is in
-`docs/PHASE4_6_ESTIMATE.md`, and no Phase 4 work has been approved.
+Phase 4 in progress (2026-09-23). Approved decisions are recorded as ADR-013/014
+resolutions (multi-process load tester; vLLM `skip_special_tokens=false` plus a
+chunk-count check, both before Phase 6) and ADR-015 (the free credit is a hard
+stop). The quantization stack is pinned and rehearsed on CPU (ADR-016).
+Qwen3-8B and both calibration sets are prepared on the Volume. AWQ passed ($0.3855
+actual). GPTQ and the vLLM sanity run each need their own yes.
 
 ## Phase log
 
@@ -108,6 +108,38 @@ apps. Two findings block Phase 6 but not Phase 4: in-container client capacity
   modal-checks smoke sync-results` (billable; see README). These are
   functional checks on L4 with a 0.6B model, not performance numbers.
 
+- **Phase 4, preparation (2026-09-23):**
+  - The pinned llm-compressor 0.7.1 / compressed-tensors 0.11.0 stack was
+    chosen to match vLLM 0.10.2 (ADR-016).
+  - `make quantize-rehearsal` ran both official recipes on a tiny Qwen3 with
+    the real tokenizer: 4-bit g128 `pack-quantized`, 14 zero-point tensors for
+    AWQ and none for GPTQ, BF16 `lm_head`; a wrong-symmetry mutation was
+    rejected and the GPTQ reload forward was finite.
+  - `make check`: Ruff, strict mypy (14 files), 58 tests.
+  - The CPU prepare run downloaded `Qwen/Qwen3-8B@b968826d…` (16,397,461,266
+    bytes; every LFS sha256 matched) and built both calibration sets. AWQ: 256
+    samples, 90,735 tokens (9–512 per sample). GPTQ: 512 samples, 572,273
+    tokens (277–2048).
+  - Evidence: `results/quantization/phase4/{download,calibration}-20260923T102838Z/`.
+
+- **Phase 4, AWQ (2026-09-23):** passed on an NVIDIA L40S (driver 580.95.05),
+  run `quantize-awq-20260923T103930Z`, llmcompressor 0.7.1 / compressed-tensors
+  0.11.0 / transformers 4.55.2 / torch 2.8.0.
+  - Time: model load 3.0 s, `oneshot` 459.4 s, save 24.5 s; function 538.3 s.
+  - Memory: peak GPU 8,791 MiB by `nvidia-smi` (torch peak allocated
+    7,785,041,408 bytes); host peak RSS 28,312,344 KiB.
+  - Checkpoint `/weights/quantized/Qwen3-8B-awq-b968826d`: `pack-quantized`,
+    4-bit group-128 asymmetric (minmax observer), `lm_head` ignored and stored
+    in BF16. Tensors: 36 packed q_proj layers and 252 zero-point tensors.
+    Safetensors total 6,098,617,040 bytes (6,114,604,278 with tokenizer and
+    config files).
+  - Actual cost $0.3855 against $1.47 expected. `llmcompressor.log` is empty
+    (llmcompressor's loguru setup bypassed the added sink), so the run log is
+    the filtered client capture `client_log_filtered.txt`. The one warning,
+    "Optimized model is not saved", is expected: we save with
+    `save_pretrained(save_compressed=True)` afterwards.
+  - Not yet loaded in vLLM; that is the sanity run.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -124,6 +156,8 @@ apps. Two findings block Phase 6 but not Phase 4: in-container client capacity
 | 2026-09-23 | 3 | vLLM smoke, aborted at the flag pre-flight (`ap-eDYO92BJ50vQOAKBpmJ6oK`) | L4 | ≈50 | $0.015520 | $0.029910 |
 | 2026-09-23 | 3 | vLLM smoke, passed (`ap-zTOJ6QYPv3WGEcInqkulAL`) | L4 | ≈129 | $0.040044 | $0.069953 |
 | 2026-09-23 | 3 | HF naive + static smoke, passed (`ap-e1i6lvPAhpupn9WHoeTtW3`) | L4 | ≈94 | $0.027521 | $0.097475 |
+| 2026-09-23 | 4 | Qwen3-8B download + calibration prep, CPU, includes quant image build (`ap-EyzLyIROLh9zFAktXmwkMu`) | None | n/a | $0.024180 | $0.121655 |
+| 2026-09-23 | 4 | AWQ W4A16_ASYM quantization, passed (`ap-bi7KgCITqb40g0uoaypiVe`) | L40S | 538 function | $0.385489 | $0.507144 |
 
 Phase 3 amounts are **actual** per-app costs from `modal billing report --for
 today --json` (saved in `results/validation/phase3/modal_billing_2026-09-23.json`),

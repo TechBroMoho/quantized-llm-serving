@@ -1,0 +1,19 @@
+{
+  "calibration": {
+    "dataset_id": "mit-han-lab/pile-val-backup",
+    "revision": "2f5e46ae6a69cf0dce4b12f78241c408936ca0e4",
+    "split": "validation",
+    "num_samples": 256,
+    "max_seq_length": 512,
+    "shuffle_seed": 42,
+    "format": "user_text",
+    "text_field": "text"
+  },
+  "samples": 256,
+  "tokens_total": 90735,
+  "tokens_min": 9,
+  "tokens_max": 512,
+  "input_ids_sha256": "c1d7e0d1c296eeb089bb53cf989b05b2bdb9719f8601408c2a53950856f33478",
+  "first_sample_decoded_prefix": "<|im_start|>user\nThe articles posted here come from a variety of sources around the web. My hope is that this information may awaken the mind and quicken the spirit -- so that one may discern, pray, and declare the importance of these days.\n\n\n\n<|im_end|>\n",
+  "path": "/weights/calibration/awq-b968826d-2f5e46ae"
+}
