@@ -481,6 +481,15 @@ spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
   midnight UTC, the Phase 6 total must merge `--start 2026-09-23` (whole days
   only) with `--for today`.
 
+- **Phase 6, parallel launch (2026-09-24 00:46 UTC, approved by Mohammed).**
+  HF naive (`hf-naive-20260924T004647Z`) and HF static
+  (`hf-static-20260924T004648Z`) launched alongside BF16, each in its own
+  L40S container. Sum of worst cases: $3.393 + $2.584 + $1.306 + $2.584 =
+  $9.87 ≤ $11 (project ≤ $21.93). With GPTQ too it would have been $12.20,
+  so GPTQ waits for budget to free up (`gptq-trimmed` without c=256 if full
+  GPTQ still doesn't fit). **Max-batch 16/64 skipped** (ADR-022 addendum):
+  no resume claim depends on them.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |

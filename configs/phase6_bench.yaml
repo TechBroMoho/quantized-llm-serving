@@ -123,6 +123,10 @@ lifetimes:
     variant: gptq
     points: [c1, c4, c16, c64, c128, c256]
     repeat_best: 2
+  gptq-trimmed:  # the budget cut of ADR-022 §5: GPTQ without c=256
+    variant: gptq
+    points: [c1, c4, c16, c64, c128]
+    repeat_best: 2
   # Max-batch lifetimes have no sweep, so no repeats (SPEC §6: x1). Seeds from
   # Little's law on AWQ's measured rates: 256 users / (16 / 3.74 s) = 59.8 s,
   # 256 / (64 / 8.19 s) = 32.8 s.

@@ -26,6 +26,7 @@ from modal_app.common import (
     BENCH_AWQ_RESOURCES,
     BENCH_BF16_RESOURCES,
     BENCH_GPTQ_RESOURCES,
+    BENCH_GPTQ_TRIMMED_RESOURCES,
     BENCH_HF_NAIVE_RESOURCES,
     BENCH_HF_STATIC_RESOURCES,
     BENCH_MAXBATCH16_RESOURCES,
@@ -382,6 +383,16 @@ def gptq_fn(run: dict[str, Any]) -> Any:
     image=VLLM_IMAGE,
     env=OFFLINE_ENV,
     volumes=_VLLM_VOLUMES,
+    **BENCH_GPTQ_TRIMMED_RESOURCES.function_kwargs(),
+)
+def gptq_trimmed_fn(run: dict[str, Any]) -> Any:
+    return _vllm_lifetimes(run, ["gptq-trimmed"], BENCH_GPTQ_TRIMMED_RESOURCES)
+
+
+@app.function(
+    image=VLLM_IMAGE,
+    env=OFFLINE_ENV,
+    volumes=_VLLM_VOLUMES,
     **BENCH_AWQ_FOLLOWUP_RESOURCES.function_kwargs(),
 )
 def awq_followup_fn(run: dict[str, Any]) -> Any:
@@ -619,6 +630,7 @@ _GPU_FUNCTIONS = {
     "hf-naive": hf_naive_fn,
     "hf-static": hf_static_fn,
     "gptq": gptq_fn,
+    "gptq-trimmed": gptq_trimmed_fn,
     "maxbatch-16": maxbatch16_fn,
     "maxbatch-64": maxbatch64_fn,
 }

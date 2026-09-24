@@ -986,3 +986,20 @@ but was 23% higher at c=256.
 
 **Consequences.** The first sweep's failed points stay in the results,
 marked failed. The results table merges `awq-followup` into `awq`.
+
+**Addendum (Mohammed, 2026-09-24, 00:46 UTC): parallel lifetimes, max-batch
+dropped.**
+- To save time, lifetimes run in parallel, each in its own L40S container
+  (same GPU type, so comparisons stay valid). Before any launch, **the sum
+  of all running lifetimes' worst cases** (timeout envelopes) plus the
+  Phase 6 actual must fit the $11 cap, and the project must stay under $25.
+- All four remaining lifetimes at once (BF16 running, HF naive, HF static,
+  GPTQ) summed to $12.20. So HF naive and HF static were launched alongside
+  BF16 ($9.87), and GPTQ waits for a finished lifetime to free budget. If
+  full GPTQ ($2.333 envelope) still does not fit then, `gptq-trimmed`
+  (no c=256; plan 27.2 min, timeout 2,120 s, $1.524 envelope) runs instead,
+  per the cut order.
+- **The max-batch lifetimes (`--max-num-seqs` 16 and 64) are skipped** to
+  save time and budget. No resume claim depends on them (SPEC §8 needs no
+  max-batch number); the latency–throughput trade-off is shown by the
+  concurrency sweeps instead. Windows and checks are unchanged.

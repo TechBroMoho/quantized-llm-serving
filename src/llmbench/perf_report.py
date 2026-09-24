@@ -32,7 +32,7 @@ def load_points(root: Path) -> list[dict[str, Any]]:
         rows.append(
             {
                 # A follow-up lifetime adds runs to the same variant (ADR-022).
-                "lifetime": match[1].removesuffix("-followup"),
+                "lifetime": match[1].removesuffix("-followup").removesuffix("-trimmed"),
                 "diagnostic": bool(summary.get("diagnostic")),
                 "run": lifetime_dir.name,
                 "time": summary.get("window_start_monotonic_s", 0.0),
