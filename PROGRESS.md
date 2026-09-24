@@ -459,6 +459,28 @@ spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
     and the ramp-down tail, while our window is a staggered steady state
     with prefill mixed into decode steps. Not yet confirmed.
 
+- **Phase 6, AWQ follow-up (run `awq-followup-20260924T000015Z`, L40S,
+  $1.204175 first read; 1,628 s lifetime): all 5 points passed.** ADR-022
+  timings.
+  - c1-r4 100.0 tokens/s (TPOT p50 9.8 ms).
+  - c128-r2 2,225.9 and c128-r3 2,196.1 tokens/s (with the sweep's c128:
+    median **2,196.8**).
+  - c256 re-timed (ramp 36 s, warmup 80 s, window 360 s = 10 × the measured
+    35.6 s E2E): **halves 0.00%**, 1,844.5 tokens/s. That matches the
+    three failed runs' 1,832–1,861, so their rate was right and only the
+    check tripped.
+  - **Diagnostic c256-sync** (all users at once, window 360 s): 2,223.8
+    tokens/s, TPOT p50 112.0 ms, within 2.4% / 0.6% of `vllm bench serve`
+    (2,277.1, 111.3 ms). This confirms the 23% cross-check gap at c=256 is the
+    arrival pattern: an all-at-once start separates prefill from decode, while
+    staggered users mix prefill into every decode step. Diagnostic only.
+  - BF16 launched at 17:30 PDT: Phase 6 actual $3.393 + $2.584 envelope =
+    $5.98 ≤ $11. Its `git.dirty=true` comes only from untracked synced result
+    files; code at `abdbd1a`.
+- Billing note: `modal billing report --for today` is a UTC day. After
+  midnight UTC, the Phase 6 total must merge `--start 2026-09-23` (whole days
+  only) with `--for today`.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -488,6 +510,7 @@ spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
 | 2026-09-23 | 6 | Prepare: checkpoint sha256 check + WikiText-103 prompt pool, passed (`ap-3es0914tudLlXFvC62Qz7f`) | None | n/a | $0.010784 | $12.103797 |
 | 2026-09-23 | 6 | AWQ probe, c=1 and c=256, passed (`ap-RyihFdSLFZprP7tolBMi7H`) | L40S | ≈392 | $0.281566 | $12.385363 |
 | 2026-09-23 | 6 | AWQ sweep + repeats + cross-check; 4 points failed the steady-state check (`ap-wlDNh5vqN7p0fgg6ncYgEb`) | L40S | ≈2,600 | $1.868826 | $14.254189 |
+| 2026-09-23/24 | 6 | AWQ follow-up (ADR-022), all 5 points passed (`ap-xh6csySKIIZ5HRZ4cLD0ri`) | L40S | ≈1,680 | $1.204175 | $15.458364 |
 
 **Phase 5 actual: $10.7004** against its $11.63 cap ($6 plus Phase 4's
 unused $4.73 and Phase 3's unused $0.90, both reallocated by Mohammed;
