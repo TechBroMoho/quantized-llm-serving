@@ -141,11 +141,42 @@ async def _run_load(args: argparse.Namespace) -> dict[str, Any]:
     return summary
 
 
+def _verify_checkpoint(args: argparse.Namespace) -> dict[str, Any]:
+    """Hash a local checkpoint against the Phase 4 files the benchmarks served.
+
+    The evidence file for each variant is the one Phase 6 verified on the
+    Volume before any GPU time (`expected_checkpoints` in the bench config).
+    """
+    import yaml
+
+    from llmbench.bench import expected_checkpoint_files, verify_checkpoint
+
+    config = yaml.safe_load(args.config.read_text())
+    # Evidence paths in the config are relative to the repo root (configs/..).
+    evidence_path = (
+        args.config.parent.parent / config["expected_checkpoints"][args.variant]
+    )
+    evidence = json.loads(evidence_path.read_text())
+    result = verify_checkpoint(args.dir, expected_checkpoint_files(evidence))
+    return result | {"variant": args.variant, "evidence": str(evidence_path)}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="llmbench")
     commands = parser.add_subparsers(dest="command", required=True)
     load_parser = commands.add_parser("load", help="run an async streaming load test")
     _load_arguments(load_parser)
+    verify_parser = commands.add_parser(
+        "verify-checkpoint",
+        help="check a local checkpoint against the benchmarked files (sha256)",
+    )
+    verify_parser.add_argument(
+        "--variant", choices=("bf16", "awq", "gptq"), required=True
+    )
+    verify_parser.add_argument("--dir", type=Path, required=True)
+    verify_parser.add_argument(
+        "--config", type=Path, default=Path("configs/phase6_bench.yaml")
+    )
     mock_parser = commands.add_parser("mock", help="serve a controllable mock")
     mock_commands = mock_parser.add_subparsers(dest="mock_command", required=True)
     mock_server_parser = mock_commands.add_parser(
@@ -153,6 +184,12 @@ def main() -> None:
     )
     _mock_arguments(mock_server_parser)
     args = parser.parse_args()
+    if args.command == "verify-checkpoint":
+        result = _verify_checkpoint(args)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        if not result["passed"]:
+            raise SystemExit(1)
+        return
     if args.command == "mock":
         asyncio.run(
             serve(

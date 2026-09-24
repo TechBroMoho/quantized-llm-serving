@@ -1,0 +1,44 @@
+# CPU-only checks (SPEC §7 Phase 8): ruff, strict mypy, pytest (mock server and
+# tiny locally built models, no downloads) and the Docker lint. No GPU, no
+# Modal, no secrets. The vLLM image is linted, never built (too large).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: make check (ruff, mypy, pytest)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7  # v10.2.0
+        with:
+          version: "0.11.16"
+          enable-cache: true
+      - name: Install (uv.lock, CPU torch on Linux)
+        run: make setup
+      - name: Lint, type-check, test, instruction-file sync
+        run: make check
+
+  docker:
+    name: Docker lint (hadolint, compose config)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: hadolint/hadolint-action@06be81baf89a55ffd0e24b8f04a4185738dd3387  # v3.5.0
+        with:
+          dockerfile: docker/Dockerfile
+      - name: Validate docker-compose.yml
+        run: MODEL_DIR=checkpoints/example docker compose config --quiet

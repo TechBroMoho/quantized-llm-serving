@@ -29,3 +29,6 @@ results/validation/multiprocess-local/capacity_requests.jsonl.gz
 
 # The in-Modal load tester check is kept under results/validation/phase6/
 results/perf/phase6/loadtest-check-*/
+
+# Local quickstart output (README)
+results/local/

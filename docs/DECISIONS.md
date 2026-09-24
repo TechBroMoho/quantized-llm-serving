@@ -1132,3 +1132,66 @@ found in PROGRESS (ADR-023).
 **Consequences.** RESULTS.md is not edited by hand. A new or changed raw
 result means rerunning `make plots report` and committing the output.
 Phase 8's README and resume bullets should quote RESULTS.md.
+
+## ADR-025 — Phase 8: CI, local serving, README and resume bullets (2026-09-24)
+
+**Context.** SPEC §7 Phase 8 asks for CPU-only CI, Compose serving of any
+variant on a local NVIDIA GPU, a public README, and final resume bullets
+built only from real numbers with links to evidence. Mohammed asked for two
+recruiter-readable bullets that credit the 54× throughput to vLLM ("served
+with vLLM") and label the 2.3× as single-user decode.
+
+**Decisions.**
+1. *CI* (`.github/workflows/ci.yml`): `make setup` + `make check` on
+   `ubuntu-24.04`, the same commands as a local check, plus hadolint and
+   `docker compose config`. Actions are pinned to commit SHAs. No GPU, no
+   Modal, no secrets, and the multi-GB vLLM image is never built. The tests
+   need no downloads: they build their tiny models locally.
+2. *CPU torch on Linux.* `[tool.uv.sources]` resolves `torch==2.8.0` from
+   the PyTorch CPU index on Linux only (`2.8.0+cpu`). The default Linux
+   wheel pulls ~3 GB of CUDA libraries that CI cannot use. macOS still gets
+   PyPI's torch 2.8.0. The Modal images pin their own CUDA torch
+   (`modal_app/common.py`) and never read this lock, so no measured
+   environment changes.
+3. *Compose serves a local directory.* `MODEL_DIR` (required; Compose
+   refuses to start without it) is bind-mounted read-only at `/model` with
+   `HF_HUB_OFFLINE=1`. The served weights are then exactly the files on
+   disk, not whatever the Hub serves today. The mount uses Compose's long
+   syntax, because a short-syntax relative path without `./` is read as a
+   named volume (found while validating). The engine flags default to
+   `configs/phase6_bench.yaml`'s. `make fetch-checkpoint VARIANT=…` copies a
+   checkpoint from the weights Volume and runs the new `llmbench
+   verify-checkpoint`, which sha256-checks every file against the Phase 4
+   evidence that Phase 6 verified before its GPU runs. This path could not
+   be run end to end here (no local NVIDIA GPU). vLLM 0.10.2's loader skips
+   the Hub for a local directory (`default_loader.py`, checked in the
+   v0.10.2 source), and the Compose file validates.
+4. *Resume bullets are generated.* `report.py` renders them into
+   RESULTS.md from the aggregate, with a table giving each phrase's exact
+   value, definition and evidence links, plus the caveats the bullets leave
+   out. Rounding: 62.6% → 63%, 2.35× → 2.3×, 54.14× → 54×, 0.95 pp →
+   "within 1 percentage point". Wording changed from the requested shape
+   where the evidence required it:
+   - "memory use" → "the model's memory footprint". Total GPU memory is
+     nearly identical across variants, because vLLM reserves 90% of the
+     GPU either way; the 63% is weight memory only.
+   - "within 1 point" → "within 1 percentage point", so it cannot be read
+     as a relative percentage.
+   - The bullets name AWQ only, because GPTQ lost 1.65 pp.
+   - "basic Hugging Face server" means HF naive (one request at a time).
+     The table states it, together with the 2.27× against static batching
+     and the fact that the 54× is peak vs peak (AWQ at 128 users). At 256
+     users the ratio is 45.4×.
+5. *README drift test.* The README is hand-written, but `tests/test_readme.py`
+   fails if any of its relative links or anchors breaks, if any decimal in
+   its Results section is missing from RESULTS.md, or if its resume bullets
+   differ from the generated ones.
+6. `make perf-table` rebuilds `results/perf/phase6/results_table.md`, and
+   `aggregate` depends on it, so `make plots report` regenerates every
+   derived file.
+
+**Consequences.** SPEC's "reproduce on Modal in ≤ 5 commands" is met as five
+ordered steps. Quantization entrypoints block, but eval and bench spawn and
+return, so each step must finish before the next (`modal app list`). Nobody
+outside Mohammed's Modal workspace can fetch the checkpoints; they must rerun
+Phase 4 (about $1.27).

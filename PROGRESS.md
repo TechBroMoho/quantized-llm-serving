@@ -2,19 +2,22 @@
 
 ## Status
 
-**Phase 7 complete (2026-09-24), stopped at the phase gate.** Charts and
-`docs/RESULTS.md` are generated from the committed raw results (`make plots
-report`, $0), with every number linked to its source file (ADR-024). Before
-that, a skeptical Phase 6 audit fixed one flaky test, two latent bugs and
-several PROGRESS numbers (ADR-023); no Phase 6 measurement changed. Spend
-unchanged: **$20.3659** total, which matches the saved billing report
-exactly; nothing running.
+**Phase 8 complete (2026-09-24), stopped at the final phase gate.** All
+SPEC phases are done. CPU-only CI runs on GitHub Actions. Compose serves any
+checkpoint from a local directory. The README is rewritten for a public
+audience, and the final resume bullets are generated into
+`docs/RESULTS.md#resume-bullets` with each number traced to its evidence
+(ADR-025). Spend unchanged: **$20.3659** total (Phase 8 $0); nothing running.
 - **Engine (vLLM BF16 vs HF, same weights):** peak output tokens/s 48.79×
   HF naive, 2.00× HF static (B = 128, largest *tested*; upper bound).
 - **Quantization (AWQ vs vLLM BF16):** single-user decode 2.35×; weight
   memory −62.6%; KV cache 1.44×; peak throughput only 1.12×; MMLU −0.95 pp.
 - **Both (AWQ vs HF):** peak requests/s 54.14× HF naive, 2.27× HF static.
-- Next: Phase 8 (Docker/repro polish, CI, README, final resume bullets).
+- Resume bullets: 63% smaller model memory, 2.3× single-user speed, within
+  1 percentage point on MMLU; served with vLLM, 256 simulated users, 54× a
+  basic (one-at-a-time) HF server.
+- Next: nothing scheduled. SPEC §11 stretch goals only if Mohammed asks and
+  the budget allows ($4.63 left under the $25 target).
 
 ## Phase log
 
@@ -643,6 +646,49 @@ exactly; nothing running.
   - `make check` (final code): exit 0 twice. Ruff, strict mypy on 24 source
     files, 151 tests passed, instruction-file comparison.
 
+- **Phase 8 (2026-09-24, $0; ADR-025).**
+  - Pushed Phase 6 audit `1b5b818` and Phase 7 `cc7efdc` first.
+  - CI (`.github/workflows/ci.yml`): `make setup` + `make check` on
+    ubuntu-24.04, plus hadolint and `docker compose config`. Actions pinned
+    to SHAs (checkout v7.0.1, setup-uv v10.2.0, hadolint-action v3.5.0). The
+    lock now takes torch from the PyTorch CPU index on Linux only (`uv lock`:
+    torch `2.8.0+cpu` there; 15 nvidia-* wheels and triton removed; macOS
+    unchanged). Modal images pin their own CUDA torch, so no measured
+    environment changes.
+  - Linux rehearsal before pushing (`python:3.12-bookworm`, linux/amd64,
+    uv 0.11.16): the first run installed `torch 2.8.0+cpu` and no nvidia
+    package, then failed strict mypy (`Library stubs not installed for
+    "yaml"`) on the new command. Fixed with `types-pyyaml` in the dev group.
+    Local `make check` showed the same error; the stubs fixed both.
+  - Compose: serves `MODEL_DIR` (required) read-only at `/model`, offline,
+    with the Phase 6 engine flags as defaults, plus a Python healthcheck (no
+    curl in the base image). `make docker-check` exits 0; with `MODEL_DIR`
+    unset Compose refuses ("required variable MODEL_DIR is missing a
+    value"). Not run on a GPU (none locally); vLLM 0.10.2's loader skips the
+    Hub for local directories (checked in the v0.10.2 source).
+  - `make fetch-checkpoint VARIANT=…` + `llmbench verify-checkpoint`:
+    `modal volume get` keeps only the last path component (checked on a
+    small results directory), so the target renames each download to
+    `checkpoints/qwen3-8b-<variant>`. Against the real AWQ evidence with no
+    local files, the verifier checked 13 files / 6,114,604,278 bytes and
+    exited 1 with 13 missing. New tests cover a matching file, a same-size
+    changed one, a longer one and a missing one.
+  - Resume bullets are rendered by `report.py` from the aggregate, with an
+    exact-value/definition/evidence table and the caveats (ADR-025 §4).
+    `make perf-table` joined `make plots report`; the regenerated
+    `results_table.md`, aggregate and charts are byte-identical.
+  - README: plain-English purpose, results table (engine / quantization /
+    accuracy / both), two charts, the engine-vs-quantization explanation,
+    how the benchmark works (Mermaid diagram), a $0 quickstart (mock server
+    + load tester, run here: 64 requests, 0 errors), local Docker serving,
+    five Modal steps with actual per-phase cost, limitations, future work.
+    `tests/test_readme.py` guards links/anchors, headline numbers and the
+    bullets. A mutation (a changed anchor, number and bullet) failed all
+    three tests. GitHub's GFM renderer produced both tables and the Mermaid
+    block.
+  - `make check` (local, final tree): exit 0; ruff clean, strict mypy on 24
+    files, 158 tests passed, instruction files identical.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -679,6 +725,7 @@ exactly; nothing running.
 | 2026-09-24 | 6 | GPTQ trimmed (no c256), all passed (`ap-FDnqJCa4CQ7vKLxYKIVg75`) | L40S | ≈1,560 | $1.121412 | $18.927273 |
 | 2026-09-24 | 6 | HF static relaunch, all passed (`ap-FSNm8dgmEFBGmIAphj1loj`) | L40S | ≈2,000 | $1.438650 | $20.365923 |
 | 2026-09-24 | 7 | Audit, charts, RESULTS.md (local only) | None | 0 | $0.00 | $20.365923 |
+| 2026-09-24 | 8 | CI, Compose, README, resume bullets (local; Modal Volume listings/reads only, no compute) | None | 0 | $0.00 | $20.365923 |
 
 **Phase 6 actual: $8.3009** against its $11 cap (raised from $10 by
 Mohammed, ADR-022). Every Phase 6 row matches the saved
@@ -804,4 +851,9 @@ the 1 TiB/month included.
   vLLM `/metrics` failure read as "idle" and let the prefix-cache check pass
   vacuously; and the HF server reported idle while it was collecting a
   batch. Neither affected a recorded point.
-
+- Phase 8: Compose read a relative `MODEL_DIR` without `./`
+  (`checkpoints/example`) as a *named volume* and rejected the project. The
+  long bind syntax fixed it for relative and absolute paths. Also, the
+  astral `uv:…-python3.12-bookworm` image tag used for the first Linux
+  rehearsal does not exist; the rehearsal moved to `python:3.12-bookworm`
+  with uv installed by pip.

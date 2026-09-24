@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -253,6 +254,104 @@ def claims_section(p: Page) -> list[str]:
         "--detach -m modal_app.quantize::{prepare,awq,gptq,sanity}`; Phase 5 `make "
         f"eval-full sync-accuracy`; Phase 6 {bench}. All are billable; "
         "estimates are required first (CLAUDE.md).",
+        "",
+    ]
+
+
+def resume_section(p: Page) -> list[str]:
+    """Plain-language bullets whose every number is rounded from the aggregate.
+
+    Throughput is attributed to vLLM ("served with vLLM") because most of it
+    is the engine, and the decode speedup is labelled single-user because it
+    mostly disappears under batching. The table gives each exact value.
+    """
+    mem = p.data["memory"]["variants"]
+    acc = p.data["accuracy"]
+    rr = p.head["requests_per_s_ratios"]
+    peaks = p.head["peak_requests_per_s"]
+    c256 = p.point("awq", "c256")
+    delta = acc["variants"]["awq"]["mmlu_delta_pp"]
+    memory_pct = round(mem["awq"]["weights_reduction_pct"])
+    decode = p.head["decode_speedup_vs_bf16"]["awq"]
+    throughput = round(rr["awq_vs_hf-naive"])
+    points = math.ceil(delta)
+    c256_ratio = (
+        c256["metrics"]["requests_per_s"]["median"] / peaks["hf-naive"]["median"]
+    )
+    return [
+        "## Resume bullets",
+        "",
+        "Written for a non-specialist reader. Each number is rounded from a "
+        "value in this page; the table says exactly what it measures.",
+        "",
+        "```text",
+        "Quantized LLM Serving & Benchmarking | Python, PyTorch, vLLM, Hugging Face, Docker, Modal",
+        f"• Compressed an 8B-parameter LLM to 4-bit with AWQ, shrinking the model's "
+        f"memory footprint by {memory_pct}% and generating text {decode:.1f}x faster "
+        f"for a single user while staying within {points} percentage "
+        f"point{'s' if points != 1 else ''} of the "
+        "original's accuracy",
+        "• Served it with vLLM on cloud GPUs and built a custom load tester "
+        f"simulating up to 256 simultaneous users, reaching {throughput}x the "
+        "throughput of a basic Hugging Face server",
+        "```",
+        "",
+        "| Phrase | Exact value | What it measures | Evidence |",
+        "| --- | --- | --- | --- |",
+        f"| memory footprint by {memory_pct}% | "
+        f"{mem['awq']['weights_reduction_pct']:.1f}% ({mem['awq']['weights_gib']['value']:.4f} "
+        f"vs {mem['bf16']['weights_gib']['value']:.4f} GiB); on disk "
+        f"{mem['awq']['disk_reduction_pct']:.1f}% | The model weights in GPU memory "
+        "(vLLM's load log), AWQ vs BF16. Not total GPU memory: vLLM reserves 90% "
+        "of the GPU either way and fills the rest with KV cache | "
+        + link("AWQ log", mem["awq"]["weights_gib"]["source"])
+        + ", "
+        + link("BF16 log", mem["bf16"]["weights_gib"]["source"])
+        + ", "
+        + link("on-disk sizes", mem["awq"]["disk_bytes"]["source"])
+        + " |",
+        f"| {decode:.1f}x faster for a single user | {x(decode)} | Single-user "
+        "decode speed (1 / median time per output token at 1 user), AWQ vs BF16, "
+        "both on vLLM, 3 runs each. With many users the gain shrinks to "
+        f"{x(p.head['quantization_peak_vs_bf16']['awq'])} (peak throughput) | "
+        f"AWQ {runs(p.point('awq', 'c1')['sources'])}; BF16 "
+        f"{runs(p.point('bf16', 'c1')['sources'])} |",
+        f"| within {points} percentage point{'s' if points != 1 else ''} of the "
+        "original's accuracy | "
+        f"{delta:.2f} pp | MMLU 5-shot (14,042 questions): "
+        f"{100 * acc['variants']['bf16']['mmlu_acc']:.2f}% → "
+        f"{100 * acc['variants']['awq']['mmlu_acc']:.2f}%. GPTQ lost "
+        f"{acc['variants']['gptq']['mmlu_delta_pp']:.2f} pp, so the bullet names "
+        "AWQ only | " + link("comparison.json", acc["source"]) + " |",
+        "| up to 256 simultaneous users | 256 | Closed-loop virtual users "
+        "streaming from the AWQ server, "
+        f"{f1(c256['metrics']['tokens_per_s']['median'])} output tokens/s, 0 errors | "
+        + runs(c256["sources"])
+        + " |",
+        f"| {throughput}x the throughput of a basic Hugging Face server | "
+        f"{x(rr['awq_vs_hf-naive'])} requests/s ({x(p.head['awq_peak_vs_hf']['naive'])} "
+        "output tokens/s) | Each system's peak over its sweep: vLLM AWQ at "
+        f"{p.point('awq', peaks['awq']['point'])['concurrency']} users vs HF naive "
+        "(one request at a time) at "
+        f"{p.point('hf-naive', peaks['hf-naive']['point'])['concurrency']}. Mostly "
+        f"the engine: vLLM with the original BF16 weights reaches "
+        f"{x(rr['bf16_vs_hf-naive'])}. At 256 users AWQ is at {x(c256_ratio)} | "
+        + link("results table", p.table)
+        + " |",
+        "",
+        "What the bullets leave out, stated here so nobody has to find it:",
+        "",
+        '- **"Basic" means one request at a time.** Against Hugging Face '
+        "with static batching, the fairer baseline, vLLM AWQ is "
+        f"{x(rr['awq_vs_hf-static'])} (an upper bound; see the batch-size caveat).",
+        "- **The throughput multiple is not a quantization result.** 4-bit "
+        f"weights add only {x(rr['awq_vs_bf16'])} peak requests/s over vLLM BF16.",
+        "- Against the SPEC §0 targets: accuracy (within 1.5%) and 256 users "
+        "were met. Memory (68%) and single-user speed (3.1×) were not: the "
+        f"memory cut matches the ~63% ceiling in [ADR-001]({ADR_001}), and the "
+        "speedup is below its ~3.1× bandwidth ceiling (see "
+        "[Where the speedup comes from](#where-the-speedup-comes-from)). The 14× "
+        "throughput target was beaten against the naive baseline only.",
         "",
     ]
 
@@ -743,6 +842,7 @@ def render(data: dict[str, Any]) -> str:
         "",
         *summary_section(page),
         *claims_section(page),
+        *resume_section(page),
         *methodology_section(page),
         *sweep_section(page),
         *memory_section(page),

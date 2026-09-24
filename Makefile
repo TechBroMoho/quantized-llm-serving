@@ -28,10 +28,24 @@ mock-validate:  # $0: timing (1 and 2 client processes) + 2-process capacity gat
 	uv run python -m llmbench.loadtest.validation --output-dir $(MOCK_VALIDATE_DIR)
 
 # --- Docker (local, $0) ---
-.PHONY: docker-check
-docker-check:
+.PHONY: docker-check fetch-checkpoint
+docker-check:  # MODEL_DIR is required by Compose; any path works for the config check
 	hadolint docker/Dockerfile
-	docker compose config --quiet
+	MODEL_DIR=checkpoints/example docker compose config --quiet
+
+# Copy a benchmarked checkpoint from the weights Volume and sha256-check it
+# against Phase 4's evidence. No compute; a large download (~6 GB for AWQ/GPTQ,
+# ~16 GB for BF16). Needs access to the Modal workspace that ran Phase 4.
+CHECKPOINT_awq = quantized/Qwen3-8B-awq-b968826d
+CHECKPOINT_gptq = quantized/Qwen3-8B-gptq-b968826d
+CHECKPOINT_bf16 = Qwen/Qwen3-8B/$(QWEN3_REVISION)
+fetch-checkpoint:  # VARIANT=awq|gptq|bf16 -> checkpoints/qwen3-8b-$(VARIANT)
+	@test -n "$(CHECKPOINT_$(VARIANT))" || { echo "VARIANT must be awq, gptq or bf16"; exit 1; }
+	@test ! -e checkpoints/qwen3-8b-$(VARIANT) || { echo "checkpoints/qwen3-8b-$(VARIANT) exists"; exit 1; }
+	rm -rf checkpoints/.partial && mkdir -p checkpoints/.partial
+	uv run modal volume get llmbench-weights $(CHECKPOINT_$(VARIANT)) checkpoints/.partial
+	mv checkpoints/.partial/$(notdir $(CHECKPOINT_$(VARIANT))) checkpoints/qwen3-8b-$(VARIANT)
+	uv run llmbench verify-checkpoint --variant $(VARIANT) --dir checkpoints/qwen3-8b-$(VARIANT)
 
 # --- Modal (BILLABLE: print an estimate and get explicit approval first) ---
 # All runs are detached, so a dropped client never kills a paid job.
@@ -133,8 +147,12 @@ accuracy-table:  # $0: comparison.json + accuracy_table.md from a synced full ru
 	uv run python -m llmbench.accuracy --run-dir $(RUN_DIR)
 
 # --- Phase 7 analysis ($0, local only) ---
-.PHONY: aggregate plots report
-aggregate:  # results/ -> results/analysis/aggregate.json (every number + its source)
+.PHONY: perf-table aggregate plots report
+perf-table:  # results/perf/phase6/ -> its results_table.md (headline medians + ratios)
+	uv run python -m llmbench.perf_report results/perf/phase6 \
+		--out results/perf/phase6/results_table.md
+
+aggregate: perf-table  # results/ -> results/analysis/aggregate.json (every number + its source)
 	uv run python -m llmbench.analysis.aggregate
 
 plots: aggregate  # charts -> results/analysis/*.png

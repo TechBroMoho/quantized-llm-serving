@@ -42,6 +42,8 @@ We quantize an open 8B LLM (default `Qwen/Qwen3-8B`) to 4-bit with AWQ and GPTQ 
 make setup / check / test                  # local, $0
 make mock-validate                         # load tester validation vs mock server, $0
 make docker-check                          # hadolint + docker compose config, $0
+make fetch-checkpoint VARIANT=awq|gptq|bf16  # Volume -> checkpoints/ + sha256 check (large download, no compute)
+MODEL_DIR=checkpoints/qwen3-8b-awq docker compose up --build  # serve locally (needs an NVIDIA GPU)
 make modal-download / modal-checks         # Modal CPU-only download + image checks (BILLABLE, tiny)
 make smoke (smoke-vllm / smoke-hf)         # Modal L4 smoke tests, detached (BILLABLE, small)
 make sync-results                          # copy phase3 results from the Modal Volume, $0
@@ -56,7 +58,7 @@ make bench-prompts-rehearsal               # $0: Phase 6 prompt build on WikiTex
 make bench-prepare                         # Modal CPU: checkpoint sha256 check + prompt pool (BILLABLE, tiny)
 make bench LIFETIME=<name in phase6_bench.yaml> [DROP=c256]  # Phase 6 L40S lifetimes, spawned (BILLABLE, ask first)
 make sync-loadtest-check / sync-bench      # copy Phase 6 check / benchmark results, $0
-make plots / report                        # regenerate charts + RESULTS.md from results/, $0 (Phase 7)
+make plots / report                        # regenerate results_table.md, charts + RESULTS.md from results/, $0
 ```
 
 ## Style

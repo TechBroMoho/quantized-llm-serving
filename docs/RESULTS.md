@@ -49,6 +49,30 @@ Targets are the SPEC §0 placeholders. They are ambitions, not results; the "Mea
 
 Environment for every row: NVIDIA L40S (driver 580.95.05), vLLM 0.10.2, torch 2.8.0+cu128. Reproduce: Phase 4 `uv run modal run --detach -m modal_app.quantize::{prepare,awq,gptq,sanity}`; Phase 5 `make eval-full sync-accuracy`; Phase 6 `make bench LIFETIME=<lifetime>` then `make sync-bench report` (billable). All are billable; estimates are required first (CLAUDE.md).
 
+## Resume bullets
+
+Written for a non-specialist reader. Each number is rounded from a value in this page; the table says exactly what it measures.
+
+```text
+Quantized LLM Serving & Benchmarking | Python, PyTorch, vLLM, Hugging Face, Docker, Modal
+• Compressed an 8B-parameter LLM to 4-bit with AWQ, shrinking the model's memory footprint by 63% and generating text 2.3x faster for a single user while staying within 1 percentage point of the original's accuracy
+• Served it with vLLM on cloud GPUs and built a custom load tester simulating up to 256 simultaneous users, reaching 54x the throughput of a basic Hugging Face server
+```
+
+| Phrase | Exact value | What it measures | Evidence |
+| --- | --- | --- | --- |
+| memory footprint by 63% | 62.6% (5.7088 vs 15.2683 GiB); on disk 62.8% | The model weights in GPU memory (vLLM's load log), AWQ vs BF16. Not total GPU memory: vLLM reserves 90% of the GPU either way and fills the rest with KV cache | [AWQ log](../results/perf/phase6/awq-20260923T220125Z/server.log#L42), [BF16 log](../results/perf/phase6/bf16-20260924T003034Z/server.log#L46), [on-disk sizes](../results/quantization/phase4/quantize-awq-20260923T103930Z/summary.json) |
+| 2.3x faster for a single user | 2.35× | Single-user decode speed (1 / median time per output token at 1 user), AWQ vs BF16, both on vLLM, 3 runs each. With many users the gain shrinks to 1.12× (peak throughput) | AWQ [r1](../results/perf/phase6/awq-20260923T220125Z/c1-r2/summary.json) [r2](../results/perf/phase6/awq-20260923T220125Z/c1-r3/summary.json) [r3](../results/perf/phase6/awq-followup-20260924T000015Z/c1-r4/summary.json); BF16 [r1](../results/perf/phase6/bf16-20260924T003034Z/c1/summary.json) [r2](../results/perf/phase6/bf16-20260924T003034Z/c1-r2/summary.json) [r3](../results/perf/phase6/bf16-20260924T003034Z/c1-r3/summary.json) |
+| within 1 percentage point of the original's accuracy | 0.95 pp | MMLU 5-shot (14,042 questions): 74.88% → 73.93%. GPTQ lost 1.65 pp, so the bullet names AWQ only | [comparison.json](../results/accuracy/phase5/full-20260923T142440Z/comparison.json) |
+| up to 256 simultaneous users | 256 | Closed-loop virtual users streaming from the AWQ server, 1,844.5 output tokens/s, 0 errors | [r1](../results/perf/phase6/awq-followup-20260924T000015Z/c256/summary.json) |
+| 54x the throughput of a basic Hugging Face server | 54.14× requests/s (54.76× output tokens/s) | Each system's peak over its sweep: vLLM AWQ at 128 users vs HF naive (one request at a time) at 4. Mostly the engine: vLLM with the original BF16 weights reaches 47.72×. At 256 users AWQ is at 45.42× | [results table](../results/perf/phase6/results_table.md) |
+
+What the bullets leave out, stated here so nobody has to find it:
+
+- **"Basic" means one request at a time.** Against Hugging Face with static batching, the fairer baseline, vLLM AWQ is 2.27× (an upper bound; see the batch-size caveat).
+- **The throughput multiple is not a quantization result.** 4-bit weights add only 1.13× peak requests/s over vLLM BF16.
+- Against the SPEC §0 targets: accuracy (within 1.5%) and 256 users were met. Memory (68%) and single-user speed (3.1×) were not: the memory cut matches the ~63% ceiling in [ADR-001](DECISIONS.md#adr-001--default-model-and-analytical-ceilings-2026-09-23), and the speedup is below its ~3.1× bandwidth ceiling (see [Where the speedup comes from](#where-the-speedup-comes-from)). The 14× throughput target was beaten against the naive baseline only.
+
 ## Methodology
 
 ### Hardware and software
