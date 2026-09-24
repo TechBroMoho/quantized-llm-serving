@@ -131,3 +131,14 @@ sync-accuracy:  # $0: copy Phase 5 results (minus per-sample JSONL) from the Vol
 
 accuracy-table:  # $0: comparison.json + accuracy_table.md from a synced full run
 	uv run python -m llmbench.accuracy --run-dir $(RUN_DIR)
+
+# --- Phase 7 analysis ($0, local only) ---
+.PHONY: aggregate plots report
+aggregate:  # results/ -> results/analysis/aggregate.json (every number + its source)
+	uv run python -m llmbench.analysis.aggregate
+
+plots: aggregate  # charts -> results/analysis/*.png
+	uv run python -m llmbench.analysis.plots
+
+report: aggregate  # docs/RESULTS.md, every number linked to its raw file
+	uv run python -m llmbench.analysis.report

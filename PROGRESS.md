@@ -2,20 +2,19 @@
 
 ## Status
 
-**Phase 6 complete (2026-09-24), stopped at the phase gate.** All
-lifetimes ran on NVIDIA L40S, vLLM 0.10.2, one 512/256-token WikiText-103
-workload. Phase 6 actual **$8.3009** (cap $11, first reads for the last
-runs); cumulative **$20.3659**; nothing running.
-- **Single-user decode:** AWQ **2.35×** BF16 (102.6 vs 43.7 tokens/s;
-  median TPOT 9.75 vs 22.86 ms, 3 runs each).
-- **Peak output tokens/s** (medians of 3):
-  - AWQ 2,196.8 (c=128); GPTQ 2,207.2 (c=128); vLLM BF16 1,957.2 (c=128);
-    HF static 977.0 (c=256, B=128); HF naive 40.1.
-  - **AWQ vs HF naive 54.8×**, vs HF static **2.25×**.
-  - Engine alone (vLLM BF16 vs HF): 48.8× naive, 2.0× static.
-  - Quantization alone at peak (AWQ vs vLLM BF16): 1.12×.
-- Table: `results/perf/phase6/results_table.md`. Max-batch lifetimes and
-  GPTQ c=256 were skipped (budget and time, ADR-022 addendum).
+**Phase 7 complete (2026-09-24), stopped at the phase gate.** Charts and
+`docs/RESULTS.md` are generated from the committed raw results (`make plots
+report`, $0), with every number linked to its source file (ADR-024). Before
+that, a skeptical Phase 6 audit fixed one flaky test, two latent bugs and
+several PROGRESS numbers (ADR-023); no Phase 6 measurement changed. Spend
+unchanged: **$20.3659** total, which matches the saved billing report
+exactly; nothing running.
+- **Engine (vLLM BF16 vs HF, same weights):** peak output tokens/s 48.79×
+  HF naive, 2.00× HF static (B = 128, largest *tested*; upper bound).
+- **Quantization (AWQ vs vLLM BF16):** single-user decode 2.35×; weight
+  memory −62.6%; KV cache 1.44×; peak throughput only 1.12×; MMLU −0.95 pp.
+- **Both (AWQ vs HF):** peak requests/s 54.14× HF naive, 2.27× HF static.
+- Next: Phase 8 (Docker/repro polish, CI, README, final resume bullets).
 
 ## Phase log
 
@@ -591,6 +590,59 @@ runs); cumulative **$20.3659**; nothing running.
     c256 +23.0%. The c256 gap is explained by arrival pattern: our
     all-at-once diagnostic gave 2,223.8 tokens/s, within 2.4% of its 2,277.1.
 
+- **Phase 7 audit of Phase 6 (2026-09-24, $0; ADR-023).**
+  - Pushed the 12 unpushed commits. Five `make check` runs with visible exit
+    codes: runs 1, 2, 4, 5 exit 0; run 3 exit 2 with
+    `test_open_loop_poisson_mode_completes_requests` (`rejected_requests
+    1 != 0`). Reproduced: 0 of 100 runs idle, 2 of 100 under CPU contention
+    (12 busy loops on 10 cores). Requests to the in-process mock took 35–52
+    ms instead of ~4, and four were in flight at a seeded arrival cluster
+    (61–74 ms). The rejection was correct and the test wrong. Fixed with a
+    cap above the scheduled arrivals, a new deterministic rejection test,
+    and a recorded `open_loop_max_dispatch_lag_s`. Stressed: 0 of 40.
+  - The earlier HF-lifetime failure did not recur (0 of 23 runs, 8 under
+    contention). Found while hunting it: `fetch_text` let
+    `RemoteDisconnected`/resets escape (a candidate cause); an unreachable
+    vLLM `/metrics` read as idle and passed the prefix-cache check
+    vacuously; the HF server looked idle while collecting a batch. All
+    fixed with regression tests that fail on the old code. The 45 recorded
+    points all had good snapshots, so no result changes.
+  - Tests that didn't test their names: the HF lifetime's idle assertion
+    was a tautology, and the hf-static regression test grepped the source.
+    Both now test behaviour; reintroducing the original bug fails the new
+    one.
+  - Numbers: a subagent traced every Phase 6 number in this file to its raw
+    file. Corrected: AWQ KV cache 245,312 (not the probe's 240,544); BF16
+    cost $1.619558 settled (the whole old $0.0115 gap); the c1 slowdown
+    description; "per process" cores; the HF static window rule; four
+    claims without a raw file. Peak requests/s is now computed by
+    `perf_report`.
+  - `make check` after the fixes: exit 0 three times (142 tests).
+- **Phase 7 (2026-09-24, $0; ADR-024).** `src/llmbench/analysis/`
+  (`aggregate`, `plots`, `report`); `make aggregate / plots / report`.
+  - Charts in `results/analysis/`: request throughput, p95 TTFT and median
+    TPOT vs concurrency; latency–throughput; weight memory + KV cache;
+    accuracy. Palette validated (`validate_palette.js`: all hard checks
+    pass; contrast relief via markers and tables). Each chart was rendered
+    and inspected; label collisions were fixed.
+  - `docs/RESULTS.md` (generated): summary with engine / quantization / both
+    kept separate, the HF static caveat, SPEC §8 claims → evidence with
+    targets vs measured, methodology (hardware, versions, commands, windows
+    per point, lifetimes with commit and image), full sweep table,
+    failed/diagnostic points, memory (with `nvidia-smi` peaks showing why it
+    is not the metric), accuracy, cross-check against passing medians,
+    sanity checks, where the speedup comes from, limitations.
+  - Sanity checks (from the aggregate): 43 points, 38 accepted, 4 failed,
+    1 diagnostic; 0 errored requests; vLLM prefix-cache queries/hits and
+    preemptions all 0 over 34 points; every curve rises to its peak; AWQ
+    and BF16 fall 16.0% / 8.8% from c=128 to c=256; repeated points spread
+    ≤ 2.6%. Measurement config sections are identical across lifetimes, with
+    one prompt pool.
+  - The cross-check against passing medians: c1 +0.9%, c64 −0.1%, c256
+    +23.5% (the all-at-once diagnostic is within +2.4%).
+  - `make check` (final code): exit 0 twice. Ruff, strict mypy on 24 source
+    files, 151 tests passed, instruction-file comparison.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -626,6 +678,7 @@ runs); cumulative **$20.3659**; nothing running.
 | 2026-09-24 | 6 | HF static, failed at startup (point resolution bug) (`ap-YfAYWf7dsuIWowYM1twSeK`) | L40S | ≈38 | $0.027280 | $17.805861 |
 | 2026-09-24 | 6 | GPTQ trimmed (no c256), all passed (`ap-FDnqJCa4CQ7vKLxYKIVg75`) | L40S | ≈1,560 | $1.121412 | $18.927273 |
 | 2026-09-24 | 6 | HF static relaunch, all passed (`ap-FSNm8dgmEFBGmIAphj1loj`) | L40S | ≈2,000 | $1.438650 | $20.365923 |
+| 2026-09-24 | 7 | Audit, charts, RESULTS.md (local only) | None | 0 | $0.00 | $20.365923 |
 
 **Phase 6 actual: $8.3009** against its $11 cap (raised from $10 by
 Mohammed, ADR-022). Every Phase 6 row matches the saved

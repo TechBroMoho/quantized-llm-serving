@@ -1079,3 +1079,56 @@ checks and diagnostics that did not trip in the recorded runs, and each
 fix has a regression test that fails on the old code. The HF lifetime flake
 stays open but instrumented: its assertion prints the lifetime's failure
 list.
+
+## ADR-024 — Phase 7 analysis: a generated, fully linked RESULTS.md (2026-09-24)
+
+**Context.** SPEC §7 Phase 7 asks for six charts and a RESULTS.md with
+methodology, all results, and a "where the speedup comes from" section, with
+every number traceable to a raw file (SPEC §3.1). A hand-written page would
+drift from the results and invite transcription errors like those the audit
+found in PROGRESS (ADR-023).
+
+**Decisions.**
+1. *Three steps, all $0 and local:* `llmbench.analysis.aggregate` reads
+   the raw files and writes `results/analysis/aggregate.json`, with every
+   value next to its repo-relative source path (server-log values carry
+   their line number, `#L<n>`). `plots` draws the charts from that file,
+   and `report` renders `docs/RESULTS.md` from it. `make plots report`
+   rebuilds everything. Tests fail if the committed aggregate, page or
+   `results_table.md` differs from a fresh build; if any link does not
+   resolve; or if a log link does not land on the line stating its value.
+2. *Headline rules* (same as `perf_report`): a point's value is the median
+   of its passing, non-diagnostic runs. A system's peak is the point with
+   the highest median, by output tokens/s or, for SPEC §5 "peak request
+   throughput", by requests/s. Failed and diagnostic points are listed in
+   their own table and never used. The `vllm bench serve` cross-check is
+   compared with *passing* medians, not the failed points Phase 6's notes
+   used.
+3. *Engine vs quantization.* The page has separate sections: engine (vLLM
+   BF16 vs HF, same weights), quantization (AWQ vs vLLM BF16, same engine),
+   then both together. Explanations that go beyond the measurements are
+   marked *(Interpretation: …)*.
+4. *HF static caveat* is a block quote in the summary. B = 128 is the
+   largest tested size, not shown to be the largest that fits, and HF
+   static's best point was its highest concurrency. Ratios against it are
+   an upper bound on vLLM's advantage.
+5. *Charts* (matplotlib 3.11.2, pinned). The reference categorical palette
+   is validated with the dataviz skill's `validate_palette.js`: adjacent
+   CVD and normal-vision checks pass; three slots are below 3:1 contrast,
+   so every series also has its own marker and every chart has a table in
+   RESULTS.md. Color follows the system in every chart. Five series use a
+   legend beside the plot instead of direct labels (which collided). Two
+   measures with different units get two panels, never two y-axes. MMLU is
+   a dot-and-interval plot, because a bar chart would need a truncated axis
+   to show ~1 pp differences. The planned max-batch Pareto points do not
+   exist (ADR-022 addendum), and the chart says so.
+6. *Fairness checks as data.* The config file's hash differs between
+   lifetimes (lifetimes and points were added). The aggregator checks that
+   the measurement sections (model, prompts, workload, vllm, hf) are
+   identical across compared lifetimes, and that all lifetimes hashed one
+   prompt pool. It also sums vLLM's prefix-cache and preemption counters
+   over all points: 0 queries, 0 hits, 0 preemptions.
+
+**Consequences.** RESULTS.md is not edited by hand. A new or changed raw
+result means rerunning `make plots report` and committing the output.
+Phase 8's README and resume bullets should quote RESULTS.md.
