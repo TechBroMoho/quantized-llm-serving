@@ -513,6 +513,15 @@ spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
   worst-case remainder counted. BF16 ended 3 minutes later; with its
   actual cost, full GPTQ would have fit.
 
+- **Phase 6 standing rule (Mohammed, 2026-09-24).** If a run crashes at
+  startup before any GPU measurement, and the fix comes with a test and the
+  budget still fits, fix and relaunch without asking, and log it here. Stop
+  only for failures during measurement, failed checks that cannot be
+  diagnosed, or budget limits.
+- HF static relaunched with the fix (`hf-static-20260924T013433Z`, 01:34
+  UTC). Budget: Phase 6 $5.731 + gptq-trimmed $1.522 + HF static $2.584 =
+  $9.84 ≤ $11.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
