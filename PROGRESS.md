@@ -522,6 +522,12 @@ spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
   UTC). Budget: Phase 6 $5.731 + gptq-trimmed $1.522 + HF static $2.584 =
   $9.84 ≤ $11.
 
+- **Phase 6, GPTQ trimmed (run `gptq-trimmed-20260924T010937Z`, L40S; 1,492 s
+  lifetime): all 7 points passed.** "Model loading took 5.6835 GiB"; KV
+  cache 240,736 tokens. c1 101.9 tokens/s (TPOT p50 9.7 ms); c4 365.2; c16
+  1,107.8; c64 2,001.0; c128 2,207.2 / 2,195.2 / 2,209.9 (median
+  **2,207.2**). No c=256 (budget cut, ADR-022 addendum).
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
