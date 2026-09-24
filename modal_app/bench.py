@@ -457,7 +457,12 @@ def _hf_lifetime(run: dict[str, Any], name: str, resources: Resources) -> Any:
     ]
     batch_size = None
     static_plan = None
-    points = resolve_points(config["points"], spec["points"])
+    # Static points need B, which only the OOM probe below provides.
+    points = (
+        []
+        if spec["mode"] == "static"
+        else resolve_points(config["points"], spec["points"])
+    )
     if spec["mode"] == "static":
         probe_out = out / "oom_probe.json"
         done = subprocess.run(
