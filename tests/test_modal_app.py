@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from llmbench.smoke import missing_flags
 from modal_app.common import (
     BENCH_AWQ_FOLLOWUP_RESOURCES,
@@ -160,24 +162,65 @@ def test_bench_config_resolves_and_every_lifetime_has_a_function() -> None:
     assert sum(f["bytes"] for f in safetensors) == 6_098_617_040
 
 
-def test_hf_static_points_resolve_only_after_the_oom_probe() -> None:
-    """Regression: hf-static once resolved hf-cB before the probe gave B."""
-    import inspect
+def _drive_hf_lifetime(monkeypatch, tmp_path, name: str) -> dict:
+    """Run modal_app.bench._hf_lifetime with every Modal and GPU effect
+    replaced: the OOM probe subprocess writes a fixed result (B = 32) and
+    run_lifetime only records what it was given."""
+    import subprocess
+    from types import SimpleNamespace
 
-    import pytest
-
-    from llmbench.bench import resolve_points, static_points_from_probe
+    import llmbench.bench
     from modal_app import bench
+    from modal_app.bench import _prepare_run
 
-    config, _ = load_config("phase6_bench.yaml")
-    spec = config["lifetimes"]["hf-static"]
-    with pytest.raises(ValueError, match="static batch size"):
-        resolve_points(config["points"], spec["points"])
-    source = inspect.getsource(bench._hf_lifetime)
-    before_probe = source.split("llmbench.baseline.oom_probe")[0]
-    assert 'if spec["mode"] == "static"\n        else resolve_points' in before_probe
     probe = {"chosen_batch_size": 32, "fitted": [{"batch_size": 32, "seconds": 20.0}]}
-    points, plan = static_points_from_probe(
-        resolve_points(config["points"], spec["points"], 32), probe
-    )
-    assert [p.concurrency for p in points] == [4, 16, 32, 64]
+    seen: dict = {"probe_calls": 0}
+
+    def fake_subprocess_run(command, **kwargs):
+        assert command[2] == "llmbench.baseline.oom_probe"
+        seen["probe_calls"] += 1
+        out = command[command.index("--out") + 1]
+        with open(out, "w") as stream:
+            json.dump(probe, stream)
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    async def fake_run_lifetime(**kwargs):
+        seen["lifetime"] = kwargs
+        return {"passed": True}
+
+    run = _prepare_run() | {"drop": []}  # reads git, before subprocess is faked
+    assert run["git"]["dirty"] == bool(run["git"]["dirty_files"])
+    monkeypatch.setattr(bench, "RESULTS_PATH", str(tmp_path))
+    monkeypatch.setattr(bench, "RESULTS", SimpleNamespace(commit=lambda: None))
+    monkeypatch.setattr(bench, "_require_prepared", lambda run, variant: {})
+    monkeypatch.setattr(bench.subprocess, "run", fake_subprocess_run)
+    monkeypatch.setattr(llmbench.bench, "run_lifetime", fake_run_lifetime)
+    resources = {
+        "hf-static": BENCH_HF_STATIC_RESOURCES,
+        "hf-naive": BENCH_HF_NAIVE_RESOURCES,
+    }[name]
+    bench._hf_lifetime(run, name, resources)
+    return seen
+
+
+def test_hf_static_lifetime_resolves_points_from_the_oom_probe(
+    monkeypatch, tmp_path
+) -> None:
+    """Regression: hf-static once resolved hf-cB before the probe gave B and
+    crashed at startup ("hf-cB needs the static batch size")."""
+    seen = _drive_hf_lifetime(monkeypatch, tmp_path, "hf-static")
+    assert seen["probe_calls"] == 1
+    lifetime = seen["lifetime"]
+    assert [p.concurrency for p in lifetime["points"]] == [4, 16, 32, 64]
+    command = lifetime["command"]
+    assert command[command.index("--batch-size") + 1] == "32"
+    assert lifetime["metadata"]["static_batch_size"] == 32
+    (plan_path,) = (tmp_path / "phase6").glob("hf-static-*/static_plan.json")
+    assert json.loads(plan_path.read_text())["batch_size"] == 32
+
+
+def test_hf_naive_lifetime_runs_without_an_oom_probe(monkeypatch, tmp_path) -> None:
+    seen = _drive_hf_lifetime(monkeypatch, tmp_path, "hf-naive")
+    assert seen["probe_calls"] == 0
+    assert [p.label for p in seen["lifetime"]["points"]] == ["c1", "hf-c4", "hf-c16"]
+    assert "--batch-size" not in seen["lifetime"]["command"]

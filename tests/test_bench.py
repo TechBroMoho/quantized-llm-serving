@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import socket
 import sys
 from pathlib import Path
 
@@ -126,11 +127,91 @@ def test_hf_lifetime_on_cpu_cuts_windows_and_waits_for_idle(tmp_path: Path) -> N
     ]
     summary = _lifetime(tmp_path, command, port, "hf")
     _check_saved(tmp_path, summary)
-    c4 = json.loads((tmp_path / "out" / "c4" / "summary.json").read_text())
-    # c2 ended with requests cut mid-stream; c4 still started from an idle
-    # server, and the HF server reported the jobs whose clients had gone.
-    assert c4["idle_before"]["busy"] == 0
+    c2, c4 = (
+        json.loads((tmp_path / "out" / label / "summary.json").read_text())
+        for label in ("c2", "c4")
+    )
+    # Both windows ended by cutting requests mid-stream (closed-loop users
+    # always have one in flight); after c2's cuts, c4 began only once the
+    # server's own /stats showed nothing queued or generating. The waiting
+    # logic itself is tested with a scripted server below.
+    assert c2["cut_at_window_end_requests"] > 0
     assert c4["cut_at_window_end_requests"] > 0
+    stats = c4["server_before"]["stats"]
+    assert stats["pending"] == 0 and not stats["busy"]
+    assert stats["generated_batch_sizes"] and max(stats["generated_batch_sizes"]) <= 2
+
+
+def test_wait_idle_waits_through_busy_and_unreachable_states(monkeypatch) -> None:
+    import pytest
+
+    from llmbench import bench
+
+    # busy, unreachable (busy None: unknown, never idle), busy, then idle.
+    states = iter([{"busy": 2}, {"busy": None}, {"busy": 1}, {"busy": 0}])
+    calls = []
+
+    def scripted(base_url: str, kind: str) -> dict:
+        calls.append(kind)
+        return next(states)
+
+    monkeypatch.setattr(bench, "server_state", scripted)  # polls every 0.5 s
+    state = asyncio.run(bench.wait_idle("http://x", "hf", timeout_s=60))
+    assert state["busy"] == 0 and len(calls) == 4
+    monkeypatch.setattr(bench, "server_state", lambda *_: {"busy": None})
+    with pytest.raises(TimeoutError, match="still busy"):
+        asyncio.run(bench.wait_idle("http://x", "vllm", timeout_s=0.01))
+
+
+def test_unreachable_vllm_metrics_are_unknown_not_idle(monkeypatch) -> None:
+    from llmbench import bench
+
+    monkeypatch.setattr(
+        bench, "fetch_text", lambda url: {"status": None, "text": "", "error": "x"}
+    )
+    state = bench.server_state("http://x", "vllm")
+    assert state["busy"] is None and state["counters"] is None
+
+
+def test_prefix_cache_check_needs_both_snapshots() -> None:
+    from llmbench.bench import PREFIX_HITS, prefix_cache_failures
+
+    def snap(hits: float | None) -> dict:
+        counters = None if hits is None else {PREFIX_HITS: hits}
+        return {"status": 200 if counters else None, "counters": counters}
+
+    assert prefix_cache_failures(snap(5), snap(5)) == []
+    assert "hits 3" in prefix_cache_failures(snap(5), snap(8))[0]
+    # Formerly an unreachable /metrics made both counts 0 and the check passed.
+    assert "unavailable" in prefix_cache_failures(snap(None), snap(8))[0]
+    assert "unavailable" in prefix_cache_failures(snap(None), snap(None))[0]
+
+
+def test_fetch_text_returns_resets_and_early_closes_as_failures() -> None:
+    import threading
+
+    from llmbench.smoke import fetch_text
+
+    # A server that accepts, reads the request and closes without replying:
+    # urlopen raises RemoteDisconnected, which is not a URLError.
+    listener = socket.socket()
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)
+
+    def serve() -> None:
+        connection, _ = listener.accept()
+        connection.recv(1024)
+        connection.close()
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    port = listener.getsockname()[1]
+    try:
+        result = fetch_text(f"http://127.0.0.1:{port}/metrics", timeout_s=5)
+    finally:
+        thread.join(timeout=5)
+        listener.close()
+    assert result["status"] is None and "RemoteDisconnected" in result["error"]
 
 
 def test_exhausted_prompt_pool_fails_the_point_loudly(tmp_path: Path) -> None:
@@ -526,3 +607,38 @@ def test_perf_report_merges_follow_ups_and_skips_diagnostics(tmp_path: Path) -> 
         "max": 2300,
         "point": "c128",
     }
+
+
+def test_perf_report_peak_requests_are_chosen_by_requests_per_s(
+    tmp_path: Path,
+) -> None:
+    from llmbench.perf_report import headline, load_points
+
+    def point(run: str, label: str, c: int, tps: float, rps: float) -> None:
+        d = tmp_path / run / label
+        d.mkdir(parents=True)
+        pct = {"p50": 0.01, "p90": 0.01, "p95": 0.01, "p99": 0.01}
+        summary = {
+            "config": {"concurrency": c},
+            "passed": True,
+            "failures": [],
+            "output_token_throughput_per_s": tps,
+            "request_throughput_per_s": rps,
+            "completed_in_window_requests": 10,
+            "ttft_s": pct,
+            "tpot_s": pct,
+            "itl_s": pct,
+            "e2e_s": pct,
+            "half_window_token_deviation": 0.01,
+        }
+        d.joinpath("summary.json").write_text(json.dumps(summary))
+
+    # Tokens/s and requests/s peak at different points (edge effects).
+    point("awq-20260101T000000Z", "c64", 64, 2000, 8.0)
+    point("awq-20260101T000000Z", "c128", 128, 2100, 7.5)
+    point("hf-naive-20260101T000000Z", "c4", 4, 40, 0.16)
+    head = headline(load_points(tmp_path))
+    assert head["peak_output_tokens_per_s"]["awq"]["point"] == "c128"
+    assert head["peak_requests_per_s"]["awq"]["point"] == "c64"
+    assert head["requests_per_s_ratios"]["awq_vs_hf-naive"] == 50.0
+    assert head["requests_per_s_ratios"]["awq_vs_bf16"] is None  # no BF16 rows

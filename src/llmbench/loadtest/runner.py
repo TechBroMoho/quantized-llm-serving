@@ -82,6 +82,9 @@ class _ShardResult:
     rejected: int
     warmup_done: int
     start_received_at: float | None = None
+    # Open loop: the latest a scheduled arrival was dispatched. A client that
+    # falls behind its schedule sends bursts, which distorts the arrivals.
+    max_dispatch_lag_s: float = 0.0
 
 
 @dataclass
@@ -124,6 +127,7 @@ async def _run_shard(
     request_number = 0
     offered = 0
     rejected = 0
+    max_dispatch_lag_s = 0.0
     rng = random.Random(shard.seed)
     payload_factory = options.payload_factory
     duration_s = options.duration_s
@@ -260,8 +264,10 @@ async def _run_shard(
             next_arrival = window_start + rng.expovariate(rate_per_s)
             while next_arrival < deadline:
                 await asyncio.sleep(max(0.0, next_arrival - time.perf_counter()))
-                if time.perf_counter() >= deadline:
+                now = time.perf_counter()
+                if now >= deadline:
                     break
+                max_dispatch_lag_s = max(max_dispatch_lag_s, now - next_arrival)
                 done_now = {task for task in pending if task.done()}
                 if done_now:
                     await asyncio.gather(*done_now, return_exceptions=True)
@@ -294,6 +300,7 @@ async def _run_shard(
         offered=offered,
         rejected=rejected,
         warmup_done=warmup_done,
+        max_dispatch_lag_s=max_dispatch_lag_s,
     )
 
 
@@ -564,6 +571,10 @@ async def run_load(
     summary["client_processes"] = processes
     summary["shard_window_process_cpu_seconds"] = [r.cpu_seconds for r in results]
     summary["shard_users"] = users
+    if mode == "open":
+        summary["open_loop_max_dispatch_lag_s"] = max(
+            r.max_dispatch_lag_s for r in results
+        )
     if clock is not None:
         summary["process_clock_check"] = clock
     summary["max_request_index"] = max(

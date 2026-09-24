@@ -412,7 +412,7 @@ runs); cumulative **$20.3659**; nothing running.
     cut at the end, 0 errors. Halves agree within 0.43%; edge bound 1.5%. 1
     chunk per token (1,944 chunks/s). Prefix-cache hits 0, preemptions 0.
   - **Where the time goes (c=256).** GPU utilization p50 96% while busy,
-    power up to 352.6 W (the 350 W limit). vLLM EngineCore 2.16 cores, API
+    power up to 352.6 W (both from `nvidia_smi.csv`). vLLM EngineCore 2.16 cores, API
     server 0.11; **client processes 0.037 + 0.037 cores** (the internal
     window CPU and `/proc` agree once `/proc` also counts the worker that
     exits as the window closes). Container 2.35 of 8 cores busy. The client
@@ -435,8 +435,8 @@ runs); cumulative **$20.3659**; nothing running.
     - At concurrency c, E2E ≈ ⌈c/B⌉ · T(min(c, B)).
     - warmup = ramp + 1.25 · E2E (rounded up to 5 s, never below the
       config).
-    - window = max(config window, 3 · T), so each half holds more than one
-      whole batch.
+    - window = max(config window, k · T) with k = 3 below c=128 and k = 10
+      from c=128 (ADR-022), so each half holds more than one whole batch.
   - The HF function writes `static_plan.json` and stops before starting the
     static server if the plan cannot finish in the time left in the function.
 
@@ -445,11 +445,12 @@ runs); cumulative **$20.3659**; nothing running.
   requires.** Table: `results/perf/phase6/results_table.md`.
   - Passed: c4 352.7, c16 1,094.8, c64 1,997.5, c128 **2,196.8** output
     tokens/s; c1-r2 100.2 and c1-r3 102.2 (TPOT p50 9.7 ms). Headroom
-    4.2–92×; client ≤ 0.19 cores per process; 0 errors, prefix-cache hits
-    0, preemptions 0.
-  - **c1 failed** (halves 7.53%): a transient ~10 s slowdown 13–24 s into
-    the window (two requests at TPOT 17.0 / 14.1 ms, stalls up to 74 ms;
-    steady 9.5–9.8 ms otherwise). The client was at 0.03 cores. Cause not
+    4.2–91× on passing points; client ≤ 0.10 cores per process (≤ 0.19 for
+    both together); 0 errors, prefix-cache hits 0, preemptions 0.
+  - **c1 failed** (halves 7.53%): a slowdown in the first half of the
+    window. Requests starting 12.9 and 17.2 s in ran at TPOT 17.0 / 14.1 ms
+    (stalls up to 74 ms); the eight starting 20.9–46.9 s in ran at 9.98–10.65
+    ms; the other 37 at 9.52–9.80 ms. The client was at 0.03 cores. Cause not
     identified.
   - **c256, c256-r2, c256-r3 failed** (halves 7.17 / 7.24 / 6.07%). Their
     18 s token bins alternate high/low (~29k / ~37k tokens): the users form
@@ -457,10 +458,13 @@ runs); cumulative **$20.3659**; nothing running.
     periods, so each half holds 2.5 and the halves differ by about one bin.
     This is periodic, not a trend. The 30 s ramp was shorter than one E2E.
     Throughput 1,831.7–1,860.5 tokens/s, below c128.
-  - **Cross-check (`vllm bench serve`, random 512/256 prompts):** c1 101.1
-    vs ours 99.0 tokens/s (+2.1%), TPOT +0.9%; c64 1,996.4 vs 1,997.5
-    (−0.1%), TPOT −3.3%; **c256 2,277.1 vs 1,850.8 (+23.0%)**, TPOT 111.3 vs
-    137.2 ms. Our TTFT is lower at c64 (82.8 vs 336.0 ms): bench serve starts
+  - **Cross-check (`vllm bench serve`, `random` dataset: 512-token target
+    inputs, 509.0–510.8 on average after its tokenizer round trip; exactly
+    256 outputs):** c1 101.1 vs ours 99.0 tokens/s (+2.1%), TPOT +0.9%; c64
+    1,996.4 vs 1,997.5 (−0.1%), TPOT −3.3%; **c256 2,277.1 vs 1,850.8
+    (+23.0%)**, TPOT 111.3 vs 137.2 ms. (Our c1 and c256 here are the
+    points that failed the halves check; RESULTS.md compares with the
+    passing medians.) Our TTFT is lower at c64 (82.8 vs 336.0 ms): bench serve starts
     all users at once. At c256 its duration includes the synchronized start
     and the ramp-down tail, while our window is a staggered steady state
     with prefill mixed into decode steps. Not yet confirmed.
@@ -481,8 +485,9 @@ runs); cumulative **$20.3659**; nothing running.
     arrival pattern: an all-at-once start separates prefill from decode, while
     staggered users mix prefill into every decode step. Diagnostic only.
   - BF16 launched at 17:30 PDT: Phase 6 actual $3.393 + $2.584 envelope =
-    $5.98 ≤ $11. Its `git.dirty=true` comes only from untracked synced result
-    files; code at `abdbd1a`.
+    $5.98 ≤ $11. Its summary records `git.dirty=true` at `abdbd1a` but not
+    which files; I believed they were untracked synced results, which the
+    results cannot confirm. Runs now also record `git.dirty_files`.
 - Billing note: `modal billing report --for today` is a UTC day. After
   midnight UTC, the Phase 6 total must merge `--start 2026-09-23` (whole days
   only) with `--for today`.
@@ -496,7 +501,7 @@ runs); cumulative **$20.3659**; nothing running.
   GPTQ still doesn't fit). **Max-batch 16/64 skipped** (ADR-022 addendum):
   no resume claim depends on them.
 
-- **Phase 6, BF16 (run `bf16-20260924T003034Z`, L40S, $1.608071 first read;
+- **Phase 6, BF16 (run `bf16-20260924T003034Z`, L40S, $1.619558 settled;
   2,219 s lifetime): all 10 points passed.**
   - "Model loading took 15.2683 GiB"; KV cache 170,944 tokens (166.9× at
     1,024 tokens).
@@ -512,12 +517,16 @@ runs); cumulative **$20.3659**; nothing running.
 - **Phase 6, HF static, first launch (`hf-static-20260924T004648Z`,
   $0.027280): failed at startup.** `_hf_lifetime` resolved the static points
   before the OOM probe had provided B ("hf-cB needs the static batch
-  size"); no GPU work ran. Fixed in `7b5ae56` with a regression test.
+  size"); no GPU work ran. It wrote no result files: the error text is in
+  the `7b5ae56` commit message, and the behavioural regression test
+  reproduces it when the bug is reintroduced. Only the cost is billed
+  evidence.
   Relaunch pending Mohammed's OK.
 - **Phase 6, GPTQ.** `gptq-trimmed` (no c=256) launched at 01:09 UTC,
   because full GPTQ plus a later HF static relaunch did not fit with BF16's
-  worst-case remainder counted. BF16 ended 3 minutes later; with its
-  actual cost, full GPTQ would have fit.
+  worst-case remainder counted. BF16's last `nvidia-smi` sample is 01:08:01
+  UTC, so it was already finishing; with its actual cost, full GPTQ would
+  have fit.
 
 - **Phase 6 standing rule (Mohammed, 2026-09-24).** If a run crashes at
   startup before any GPU measurement, and the fix comes with a test and the
@@ -525,8 +534,8 @@ runs); cumulative **$20.3659**; nothing running.
   only for failures during measurement, failed checks that cannot be
   diagnosed, or budget limits.
 - HF static relaunched with the fix (`hf-static-20260924T013433Z`, 01:34
-  UTC). Budget: Phase 6 $5.731 + gptq-trimmed $1.522 + HF static $2.584 =
-  $9.84 ≤ $11.
+  UTC). Budget: Phase 6 $5.729 (the Spend-log first reads then) +
+  gptq-trimmed $1.522 + HF static $2.584 = $9.84 ≤ $11.
 
 - **Phase 6, GPTQ trimmed (run `gptq-trimmed-20260924T010937Z`, L40S; 1,492 s
   lifetime): all 7 points passed.** "Model loading took 5.6835 GiB"; KV
@@ -566,14 +575,17 @@ runs); cumulative **$20.3659**; nothing running.
     | Peak output tokens/s | 2,196.8 @ c128 | 2,207.2 @ c128 | 1,957.2 @ c128 | 977.0 @ c256 | 40.1 @ c4 |
     | Peak requests/s | 8.572 | 8.606 | 7.556 | 3.777 | 0.158 |
     | Weight memory (vLLM log) | 5.7088 GiB | 5.6835 GiB | 15.2683 GiB | — | — |
-    | KV cache (tokens, 1,024 max len) | 240,544 | 240,736 | 170,944 | — | — |
+    | KV cache (tokens, 1,024 max len) | 245,312 | 240,736 | 170,944 | — | — |
 
+  - AWQ's KV cache is from the sweep and follow-up lifetimes (both
+    245,312). The probe lifetime, same flags, logged 240,544 (−1.9%), so
+    lifetimes vary by ~2% and AWQ vs GPTQ (240,736) is within that.
   - **Ratios:**
     - AWQ decode 2.35× BF16.
     - Peak tokens/s: AWQ vs HF naive 54.8×, vs HF static 2.25×; BF16 vs HF
       naive 48.8×, vs static 2.00×.
-    - Requests/s: 54.1× / 2.27× (HF requests/s carries the edge-bound
-      warning).
+    - Requests/s (now computed by `perf_report`): AWQ vs HF naive 54.1×,
+      vs static 2.27× (HF requests/s carries the edge-bound warning).
     - Quantization at peak: 1.12× (AWQ), 1.13× (GPTQ).
   - **Cross-check** (`vllm bench serve`, AWQ): c1 +2.1% tokens/s, c64 −0.1%,
     c256 +23.0%. The c256 gap is explained by arrival pattern: our
@@ -609,15 +621,18 @@ runs); cumulative **$20.3659**; nothing running.
 | 2026-09-23 | 6 | AWQ probe, c=1 and c=256, passed (`ap-RyihFdSLFZprP7tolBMi7H`) | L40S | ≈392 | $0.281566 | $12.385363 |
 | 2026-09-23 | 6 | AWQ sweep + repeats + cross-check; 4 points failed the steady-state check (`ap-wlDNh5vqN7p0fgg6ncYgEb`) | L40S | ≈2,600 | $1.868826 | $14.254189 |
 | 2026-09-23/24 | 6 | AWQ follow-up (ADR-022), all 5 points passed (`ap-xh6csySKIIZ5HRZ4cLD0ri`) | L40S | ≈1,680 | $1.204175 | $15.458364 |
-| 2026-09-24 | 6 | BF16 sweep + c1 and c128 repeats, all passed (`ap-M0EH6Yb26rksfXcKxtsv9v`) | L40S | ≈2,240 | $1.608071 | $17.066435 |
-| 2026-09-24 | 6 | HF naive, all passed (`ap-rZcEliswiLDYYgL0RuUx2L`) | L40S | ≈975 | $0.700659 | $17.767094 |
-| 2026-09-24 | 6 | HF static, failed at startup (point resolution bug) (`ap-YfAYWf7dsuIWowYM1twSeK`) | L40S | ≈38 | $0.027280 | $17.794374 |
-| 2026-09-24 | 6 | GPTQ trimmed (no c256), all passed (`ap-FDnqJCa4CQ7vKLxYKIVg75`) | L40S | ≈1,560 | $1.121412 | $18.915786 |
-| 2026-09-24 | 6 | HF static relaunch, all passed (`ap-FSNm8dgmEFBGmIAphj1loj`) | L40S | ≈2,000 | $1.438650 | $20.354436 |
+| 2026-09-24 | 6 | BF16 sweep + c1 and c128 repeats, all passed (`ap-M0EH6Yb26rksfXcKxtsv9v`) | L40S | ≈2,240 | $1.619558 | $17.077922 |
+| 2026-09-24 | 6 | HF naive, all passed (`ap-rZcEliswiLDYYgL0RuUx2L`) | L40S | ≈975 | $0.700659 | $17.778581 |
+| 2026-09-24 | 6 | HF static, failed at startup (point resolution bug) (`ap-YfAYWf7dsuIWowYM1twSeK`) | L40S | ≈38 | $0.027280 | $17.805861 |
+| 2026-09-24 | 6 | GPTQ trimmed (no c256), all passed (`ap-FDnqJCa4CQ7vKLxYKIVg75`) | L40S | ≈1,560 | $1.121412 | $18.927273 |
+| 2026-09-24 | 6 | HF static relaunch, all passed (`ap-FSNm8dgmEFBGmIAphj1loj`) | L40S | ≈2,000 | $1.438650 | $20.365923 |
 
-**Phase 6 actual: $8.3009** (first reads for the last runs; the running
-total above differs by $0.0115 from settling updates to earlier rows) against
-its $11 cap (raised from $10 by Mohammed, ADR-022).
+**Phase 6 actual: $8.3009** against its $11 cap (raised from $10 by
+Mohammed, ADR-022). Every Phase 6 row matches the saved
+`results/perf/phase6/modal_billing_2026-09-24.json` (the AWQ follow-up is its
+two UTC-day rows summed). The BF16 row first showed the pre-settlement
+$1.608071; it was corrected in the Phase 7 audit, which removed the $0.0115
+gap previously noted here.
 
 **Phase 5 actual: $10.7004** against its $11.63 cap ($6 plus Phase 4's
 unused $4.73 and Phase 3's unused $0.90, both reallocated by Mohammed;
@@ -726,3 +741,14 @@ the 1 TiB/month included.
   maximum. A larger B might raise HF static's peak (probe throughput was
   still rising: 1,007 → 1,084 tokens/s from 96 to 128). The comparison vs
   HF static is reported with that caveat.
+- Phase 7 audit (ADR-023): five `make check` runs with visible exit codes
+  exposed a *second* flaky test. `test_open_loop_poisson_mode_completes_requests`
+  failed once on 1 rejected request: under CPU contention the in-process
+  mock slowed to 35–52 ms per request, and a cluster of five seeded arrivals
+  found all four slots busy. The runner was right; the test assumed an idle
+  machine. The Phase 6 HF-lifetime flake still has not recurred (0 of 23,
+  8 of them under contention). Two real bugs turned up while hunting it: a
+  vLLM `/metrics` failure read as "idle" and let the prefix-cache check pass
+  vacuously; and the HF server reported idle while it was collecting a
+  batch. Neither affected a recorded point.
+

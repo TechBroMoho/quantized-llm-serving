@@ -9,6 +9,7 @@ fail, and the server is always terminated in `finally`.
 from __future__ import annotations
 
 import asyncio
+import http.client
 import json
 import os
 import platform
@@ -17,7 +18,6 @@ import shutil
 import signal
 import subprocess
 import time
-import urllib.error
 import urllib.request
 from collections.abc import Callable, Sequence
 from contextlib import suppress
@@ -297,11 +297,17 @@ async def wait_for_health(
 
 
 def fetch_text(url: str, timeout_s: float = 10) -> dict[str, Any]:
+    """GET `url`; any transport failure is returned as status None, not raised.
+
+    `urlopen` wraps only connect errors in URLError: a reset or an early close
+    while reading the response (ConnectionResetError, RemoteDisconnected,
+    IncompleteRead) escapes as OSError or HTTPException, so both are caught.
+    """
     try:
         with urllib.request.urlopen(url, timeout=timeout_s) as response:
             return {"status": response.status, "text": response.read().decode()}
-    except (urllib.error.URLError, TimeoutError) as exc:
-        return {"status": None, "text": "", "error": str(exc)}
+    except (OSError, http.client.HTTPException) as exc:  # URLError is an OSError
+        return {"status": None, "text": "", "error": f"{type(exc).__name__}: {exc}"}
 
 
 async def run_workload(

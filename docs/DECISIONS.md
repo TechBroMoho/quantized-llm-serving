@@ -1010,3 +1010,72 @@ extrapolated E2E. The all-at-once diagnostic reproduced `vllm bench serve`
 within 2.4%. Each sweep's best point was c=128 for all three vLLM variants
 and c=2B for HF static. HF static's B = 128 is the largest *tested* batch
 size (no candidate reached OOM); a larger B was not probed.
+
+## ADR-023 — Phase 6 audit: flaky tests, server-state fetches, evidence (2026-09-24)
+
+**Context.** Before Phase 7, a skeptical review of the Phase 6 code, tests
+and PROGRESS numbers. `make check` was run five times with visible exit
+codes: run 3 failed with `test_open_loop_poisson_mode_completes_requests`
+(`rejected_requests 1 != 0`). The failure reported earlier
+(`test_hf_lifetime_on_cpu_cuts_windows_and_waits_for_idle`, message lost)
+did not recur in those five runs or in 8 runs under CPU contention (12
+busy loops on 10 cores). That makes 0 of 23 so far, counting the earlier
+15 reruns.
+
+**Findings and decisions.**
+1. *Open-loop flake: the test was wrong, not the runner.* Reproduced under
+   contention (2 of 100 runs; 0 of 100 idle). The seeded schedule has five
+   arrivals in 61–74 ms. Requests to the in-process mock stretched from ~4
+   ms to 35–52 ms, so all four slots (concurrency 4) were busy, and the
+   runner correctly rejected and counted the arrival. The test asserted a
+   property of machine speed. Decision: the no-rejection test uses a cap
+   (32) above the 17 scheduled arrivals, and also checks offered ≤ 17 and
+   records = offered. A new deterministic test covers the cap: requests
+   holding their slot for longer than the window → exactly offered − 2
+   rejections. Open-loop summaries now record
+   `open_loop_max_dispatch_lag_s`, so a client that falls behind its
+   schedule, and bursts, is visible in the data. 0 failures in 40 stressed
+   runs of both tests.
+2. *`fetch_text` let resets escape.* `urlopen` wraps only connect errors
+   in URLError. `RemoteDisconnected` / `ConnectionResetError` /
+   `IncompleteRead` while reading the response were raised, which would
+   end a lifetime mid-sweep. They now return status None, like other
+   transport failures. This is a candidate cause of the unrecorded HF
+   lifetime failure, not a proven one.
+3. *An unreachable vLLM `/metrics` looked idle.* Empty counters gave busy =
+   0, and the prefix-cache check passed vacuously when both snapshots
+   failed (0 − 0). Now a failed fetch is busy None (never idle), and a
+   missing snapshot or counter fails the point. The 45 recorded Phase 6
+   points all had status 200 snapshots with the counter present, so no
+   result is affected.
+4. *HF server looked idle while collecting a batch.* The first job left
+   the queue before `busy` was set. For up to `batch_wait_ms` (50 ms),
+   `/stats` showed pending 0 and not busy. Now busy is set as soon as a live
+   job is taken. Real runs used ≥ 60 s warmups, so no window was affected.
+5. *Tests that did not test their names.*
+   `test_hf_lifetime_…_waits_for_idle` asserted `idle_before.busy == 0`,
+   which `wait_idle` guarantees by construction. It now checks that c2 and
+   c4 both cut requests and that c4's own `/stats` snapshot showed nothing
+   queued or running. A scripted-server unit test covers waiting through
+   busy and unreachable states, and the timeout.
+   `test_hf_static_points_resolve_only_after_the_oom_probe` asserted on
+   the *source text* of `_hf_lifetime`. It is replaced by tests that
+   drive `_hf_lifetime` with the probe subprocess and `run_lifetime`
+   faked. Reintroducing the original bug fails it with the original
+   error.
+6. *Numbers without script backing.* Peak requests/s and its ratios were
+   hand medians; `perf_report` now computes them (SPEC §5: chosen by
+   requests/s). RESULTS.md's generator computes the cross-check
+   comparisons against *passing* points. Phase 6's text compared against
+   the failed c1 and c256 points.
+7. *PROGRESS corrections.* AWQ KV cache in the headline is 245,312
+   (sweep/follow-up), not the probe's 240,544. The BF16 cost is the settled
+   $1.619558. Four claims had no raw file and are now reworded (the
+   first HF-static crash text, "350 W limit", "BF16 ended 3 minutes
+   later", $5.731). Launch metadata now records `git.dirty_files`.
+
+**Consequences.** No Phase 6 measurement changes: all fixes are to
+checks and diagnostics that did not trip in the recorded runs, and each
+fix has a regression test that fails on the old code. The HF lifetime flake
+stays open but instrumented: its assertion prints the lifetime's failure
+list.

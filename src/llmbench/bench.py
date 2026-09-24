@@ -186,6 +186,9 @@ def server_state(base_url: str, kind: str) -> dict[str, Any]:
     """Counters and in-flight work, from vLLM `/metrics` or HF `/stats`."""
     if kind == "vllm":
         response = fetch_text(f"{base_url}/metrics")
+        if response["status"] != 200:
+            # Unknown, not idle: empty counters would read as busy == 0.
+            return {"status": response["status"], "counters": None, "busy": None}
         counters = vllm_counters(response["text"])
         busy = counters.get("vllm:num_requests_running", 0) + counters.get(
             "vllm:num_requests_waiting", 0
@@ -202,8 +205,26 @@ def server_state(base_url: str, kind: str) -> dict[str, Any]:
     return {"status": None, "busy": 0}
 
 
+PREFIX_HITS = "vllm:prefix_cache_hits_total"
+
+
+def prefix_cache_failures(before: dict[str, Any], after: dict[str, Any]) -> list[str]:
+    """SPEC §6: no prefix-cache hit during a point. A missing snapshot or
+    counter fails the point, since the check could not be made."""
+    counters = [state.get("counters") or {} for state in (before, after)]
+    if any(PREFIX_HITS not in c for c in counters):
+        return [
+            f"prefix-cache counter unavailable ({before['status']}, "
+            f"{after['status']}): cannot show that caching was off"
+        ]
+    hits = counters[1][PREFIX_HITS] - counters[0][PREFIX_HITS]
+    return [f"prefix cache hits {hits:g} (caching must be off)"] if hits else []
+
+
 async def wait_idle(base_url: str, kind: str, timeout_s: float) -> dict[str, Any]:
-    """Wait until the server has no running or queued work (bounded)."""
+    """Wait until the server has no running or queued work (bounded).
+
+    An unreachable server reports busy None, which is not idle."""
     started = time.perf_counter()
     while True:
         state = await asyncio.to_thread(server_state, base_url, kind)
@@ -529,11 +550,7 @@ async def run_points(
                     f"{validated_chunks_per_s:.0f}/s validated (ADR-005)"
                 )
         if kind == "vllm":
-            hits = after["counters"].get("vllm:prefix_cache_hits_total", 0) - before[
-                "counters"
-            ].get("vllm:prefix_cache_hits_total", 0)
-            if hits:
-                failures.append(f"prefix cache hits {hits} (caching must be off)")
+            failures.extend(prefix_cache_failures(before, after))
         if point.diagnostic:
             summary["diagnostic_findings"] = failures + warnings
             failures, warnings = [], []

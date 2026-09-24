@@ -79,6 +79,19 @@ def median_of(rows: list[dict[str, Any]], lifetime: str, base: str, key: str) ->
     }
 
 
+SYSTEMS = ("bf16", "awq", "gptq", "hf-naive", "hf-static")
+
+
+def peak(rows: list[dict[str, Any]], lifetime: str, key: str) -> Any:
+    """The point whose median `key` over passing runs is highest."""
+    best = None
+    for base in sorted({r["base"] for r in rows if r["lifetime"] == lifetime}):
+        value = median_of(rows, lifetime, base, key)
+        if value and (best is None or value["median"] > best["median"]):
+            best = value | {"point": base}
+    return best
+
+
 def headline(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """SPEC §8: single-user decode speed and peak throughput ratios."""
     decode: dict[str, Any] = {}
@@ -87,14 +100,8 @@ def headline(rows: list[dict[str, Any]]) -> dict[str, Any]:
         decode[lifetime] = (
             {"tokens_per_s": 1 / tpot["median"], "tpot": tpot} if tpot else None
         )
-    peaks: dict[str, Any] = {}
-    for lifetime in ("bf16", "awq", "gptq", "hf-naive", "hf-static"):
-        best = None
-        for base in {r["base"] for r in rows if r["lifetime"] == lifetime}:
-            value = median_of(rows, lifetime, base, "tokens_per_s")
-            if value and (best is None or value["median"] > best["median"]):
-                best = value | {"point": base}
-        peaks[lifetime] = best
+    peaks = {v: peak(rows, v, "tokens_per_s") for v in SYSTEMS}
+    request_peaks = {v: peak(rows, v, "requests_per_s") for v in SYSTEMS}
 
     def ratio(a: Any, b: Any) -> float | None:
         return a["median"] / b["median"] if a and b else None
@@ -117,6 +124,20 @@ def headline(rows: list[dict[str, Any]]) -> dict[str, Any]:
         },
         "quantization_peak_vs_bf16": {
             v: ratio(peaks.get(v), peaks.get("bf16")) for v in ("awq", "gptq")
+        },
+        # SPEC §5: the highest median requests/s across the sweep. HF points
+        # carry the edge-bound warning (whole batches complete together).
+        "peak_requests_per_s": request_peaks,
+        "requests_per_s_ratios": {
+            f"{a}_vs_{b}": ratio(request_peaks.get(a), request_peaks.get(b))
+            for a, b in (
+                ("awq", "hf-naive"),
+                ("awq", "hf-static"),
+                ("bf16", "hf-naive"),
+                ("bf16", "hf-static"),
+                ("awq", "bf16"),
+                ("gptq", "bf16"),
+            )
         },
     }
 

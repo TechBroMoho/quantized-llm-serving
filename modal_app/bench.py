@@ -622,7 +622,12 @@ def _prepare_run() -> dict[str, Any]:
         "config_sha256": config_sha256(config),
         "quant_config": quant_config,
         "expected_checkpoints": expected,
-        "git": {"commit": git("rev-parse", "HEAD"), "dirty": bool(git("status", "-s"))},
+        # The file list says whether a dirty tree touched code or only results.
+        "git": {
+            "commit": git("rev-parse", "HEAD"),
+            "dirty": bool(git("status", "--porcelain")),
+            "dirty_files": git("status", "--porcelain").splitlines(),
+        },
         "stamp": run_stamp(),
     }
 

@@ -18,18 +18,22 @@ from llmbench.loadtest.workloads import (
 from llmbench.mock.server import CONFIG_KEY, MockConfig, completion, make_app
 
 
-def test_open_loop_poisson_mode_completes_requests() -> None:
+def _open_loop(
+    concurrency: int, ttft_s: float, drain_s: float = 0.2
+) -> tuple[dict, list]:
+    """0.15 s at 60 arrivals/s, seed 7: 17 scheduled arrivals (6.5 ... 135.4 ms)."""
+
     async def run() -> tuple[dict, list]:
         server = TestServer(
-            make_app(MockConfig(ttft_s=0.002, itl_s=0.001, output_tokens=2))
+            make_app(MockConfig(ttft_s=ttft_s, itl_s=0.001, output_tokens=2))
         )
         await server.start_server()
         try:
             return await run_load(
                 url=str(server.make_url("/v1/completions")),
-                concurrency=4,
-                timeout_s=1,
-                drain_s=0.2,
+                concurrency=concurrency,
+                timeout_s=2,
+                drain_s=drain_s,
                 payload_factory=lambda index: completions_payload(
                     prompt="open loop",
                     request_index=index,
@@ -45,13 +49,33 @@ def test_open_loop_poisson_mode_completes_requests() -> None:
         finally:
             await server.close()
 
-    summary, rows = asyncio.run(run())
+    return asyncio.run(run())
+
+
+def test_open_loop_poisson_mode_completes_requests() -> None:
+    # The cap (32) is above the 17 scheduled arrivals, so no arrival can be
+    # rejected however slowly this machine serves the in-process mock. With a
+    # cap of 4, a loaded laptop stretched requests from ~4 ms to 35-52 ms and
+    # 4 were still in flight at the 61-74 ms arrival cluster: a correct
+    # rejection, but a flaky test (the cap itself is tested below).
+    summary, rows = _open_loop(concurrency=32, ttft_s=0.002)
     assert summary["config"]["mode"] == "open"
-    assert summary["offered_requests"] > 0
+    assert 0 < summary["offered_requests"] <= 17
     assert summary["warmup_requests_completed"] == 3
     assert summary["on_time_completed_requests"] > 0
     assert summary["rejected_requests"] == 0
+    assert len(rows) == summary["offered_requests"]
     assert all(row.status in {"ok", "late_completion"} for row in rows)
+    assert summary["open_loop_max_dispatch_lag_s"] >= 0
+
+
+def test_open_loop_rejects_arrivals_that_find_every_slot_busy() -> None:
+    # Each request holds its slot for >= 0.5 s, longer than the whole window,
+    # so the first 2 arrivals take both slots and every later one is rejected.
+    summary, rows = _open_loop(concurrency=2, ttft_s=0.5, drain_s=2)
+    assert summary["offered_requests"] >= 3
+    assert summary["rejected_requests"] == summary["offered_requests"] - 2
+    assert len(rows) == 2 and all(row.status == "late_completion" for row in rows)
 
 
 def test_deadline_cancels_work_after_bounded_drain() -> None:

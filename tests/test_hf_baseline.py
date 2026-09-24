@@ -12,7 +12,7 @@ import torch
 import uvicorn
 from transformers import GPT2Config, GPT2LMHeadModel
 
-from llmbench.baseline.hf_server import Baseline, make_app
+from llmbench.baseline.hf_server import Baseline, Job, make_app
 from llmbench.loadtest.runner import run_load
 
 
@@ -392,3 +392,28 @@ def test_closing_the_stream_marks_the_job_cancelled() -> None:
         return job.cancelled
 
     assert asyncio.run(run())
+
+
+def test_server_is_busy_while_it_collects_a_batch() -> None:
+    # Regression: the first job left the queue before `busy` was set, so for
+    # the batch-wait time /stats showed pending 0 and busy false (idle).
+    async def run() -> tuple[bool, int, bool]:
+        baseline = Baseline(
+            _model(), TinyTokenizer(), mode="static", batch_size=4, batch_wait_ms=300
+        )
+        job = Job([1, 2], 3)
+        baseline.pending.put_nowait(job)
+        await baseline.start()
+        try:
+            await asyncio.sleep(0.1)  # inside the 300 ms collection wait
+            collecting = (baseline.busy, baseline.pending.qsize())
+            while await job.events.get() is not None:
+                pass
+            await asyncio.sleep(0.05)
+            return collecting[0], collecting[1], baseline.busy
+        finally:
+            await baseline.stop()
+
+    busy_while_collecting, queued, busy_after = asyncio.run(run())
+    assert busy_while_collecting and queued == 0
+    assert not busy_after

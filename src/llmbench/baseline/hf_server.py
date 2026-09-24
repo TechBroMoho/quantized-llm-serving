@@ -120,27 +120,31 @@ class Baseline:
             if first.cancelled:
                 self.skipped_cancelled_jobs += 1
                 continue
+            # Busy from here: the job has left the queue, so while the batch
+            # is collected, `pending` alone would make the server look idle.
+            self.busy = True
             jobs = [first]
-            deadline = asyncio.get_running_loop().time() + self.batch_wait_s
-            while len(jobs) < self.batch_size:
-                remaining = deadline - asyncio.get_running_loop().time()
-                if remaining <= 0:
-                    break
-                try:
-                    candidate = await asyncio.wait_for(self.pending.get(), remaining)
-                except TimeoutError:
-                    break
-                if candidate.cancelled:
-                    self.skipped_cancelled_jobs += 1
-                    continue
-                if candidate.max_new_tokens != first.max_new_tokens:
-                    # A single generate call has one length setting.
-                    self.pending.put_nowait(candidate)
-                    break
-                jobs.append(candidate)
             try:
+                deadline = asyncio.get_running_loop().time() + self.batch_wait_s
+                while len(jobs) < self.batch_size:
+                    remaining = deadline - asyncio.get_running_loop().time()
+                    if remaining <= 0:
+                        break
+                    try:
+                        candidate = await asyncio.wait_for(
+                            self.pending.get(), remaining
+                        )
+                    except TimeoutError:
+                        break
+                    if candidate.cancelled:
+                        self.skipped_cancelled_jobs += 1
+                        continue
+                    if candidate.max_new_tokens != first.max_new_tokens:
+                        # A single generate call has one length setting.
+                        self.pending.put_nowait(candidate)
+                        break
+                    jobs.append(candidate)
                 self.generated_batch_sizes.append(len(jobs))
-                self.busy = True
                 await asyncio.to_thread(
                     self._generate, jobs, asyncio.get_running_loop()
                 )
