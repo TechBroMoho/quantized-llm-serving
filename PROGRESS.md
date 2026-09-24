@@ -490,6 +490,29 @@ spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
   GPTQ still doesn't fit). **Max-batch 16/64 skipped** (ADR-022 addendum):
   no resume claim depends on them.
 
+- **Phase 6, BF16 (run `bf16-20260924T003034Z`, L40S, $1.608071 first read;
+  2,219 s lifetime): all 10 points passed.**
+  - "Model loading took 15.2683 GiB"; KV cache 170,944 tokens (166.9× at
+    1,024 tokens).
+  - c1 43.6 / 43.6 / 43.5 tokens/s (TPOT p50 22.8–22.9 ms); c4 157.6; c16
+    561.9; c64 1,476.9; c128 1,943.7 then repeats 1,958.7 / 1,957.2
+    (median **1,957.2**); c256 1,784.3 (ADR-022 window 340 s from an
+    extrapolated 33.7 s E2E; measured 36.7 s; halves 1.44%).
+  - The best point was c128, repeated as `repeat_best`.
+- **Phase 6, HF naive (run `hf-naive-20260924T004647Z`, L40S, $0.700659
+  first read; 957 s lifetime): all 5 points passed.** 40.1 / 40.1 / 40.0
+  tokens/s at c1/c4/c16 (one request at a time, as designed), repeats of the
+  best (c4) 40.1 / 40.1.
+- **Phase 6, HF static, first launch (`hf-static-20260924T004648Z`,
+  $0.027280): failed at startup.** `_hf_lifetime` resolved the static points
+  before the OOM probe had provided B ("hf-cB needs the static batch
+  size"); no GPU work ran. Fixed in `7b5ae56` with a regression test.
+  Relaunch pending Mohammed's OK.
+- **Phase 6, GPTQ.** `gptq-trimmed` (no c=256) launched at 01:09 UTC,
+  because full GPTQ plus a later HF static relaunch did not fit with BF16's
+  worst-case remainder counted. BF16 ended 3 minutes later; with its
+  actual cost, full GPTQ would have fit.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -520,6 +543,9 @@ spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
 | 2026-09-23 | 6 | AWQ probe, c=1 and c=256, passed (`ap-RyihFdSLFZprP7tolBMi7H`) | L40S | ≈392 | $0.281566 | $12.385363 |
 | 2026-09-23 | 6 | AWQ sweep + repeats + cross-check; 4 points failed the steady-state check (`ap-wlDNh5vqN7p0fgg6ncYgEb`) | L40S | ≈2,600 | $1.868826 | $14.254189 |
 | 2026-09-23/24 | 6 | AWQ follow-up (ADR-022), all 5 points passed (`ap-xh6csySKIIZ5HRZ4cLD0ri`) | L40S | ≈1,680 | $1.204175 | $15.458364 |
+| 2026-09-24 | 6 | BF16 sweep + c1 and c128 repeats, all passed (`ap-M0EH6Yb26rksfXcKxtsv9v`) | L40S | ≈2,240 | $1.608071 | $17.066435 |
+| 2026-09-24 | 6 | HF naive, all passed (`ap-rZcEliswiLDYYgL0RuUx2L`) | L40S | ≈975 | $0.700659 | $17.767094 |
+| 2026-09-24 | 6 | HF static, failed at startup (point resolution bug) (`ap-YfAYWf7dsuIWowYM1twSeK`) | L40S | ≈38 | $0.027280 | $17.794374 |
 
 **Phase 5 actual: $10.7004** against its $11.63 cap ($6 plus Phase 4's
 unused $4.73 and Phase 3's unused $0.90, both reallocated by Mohammed;
