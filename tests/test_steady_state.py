@@ -105,7 +105,10 @@ def test_steady_window_counts_tokens_and_cuts_in_flight_requests() -> None:
     summary, rows = _steady(
         concurrency=8,
         processes=2,
-        duration_s=1.5,
+        # ~210 completions: at 1.5 s (~80 on Linux, where the mock's 5 ms ITL
+        # runs ~6.7 ms) two coinciding completions already hit the 5% edge
+        # bound, and native Linux failed 14 of 15 runs (ADR-025).
+        duration_s=4.0,
         warmup_s=0.4,
         ramp_s=0.12,
         index_offset=1000,

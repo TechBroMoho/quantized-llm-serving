@@ -186,6 +186,13 @@ def test_actual_generate_batches_and_routes_distinct_rows() -> None:
                         assert isinstance(token, int)
                         tokens.append(token)
                     streamed.append(tokens)
+                # The streamer's end() posts None from inside generate(), so
+                # the stream can finish before generate() returns and observe()
+                # records the call. `busy` clears only after the thread returns
+                # (a slow emulated Linux run lost this race).
+                async with asyncio.timeout(5):
+                    while baseline.busy:
+                        await asyncio.sleep(0.01)
                 await baseline.stop()
             assert len(calls) == 1
             arguments, sequences = calls[0]

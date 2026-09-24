@@ -686,8 +686,16 @@ audience, and the final resume bullets are generated into
     bullets. A mutation (a changed anchor, number and bullet) failed all
     three tests. GitHub's GFM renderer produced both tables and the Mermaid
     block.
-  - `make check` (local, final tree): exit 0; ruff clean, strict mypy on 24
-    files, 158 tests passed, instruction files identical.
+  - The Linux rehearsal then failed 2 tests that pass on macOS: a race in
+    the HF batching test, and a steady-state test whose 1.5 s window was
+    too small for its 5% gates (native arm64 Linux failed it 14 of 15
+    times). Both tests were fixed without changing any assertion
+    (ADR-025 §7). On GitHub's runners the four timing-sensitive test
+    files passed 30 of 30 repeats (run 35953271637, temporary branch,
+    deleted).
+  - Fresh clone of the final tree: `make setup` exit 0, `make check` exit 0
+    (ruff clean, strict mypy on 24 files, 158 tests passed, instruction
+    files identical).
 
 ## Spend log
 
@@ -857,3 +865,12 @@ the 1 TiB/month included.
   astral `uv:…-python3.12-bookworm` image tag used for the first Linux
   rehearsal does not exist; the rehearsal moved to `python:3.12-bookworm`
   with uv installed by pip.
+- Phase 8: the CI rehearsal on Linux exposed two tests that only passed
+  on macOS. (1) The HF batching test asserted before the generation thread
+  had recorded its call, because the stream's end marker is posted from
+  inside `generate()`; under the slower Linux run the assertion won the
+  race. (2) The steady-state test's 1.5 s window left the request-rate gate
+  on a knife edge: at ~95 completions macOS scored 0.042 against a 0.05
+  limit, and Linux, where `asyncio.sleep(0.005)` takes ~6.7 ms, had ~80
+  completions and failed 14 of 15 runs. Without the rehearsal, CI would
+  have gone red on its first push.

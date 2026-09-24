@@ -1189,6 +1189,31 @@ with vLLM") and label the 2.3× as single-user decode.
 6. `make perf-table` rebuilds `results/perf/phase6/results_table.md`, and
    `aggregate` depends on it, so `make plots report` regenerates every
    derived file.
+7. *Two test bugs found by rehearsing CI on Linux* (Docker,
+   `python:3.12-bookworm`), both hidden on macOS. No assertion or gate
+   changed.
+   - `test_actual_generate_batches_and_routes_distinct_rows` raced:
+     `TokenStreamer.end()` posts the end marker from inside `generate()`,
+     so the test could stop the server and assert before the worker thread
+     returned and its `observe()` wrapper recorded the call ("assert 0 ==
+     1"). The test now waits for `baseline.busy` to clear, which happens
+     only after the thread returns. A 0.5 s delay injected after
+     `generate()` reproduces the failure without the wait and passes with
+     it.
+   - `test_steady_window_counts_tokens_and_cuts_in_flight_requests` held
+     production gates (5% edge error, 5% halves) to a 1.5 s window. On
+     Linux the mock's 5 ms ITL runs at ~6.7 ms, so only ~80 requests
+     completed. Two coinciding completions then already reached the
+     edge-error bound (2·2/80 = 0.05); macOS, at ~95 completions, sat at
+     0.042. Native arm64 Linux failed 14 of 15 runs. The window is now
+     4.0 s (~210 completions): 0 request-rate failures in 130 Linux runs,
+     worst 0.031. The halves check still failed 3 of 130 times inside
+     Docker Desktop (worst 7.3%). A 6 s window did not help (2 of 40), so
+     these misses are real unsteadiness in that VM, which the check exists
+     to catch, not a sample-size problem. On GitHub's ubuntu-24.04 runners
+     (4 cores), a throwaway branch ran the four timing-sensitive test files
+     30 times (1,200 test executions) with 0 failures (run 35953271637; the
+     branch was deleted afterwards).
 
 **Consequences.** SPEC's "reproduce on Modal in ≤ 5 commands" is met as five
 ordered steps. Quantization entrypoints block, but eval and bench spawn and
