@@ -1,0 +1,14 @@
+{"batch_size": 8, "seconds": 9.976507354999999, "output_tokens_per_s": 205.2822623313748, "peak_allocated_bytes": 17434528256}
+{"batch_size": 16, "seconds": 9.807346206000002, "output_tokens_per_s": 417.6461107790936, "peak_allocated_bytes": 18476943872}
+{"batch_size": 32, "seconds": 12.221798209999996, "output_tokens_per_s": 670.2777986710029, "peak_allocated_bytes": 20561775104}
+{"batch_size": 48, "seconds": 15.265823297000004, "output_tokens_per_s": 804.9352963763705, "peak_allocated_bytes": 22646606336}
+{"batch_size": 64, "seconds": 18.164468966, "output_tokens_per_s": 901.980676157797, "peak_allocated_bytes": 24731437568}
+{"batch_size": 96, "seconds": 24.412591145000007, "output_tokens_per_s": 1006.6936301038024, "peak_allocated_bytes": 28901100544}
+{"batch_size": 128, "seconds": 30.221151961000004, "output_tokens_per_s": 1084.2736915616806, "peak_allocated_bytes": 33070763008}
+
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]
+Loading checkpoint shards:  20%|██        | 1/5 [00:00<00:02,  1.93it/s]
+Loading checkpoint shards:  40%|████      | 2/5 [00:01<00:01,  1.58it/s]
+Loading checkpoint shards:  60%|██████    | 3/5 [00:01<00:01,  1.54it/s]
+Loading checkpoint shards:  80%|████████  | 4/5 [00:02<00:00,  1.63it/s]
+Loading checkpoint shards: 100%|██████████| 5/5 [00:02<00:00,  2.02it/s]

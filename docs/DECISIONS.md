@@ -1003,3 +1003,10 @@ dropped.**
   save time and budget. No resume claim depends on them (SPEC §8 needs no
   max-batch number); the latency–throughput trade-off is shown by the
   concurrency sweeps instead. Windows and checks are unchanged.
+
+**Outcome (2026-09-24).** With ADR-022 timings every re-run point passed:
+AWQ's re-timed c256 had halves 0.00%, and BF16's c256 1.44% with an
+extrapolated E2E. The all-at-once diagnostic reproduced `vllm bench serve`
+within 2.4%. Each sweep's best point was c=128 for all three vLLM variants
+and c=2B for HF static. HF static's B = 128 is the largest *tested* batch
+size (no candidate reached OOM); a larger B was not probed.

@@ -1,0 +1,823 @@
+{
+  "checkpoint": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+  "checkpoint_verification": {
+    "bytes_checked": 16397461266,
+    "evidence": "results/quantization/phase4/download-20260923T102838Z/manifest.json",
+    "evidence_sha256": "27eef62edfd54295f5a586f6f083f0408d01ec7b87141ae2580f78656ea3b19a",
+    "files_checked": 15,
+    "mismatches": [],
+    "passed": true,
+    "root": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+    "seconds": 23.359487540999996,
+    "variant": "bf16"
+  },
+  "command": [
+    "/usr/local/bin/python",
+    "-m",
+    "llmbench.baseline.hf_server",
+    "--model",
+    "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+    "--mode",
+    "naive",
+    "--dtype",
+    "bfloat16",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8000"
+  ],
+  "config": {
+    "expected_checkpoints": {
+      "awq": "results/quantization/phase4/quantize-awq-20260923T103930Z/summary.json",
+      "bf16": "results/quantization/phase4/download-20260923T102838Z/manifest.json",
+      "gptq": "results/quantization/phase4/quantize-gptq-20260923T121835Z/summary.json"
+    },
+    "gpu": "L40S",
+    "hf": {
+      "attn_implementation": "sdpa",
+      "batch_wait_ms": 50,
+      "dtype": "bfloat16",
+      "health_timeout_s": 600,
+      "oom_candidates": [
+        8,
+        16,
+        32,
+        48,
+        64,
+        96,
+        128
+      ]
+    },
+    "lifetimes": {
+      "awq": {
+        "cross_check": [
+          {
+            "concurrency": 1,
+            "num_prompts": 30
+          },
+          {
+            "concurrency": 64,
+            "num_prompts": 640
+          },
+          {
+            "concurrency": 256,
+            "num_prompts": 2048
+          }
+        ],
+        "points": [
+          "c1",
+          "c4",
+          "c16",
+          "c64",
+          "c128",
+          "c256",
+          "c1-r2",
+          "c256-r2",
+          "c1-r3",
+          "c256-r3"
+        ],
+        "variant": "awq"
+      },
+      "awq-followup": {
+        "e2e_seeds": {
+          "128": 14.87,
+          "256": 35.6
+        },
+        "points": [
+          "c1-r4",
+          "c128-r2",
+          "c128-r3",
+          "c256",
+          "c256-sync"
+        ],
+        "variant": "awq"
+      },
+      "bf16": {
+        "points": [
+          "c1",
+          "c4",
+          "c16",
+          "c64",
+          "c128",
+          "c256",
+          "c1-r2",
+          "c1-r3"
+        ],
+        "repeat_best": 2,
+        "variant": "bf16"
+      },
+      "gptq": {
+        "points": [
+          "c1",
+          "c4",
+          "c16",
+          "c64",
+          "c128",
+          "c256"
+        ],
+        "repeat_best": 2,
+        "variant": "gptq"
+      },
+      "hf-naive": {
+        "engine": "hf",
+        "mode": "naive",
+        "points": [
+          "c1",
+          "hf-c4",
+          "hf-c16"
+        ],
+        "repeat_best": 2,
+        "variant": "bf16"
+      },
+      "hf-static": {
+        "engine": "hf",
+        "mode": "static",
+        "points": [
+          "c4",
+          "c16",
+          "hf-cB",
+          "hf-c2B"
+        ],
+        "repeat_best": 2,
+        "variant": "bf16"
+      },
+      "maxbatch-16": {
+        "e2e_seeds": {
+          "256": 59.8
+        },
+        "extra_engine_args": [
+          "--max-num-seqs",
+          "16"
+        ],
+        "points": [
+          "c256"
+        ],
+        "variant": "awq"
+      },
+      "maxbatch-64": {
+        "e2e_seeds": {
+          "256": 32.8
+        },
+        "extra_engine_args": [
+          "--max-num-seqs",
+          "64"
+        ],
+        "points": [
+          "c256"
+        ],
+        "variant": "awq"
+      },
+      "probe": {
+        "points": [
+          "probe-c1",
+          "probe-c256"
+        ],
+        "variant": "awq"
+      }
+    },
+    "model": {
+      "id": "Qwen/Qwen3-8B",
+      "revision": "b968826d9c46dd6066d109eabc6255188de91218"
+    },
+    "name": "phase6-bench",
+    "points": {
+      "c1": {
+        "concurrency": 1,
+        "ramp_s": 0,
+        "timeout_s": 600,
+        "warmup_s": 15,
+        "window_s": 120
+      },
+      "c128": {
+        "concurrency": 128,
+        "ramp_s": 20,
+        "timeout_s": 600,
+        "warmup_s": 50,
+        "window_s": 180
+      },
+      "c16": {
+        "concurrency": 16,
+        "ramp_s": 8,
+        "timeout_s": 600,
+        "warmup_s": 25,
+        "window_s": 120
+      },
+      "c256": {
+        "concurrency": 256,
+        "ramp_s": 30,
+        "timeout_s": 600,
+        "warmup_s": 80,
+        "window_s": 180
+      },
+      "c256-sync": {
+        "adapt_ramp": false,
+        "concurrency": 256,
+        "diagnostic": true,
+        "ramp_s": 0,
+        "timeout_s": 900,
+        "warmup_s": 80,
+        "window_s": 180
+      },
+      "c4": {
+        "concurrency": 4,
+        "ramp_s": 5,
+        "timeout_s": 600,
+        "warmup_s": 20,
+        "window_s": 120
+      },
+      "c64": {
+        "concurrency": 64,
+        "ramp_s": 15,
+        "timeout_s": 600,
+        "warmup_s": 40,
+        "window_s": 180
+      },
+      "hf-c16": {
+        "concurrency": 16,
+        "ramp_s": 8,
+        "timeout_s": 900,
+        "warmup_s": 125,
+        "window_s": 180
+      },
+      "hf-c2B": {
+        "concurrency": "2B",
+        "ramp_s": 20,
+        "timeout_s": 900,
+        "warmup_s": 90,
+        "window_s": 180
+      },
+      "hf-c4": {
+        "concurrency": 4,
+        "ramp_s": 5,
+        "timeout_s": 900,
+        "warmup_s": 40,
+        "window_s": 120
+      },
+      "hf-cB": {
+        "concurrency": "B",
+        "ramp_s": 10,
+        "timeout_s": 900,
+        "warmup_s": 60,
+        "window_s": 180
+      },
+      "probe-c1": {
+        "concurrency": 1,
+        "ramp_s": 0,
+        "timeout_s": 600,
+        "warmup_s": 10,
+        "window_s": 60
+      },
+      "probe-c256": {
+        "concurrency": 256,
+        "ramp_s": 30,
+        "timeout_s": 600,
+        "warmup_s": 60,
+        "window_s": 90
+      }
+    },
+    "prompts": {
+      "count": 50000,
+      "dataset": "Salesforce/wikitext",
+      "files": [
+        "wikitext-103-raw-v1/train-00000-of-00002.parquet",
+        "wikitext-103-raw-v1/train-00001-of-00002.parquet"
+      ],
+      "input_tokens": 512,
+      "oversample": 1.5,
+      "revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+      "seed": 20260923
+    },
+    "quantization_config": "phase4_quantize.yaml",
+    "vllm": {
+      "engine_args": [
+        "--dtype",
+        "bfloat16",
+        "--max-model-len",
+        "1024",
+        "--gpu-memory-utilization",
+        "0.90",
+        "--max-num-seqs",
+        "256",
+        "--seed",
+        "0",
+        "--no-enable-prefix-caching",
+        "--generation-config",
+        "vllm",
+        "--disable-uvicorn-access-log"
+      ],
+      "health_timeout_s": 900
+    },
+    "workload": {
+      "client_processes": 2,
+      "idle_timeout_s": 900,
+      "input_tokens": 512,
+      "output_tokens": 256,
+      "seed": 0,
+      "validated_client_chunks_per_s": 9124.1
+    }
+  },
+  "config_sha256": "1a2678d91598bf48d840090bea6b03fe51998c71af1856112527c32cbd7e662c",
+  "config_yaml": "# Phase 6 performance benchmarks (ADR-020 windows, ADR-021 prompts).\n# Every run embeds this file and its SHA-256 in its results.\n# Point timings were revised after the AWQ probe (probe-20260923T213438Z):\n# E2E p50 2.42 s at c=1 and 34.4 s at c=256. Rule (ADR-020): warmup_s >=\n# ramp_s + one expected E2E, with the other systems' E2E extrapolated.\nname: phase6-bench\ngpu: L40S\nmodel:\n  id: Qwen/Qwen3-8B\n  revision: b968826d9c46dd6066d109eabc6255188de91218\nquantization_config: phase4_quantize.yaml  # where Phase 4 wrote AWQ/GPTQ\n\n# The checkpoints must match the files Phase 4 produced, and Phase 5 measured\n# accuracy on, byte for byte (sha256), before any GPU time is spent.\nexpected_checkpoints:\n  bf16: results/quantization/phase4/download-20260923T102838Z/manifest.json\n  awq: results/quantization/phase4/quantize-awq-20260923T103930Z/summary.json\n  gptq: results/quantization/phase4/quantize-gptq-20260923T121835Z/summary.json\n\nprompts:  # W1: exact 512-token windows of WikiText-103 (ADR-021)\n  dataset: Salesforce/wikitext\n  revision: b08601e04326c79dfdd32d625aee71d232d685c3\n  files:\n    - wikitext-103-raw-v1/train-00000-of-00002.parquet\n    - wikitext-103-raw-v1/train-00001-of-00002.parquet\n  input_tokens: 512\n  count: 50000  # > the most requests any lifetime can send (~25k planned)\n  oversample: 1.5  # sample from the first 75,000 windows\n  seed: 20260923\n\nworkload:\n  input_tokens: 512\n  output_tokens: 256\n  seed: 0\n  client_processes: 2  # ADR-013\n  # In-Modal capacity (loadtest-check-20260923T205147Z). A point receiving more\n  # than a third of this fails ADR-005's 3x headroom rule and is not accepted.\n  validated_client_chunks_per_s: 9124.1\n  idle_timeout_s: 900\n\nvllm:\n  health_timeout_s: 900\n  engine_args:\n    - --dtype\n    - bfloat16\n    - --max-model-len\n    - \"1024\"  # 512 + 256 = 768 tokens per request\n    - --gpu-memory-utilization\n    - \"0.90\"\n    - --max-num-seqs\n    - \"256\"\n    - --seed\n    - \"0\"\n    - --no-enable-prefix-caching  # unique prompts and no cache reuse (SPEC \u00a76)\n    - --generation-config\n    - vllm  # ignore the checkpoint's sampling defaults\n    - --disable-uvicorn-access-log\n    # No --enforce-eager: performance runs use CUDA graphs.\n\nhf:\n  dtype: bfloat16\n  attn_implementation: sdpa\n  health_timeout_s: 600\n  batch_wait_ms: 50\n  oom_candidates: [8, 16, 32, 48, 64, 96, 128]\n\n# Steady-state points (ADR-020): users start staggered over ramp_s; the\n# window opens at warmup_s (>= ramp_s + one expected E2E).\npoints:\n  c1: {concurrency: 1, ramp_s: 0, warmup_s: 15, window_s: 120, timeout_s: 600}\n  c4: {concurrency: 4, ramp_s: 5, warmup_s: 20, window_s: 120, timeout_s: 600}\n  c16: {concurrency: 16, ramp_s: 8, warmup_s: 25, window_s: 120, timeout_s: 600}\n  c64: {concurrency: 64, ramp_s: 15, warmup_s: 40, window_s: 180, timeout_s: 600}\n  c128: {concurrency: 128, ramp_s: 20, warmup_s: 50, window_s: 180, timeout_s: 600}\n  c256: {concurrency: 256, ramp_s: 30, warmup_s: 80, window_s: 180, timeout_s: 600}\n  # AWQ follow-up (ADR-022): timings adapt at c >= 128; all-at-once start.\n  c256-sync: {concurrency: 256, ramp_s: 0, warmup_s: 80, window_s: 180, timeout_s: 900, diagnostic: true, adapt_ramp: false}\n  probe-c1: {concurrency: 1, ramp_s: 0, warmup_s: 10, window_s: 60, timeout_s: 600}\n  probe-c256: {concurrency: 256, ramp_s: 30, warmup_s: 60, window_s: 90, timeout_s: 600}\n  # HF: naive queues every request behind the others (~7 s each, estimated),\n  # so E2E grows with concurrency; static batches of B.\n  hf-c4: {concurrency: 4, ramp_s: 5, warmup_s: 40, window_s: 120, timeout_s: 900}\n  hf-c16: {concurrency: 16, ramp_s: 8, warmup_s: 125, window_s: 180, timeout_s: 900}\n  hf-cB: {concurrency: B, ramp_s: 10, warmup_s: 60, window_s: 180, timeout_s: 900}\n  hf-c2B: {concurrency: 2B, ramp_s: 20, warmup_s: 90, window_s: 180, timeout_s: 900}\n\n# One server lifetime each. \"-rK\" repeats a point. `repeat_best` repeats the\n# sweep's best passing point that many times (ADR-022). At c >= 128 timings\n# adapt to the expected request duration (ADR-022); `e2e_seeds` are durations\n# measured earlier (seconds, by concurrency).\nlifetimes:\n  probe:\n    variant: awq\n    points: [probe-c1, probe-c256]\n  awq:  # run 2026-09-23 (awq-20260923T220125Z), before ADR-022\n    variant: awq\n    points: [c1, c4, c16, c64, c128, c256, c1-r2, c256-r2, c1-r3, c256-r3]\n    cross_check:  # vllm bench serve at matching settings (random 512/256 prompts)\n      - {concurrency: 1, num_prompts: 30}\n      - {concurrency: 64, num_prompts: 640}\n      - {concurrency: 256, num_prompts: 2048}\n  awq-followup:  # ADR-022: a 4th c=1, the c=128 peak twice, c=256 re-timed\n    variant: awq\n    points: [c1-r4, c128-r2, c128-r3, c256, c256-sync]\n    e2e_seeds: {128: 14.87, 256: 35.60}  # awq-20260923T220125Z medians\n  bf16:\n    variant: bf16\n    points: [c1, c4, c16, c64, c128, c256, c1-r2, c1-r3]\n    repeat_best: 2\n  hf-naive:\n    variant: bf16\n    engine: hf\n    mode: naive\n    points: [c1, hf-c4, hf-c16]\n    repeat_best: 2\n  hf-static:\n    variant: bf16\n    engine: hf\n    mode: static\n    points: [c4, c16, hf-cB, hf-c2B]\n    repeat_best: 2\n  gptq:\n    variant: gptq\n    points: [c1, c4, c16, c64, c128, c256]\n    repeat_best: 2\n  # Max-batch lifetimes have no sweep, so no repeats (SPEC \u00a76: x1). Seeds from\n  # Little's law on AWQ's measured rates: 256 users / (16 / 3.74 s) = 59.8 s,\n  # 256 / (64 / 8.19 s) = 32.8 s.\n  maxbatch-16:\n    variant: awq\n    extra_engine_args: [--max-num-seqs, \"16\"]\n    points: [c256]\n    e2e_seeds: {256: 59.8}\n  maxbatch-64:\n    variant: awq\n    extra_engine_args: [--max-num-seqs, \"64\"]\n    points: [c256]\n    e2e_seeds: {256: 32.8}\n",
+  "cpu_sampler_enabled": true,
+  "dropped_points": [],
+  "engine": "hf",
+  "failures": [],
+  "git": {
+    "commit": "6d9cee755ff30417bc36db3a2688b6be57630629",
+    "dirty": false
+  },
+  "health_wait_s": 17.041593975,
+  "label": "hf-naive",
+  "lifetime": "hf-naive",
+  "log_excerpts": [],
+  "next_prompt_index": 171,
+  "passed": true,
+  "points": [
+    {
+      "chunks_in_window_per_s": 40.05833333333333,
+      "client_shard_cpu_cores": [
+        0.008333333333333333
+      ],
+      "completed_in_window_requests": 18,
+      "concurrency": 1,
+      "cpu_in_window": {
+        "client_or_other_cores": 0,
+        "container_busy_cores": 1.0018575335840028,
+        "processes": [
+          {
+            "comm": "python",
+            "cores": 0.9930302315341437,
+            "group": "server",
+            "observed_s": 121.21483936500002,
+            "pid": 15
+          }
+        ],
+        "sample_span_s": 121.21483936500002,
+        "server_cores": 0.9930302315341437
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 6.3841489110000005,
+        "p90": 6.426046229700006,
+        "p95": 6.428959604449995,
+        "p99": 6.435281947290007
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.002080299563137092,
+      "itl_s": {
+        "p50": 0.02481175449999995,
+        "p90": 0.025093737899992162,
+        "p95": 0.025239383499998526,
+        "p99": 0.025599994679996883
+      },
+      "label": "c1",
+      "output_token_throughput_per_s": 40.05833333333333,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 1,
+        "diagnostic": false,
+        "label": "c1",
+        "ramp_s": 0.0,
+        "timeout_s": 600.0,
+        "warmup_s": 15.0,
+        "window_s": 120.0
+      },
+      "request_rate_edge_error_bound": 0.1111111111111111,
+      "request_throughput_per_s": 0.15,
+      "timing_rule": null,
+      "tpot_s": {
+        "p50": 0.024831199335294117,
+        "p90": 0.024991537736078425,
+        "p95": 0.025004406774509724,
+        "p99": 0.025028669681176487
+      },
+      "ttft_s": {
+        "p50": 0.052847968000008905,
+        "p90": 0.05335175170000639,
+        "p95": 0.0533933440000041,
+        "p99": 0.05347781360000653
+      },
+      "warnings": [
+        "requests/s edge error bound 0.111 exceeds the limit"
+      ],
+      "window_process_cpu_cores_average": 0.008333333333333333
+    },
+    {
+      "chunks_in_window_per_s": 40.14166666666667,
+      "client_shard_cpu_cores": [
+        0.0034166666666666685,
+        0.001333333333333333
+      ],
+      "completed_in_window_requests": 19,
+      "concurrency": 4,
+      "cpu_in_window": {
+        "client_or_other_cores": 0,
+        "container_busy_cores": 0.9987804619261537,
+        "processes": [
+          {
+            "comm": "python",
+            "cores": 0.9927091009701527,
+            "group": "server",
+            "observed_s": 120.236633152,
+            "pid": 15
+          }
+        ],
+        "sample_span_s": 120.236633152,
+        "server_cores": 0.9927091009701527
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 25.493444444000033,
+        "p90": 25.632975338,
+        "p95": 25.660169319399987,
+        "p99": 25.68057372628
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.0037367656217562797,
+      "itl_s": {
+        "p50": 0.024766547000012906,
+        "p90": 0.025014708000003338,
+        "p95": 0.025145472000014026,
+        "p99": 0.025417280400000665
+      },
+      "label": "hf-c4",
+      "output_token_throughput_per_s": 40.14166666666667,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 4,
+        "diagnostic": false,
+        "label": "hf-c4",
+        "ramp_s": 5.0,
+        "timeout_s": 900.0,
+        "warmup_s": 40.0,
+        "window_s": 120.0
+      },
+      "request_rate_edge_error_bound": 0.10526315789473684,
+      "request_throughput_per_s": 0.15833333333333338,
+      "timing_rule": null,
+      "tpot_s": {
+        "p50": 0.024754444258823526,
+        "p90": 0.0250059102039215,
+        "p95": 0.025019135540392087,
+        "p99": 0.025025029398274504
+      },
+      "ttft_s": {
+        "p50": 19.175965333000022,
+        "p90": 19.285952805199997,
+        "p95": 19.31080753440002,
+        "p99": 19.345392938880007
+      },
+      "warnings": [
+        "requests/s edge error bound 0.105 exceeds the limit"
+      ],
+      "window_process_cpu_cores_average": 0.004750000000000002
+    },
+    {
+      "chunks_in_window_per_s": 39.99444444444445,
+      "client_shard_cpu_cores": [
+        0.004277777777777775,
+        0.003
+      ],
+      "completed_in_window_requests": 28,
+      "concurrency": 16,
+      "cpu_in_window": {
+        "client_or_other_cores": 0,
+        "container_busy_cores": 0.9965608605029901,
+        "processes": [
+          {
+            "comm": "python",
+            "cores": 0.9880144992449418,
+            "group": "server",
+            "observed_s": 181.363735185,
+            "pid": 15
+          }
+        ],
+        "sample_span_s": 181.363735185,
+        "server_cores": 0.9880144992449418
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 102.13151770150003,
+        "p90": 102.4844994908,
+        "p95": 102.49022538975004,
+        "p99": 102.52356746973001
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.004722878177524656,
+      "itl_s": {
+        "p50": 0.02485060600002953,
+        "p90": 0.02513712919999307,
+        "p95": 0.02524557599999753,
+        "p99": 0.025506908729979613
+      },
+      "label": "hf-c16",
+      "output_token_throughput_per_s": 39.99444444444445,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 16,
+        "diagnostic": false,
+        "label": "hf-c16",
+        "ramp_s": 8.0,
+        "timeout_s": 900.0,
+        "warmup_s": 125.0,
+        "window_s": 180.0
+      },
+      "request_rate_edge_error_bound": 0.07142857142857142,
+      "request_throughput_per_s": 0.15555555555555556,
+      "timing_rule": null,
+      "tpot_s": {
+        "p50": 0.024892556923529416,
+        "p90": 0.025022004266274562,
+        "p95": 0.02503871354725483,
+        "p99": 0.025068178578431414
+      },
+      "ttft_s": {
+        "p50": 95.80452819200002,
+        "p90": 96.09646693319998,
+        "p95": 96.11778344310002,
+        "p99": 96.15419854814999
+      },
+      "warnings": [
+        "requests/s edge error bound 0.071 exceeds the limit"
+      ],
+      "window_process_cpu_cores_average": 0.007277777777777775
+    },
+    {
+      "chunks_in_window_per_s": 40.1,
+      "client_shard_cpu_cores": [
+        0.004249999999999999,
+        0.002833333333333334
+      ],
+      "completed_in_window_requests": 19,
+      "concurrency": 4,
+      "cpu_in_window": {
+        "client_or_other_cores": 0,
+        "container_busy_cores": 0.9978415950868561,
+        "processes": [
+          {
+            "comm": "python",
+            "cores": 0.9891797756850599,
+            "group": "server",
+            "observed_s": 121.221645395,
+            "pid": 15
+          }
+        ],
+        "sample_span_s": 121.221645395,
+        "server_cores": 0.9891797756850599
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 25.54053270899999,
+        "p90": 25.607352773800017,
+        "p95": 25.656146163200027,
+        "p99": 25.68403742383999
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.0016625103906899418,
+      "itl_s": {
+        "p50": 0.02478864500005784,
+        "p90": 0.025033653799982857,
+        "p95": 0.02513475920000019,
+        "p99": 0.025431992160006304
+      },
+      "label": "hf-c4-r2",
+      "output_token_throughput_per_s": 40.1,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 4,
+        "diagnostic": false,
+        "label": "hf-c4-r2",
+        "ramp_s": 5.0,
+        "timeout_s": 900.0,
+        "warmup_s": 40.0,
+        "window_s": 120.0
+      },
+      "request_rate_edge_error_bound": 0.10526315789473684,
+      "request_throughput_per_s": 0.15833333333333333,
+      "timing_rule": null,
+      "tpot_s": {
+        "p50": 0.024826649407843578,
+        "p90": 0.024890293483921435,
+        "p95": 0.024924028727450916,
+        "p99": 0.024943149146274386
+      },
+      "ttft_s": {
+        "p50": 19.215960989999985,
+        "p90": 19.283626514399977,
+        "p95": 19.318717362400015,
+        "p99": 19.327174096480014
+      },
+      "warnings": [
+        "requests/s edge error bound 0.105 exceeds the limit"
+      ],
+      "window_process_cpu_cores_average": 0.007083333333333332
+    },
+    {
+      "chunks_in_window_per_s": 40.11666666666667,
+      "client_shard_cpu_cores": [
+        0.003583333333333331,
+        0.003000000000000001
+      ],
+      "completed_in_window_requests": 19,
+      "concurrency": 4,
+      "cpu_in_window": {
+        "client_or_other_cores": 0,
+        "container_busy_cores": 0.9946988626048165,
+        "processes": [
+          {
+            "comm": "python",
+            "cores": 0.9866977190877199,
+            "group": "server",
+            "observed_s": 121.23267104599995,
+            "pid": 15
+          }
+        ],
+        "sample_span_s": 121.23267104599995,
+        "server_cores": 0.9866977190877199
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 25.517865719999918,
+        "p90": 25.563542601200016,
+        "p95": 25.57452887970002,
+        "p99": 25.575511807139954
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.0008309098462816784,
+      "itl_s": {
+        "p50": 0.024781745000041155,
+        "p90": 0.025031389999958263,
+        "p95": 0.025145540600010462,
+        "p99": 0.02547601456004486
+      },
+      "label": "hf-c4-r3",
+      "output_token_throughput_per_s": 40.11666666666667,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 4,
+        "diagnostic": false,
+        "label": "hf-c4-r3",
+        "ramp_s": 5.0,
+        "timeout_s": 900.0,
+        "warmup_s": 40.0,
+        "window_s": 120.0
+      },
+      "request_rate_edge_error_bound": 0.10526315789473684,
+      "request_throughput_per_s": 0.15833333333333333,
+      "timing_rule": null,
+      "tpot_s": {
+        "p50": 0.02481454961568631,
+        "p90": 0.024868347423529415,
+        "p95": 0.024898795120392045,
+        "p99": 0.02492798676368605
+      },
+      "ttft_s": {
+        "p50": 19.202871862000052,
+        "p90": 19.22362989900005,
+        "p95": 19.22986954479999,
+        "p99": 19.255055128960006
+      },
+      "warnings": [
+        "requests/s edge error bound 0.105 exceeds the limit"
+      ],
+      "window_process_cpu_cores_average": 0.006583333333333332
+    }
+  ],
+  "points_planned": [
+    {
+      "adapt": true,
+      "adapt_ramp": true,
+      "concurrency": 1,
+      "diagnostic": false,
+      "label": "c1",
+      "ramp_s": 0.0,
+      "timeout_s": 600.0,
+      "warmup_s": 15.0,
+      "window_s": 120.0
+    },
+    {
+      "adapt": true,
+      "adapt_ramp": true,
+      "concurrency": 4,
+      "diagnostic": false,
+      "label": "hf-c4",
+      "ramp_s": 5.0,
+      "timeout_s": 900.0,
+      "warmup_s": 40.0,
+      "window_s": 120.0
+    },
+    {
+      "adapt": true,
+      "adapt_ramp": true,
+      "concurrency": 16,
+      "diagnostic": false,
+      "label": "hf-c16",
+      "ramp_s": 8.0,
+      "timeout_s": 900.0,
+      "warmup_s": 125.0,
+      "window_s": 180.0
+    }
+  ],
+  "prompt_pool": {
+    "articles_read": 9900,
+    "dataset": "Salesforce/wikitext",
+    "dataset_revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+    "duplicate_windows": 223,
+    "files": [
+      {
+        "bytes": 156987808,
+        "file": "wikitext-103-raw-v1/train-00000-of-00002.parquet"
+      },
+      {
+        "bytes": 157088770,
+        "file": "wikitext-103-raw-v1/train-00001-of-00002.parquet"
+      }
+    ],
+    "license": "CC BY-SA 3.0 / GFDL (text is not redistributed; IDs only)",
+    "lines": 1801350,
+    "path": "/weights/phase6/prompts/wikitext103-b08601e0-50000x512-seed20260923.npy",
+    "pool_sha256": "155f08a3849a11f6c676028635c60075bbb91685684fdabf177e8277776eb07e",
+    "prompt_count": 50000,
+    "prompt_tokens": 512,
+    "sample_decoded": "ok tunnels are not only the largest individual structures on the motorway but they are also the longest tunnels in Croatia . The tunnels separate three distinct climate zones . The Mala Kapela Tunnel spans between the continental climate of the central Croatia and the mountain climate of Lika , while the Sveti Rok Tunnel provides a",
+    "seed": 20260923,
+    "tokenizer": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+    "windows_available": 75000,
+    "windows_needed": 75000
+  },
+  "repeat_best_used": 2,
+  "resources": {
+    "cpu_cores": 8,
+    "gpu": "L40S",
+    "memory_mib": 32768,
+    "startup_timeout_s": 300,
+    "timeout_s": 1820
+  },
+  "runtime": {
+    "gpu": {
+      "nvidia_smi": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "NVIDIA L40S, 580.95.05, 49140 MiB, 8.9"
+      },
+      "torch_cuda": {
+        "available": true,
+        "device_name": "NVIDIA L40S",
+        "torch_cuda_version": "12.8"
+      }
+    },
+    "logical_cpu_count": 8,
+    "modal_image_id": "im-IKgXw0BE66W2sLafGqgqmA",
+    "modal_task_id": "ta-01M38E26T35ESMQATB6ZA8AQ1R",
+    "packages": {
+      "aiohttp": "3.14.3",
+      "fastapi": "0.117.1",
+      "huggingface-hub": "0.36.2",
+      "tokenizers": "0.22.2",
+      "torch": "2.8.0",
+      "transformers": "4.56.2",
+      "uvicorn": "0.36.0"
+    },
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+    "python": "3.12.10",
+    "timestamp_utc": "2026-09-24T00:46:54.541522+00:00"
+  },
+  "server_at_health": {
+    "busy": 0,
+    "stats": {
+      "attn_implementation": "sdpa",
+      "batch_size": 1,
+      "batch_wait_s": 0,
+      "busy": false,
+      "device": "cuda:0",
+      "dtype": "torch.bfloat16",
+      "generated_batch_sizes": [],
+      "mode": "naive",
+      "pending": 0,
+      "skipped_cancelled_jobs": 0,
+      "stopped_batches": 0
+    },
+    "status": 200
+  },
+  "server_lifetime_s": 957.0226352330001,
+  "server_returncode_after_stop": -15,
+  "state": "finished",
+  "static_batch_size": null,
+  "static_plan": null,
+  "variant": "bf16"
+}

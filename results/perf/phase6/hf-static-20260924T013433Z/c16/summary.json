@@ -1,0 +1,295 @@
+{
+  "chunks_in_window_per_s": 393.6,
+  "client_capacity_headroom": 23.18114837398374,
+  "client_processes": 2,
+  "client_shard_cpu_cores": [
+    0.02216666666666666,
+    0.01983333333333333
+  ],
+  "completed_in_window_requests": 192,
+  "completed_request_output_tokens_per_s": 409.6,
+  "completion_bunch_size": 16,
+  "completion_bunch_window_s": 0.03717245350000553,
+  "config": {
+    "concurrency": 16,
+    "drain_s": 0,
+    "duration_s": 120.0,
+    "index_offset": 69,
+    "mode": "steady",
+    "processes": 2,
+    "ramp_s": 8.0,
+    "rate_per_s": null,
+    "request_count": null,
+    "seed": 0,
+    "timeout_s": 600.0,
+    "warmup_requests": 0,
+    "warmup_s": 25.0
+  },
+  "configured_point": {
+    "adapt": false,
+    "adapt_ramp": false,
+    "concurrency": 16,
+    "diagnostic": false,
+    "label": "c16",
+    "ramp_s": 8.0,
+    "timeout_s": 600.0,
+    "warmup_s": 25.0,
+    "window_s": 120.0
+  },
+  "cpu_in_window": {
+    "client_or_other_cores": 0.0422298763189196,
+    "container_busy_cores": 1.0622315060510192,
+    "processes": [
+      {
+        "comm": "python",
+        "cores": 1.0188448177311844,
+        "group": "server",
+        "observed_s": 121.235342076,
+        "pid": 28
+      },
+      {
+        "comm": "python",
+        "cores": 0.022518186143184373,
+        "group": "client_or_other",
+        "observed_s": 121.235342076,
+        "pid": 2
+      },
+      {
+        "comm": "python",
+        "cores": 0.019711690175735225,
+        "group": "client_or_other",
+        "observed_s": 120.23322093999997,
+        "pid": 55
+      }
+    ],
+    "sample_span_s": 121.235342076,
+    "server_cores": 1.0188448177311844
+  },
+  "cut_at_window_end_requests": 16,
+  "diagnostic": false,
+  "drain_duration_s": 0,
+  "e2e_s": {
+    "p50": 10.3751081005,
+    "p90": 10.40293896519999,
+    "p95": 10.404819572900005,
+    "p99": 10.407775107619976
+  },
+  "error_rate": 0.0,
+  "errored_or_cancelled_requests": 0,
+  "failures": [],
+  "half_window_token_deviation": 0.005420054200542005,
+  "idle_before": {
+    "busy": 0,
+    "stats": {
+      "attn_implementation": "sdpa",
+      "batch_size": 128,
+      "batch_wait_s": 0.05,
+      "busy": false,
+      "device": "cuda:0",
+      "dtype": "torch.bfloat16",
+      "generated_batch_sizes": [
+        1,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "mode": "static",
+      "pending": 0,
+      "skipped_cancelled_jobs": 0,
+      "stopped_batches": 1
+    },
+    "status": 200,
+    "waited_s": 0.002302331000009872
+  },
+  "itl_s": {
+    "p50": 0.03717245350000553,
+    "p90": 0.03784937779998358,
+    "p95": 0.037997673249961395,
+    "p99": 0.03828211597998973
+  },
+  "late_completed_requests": 0,
+  "max_half_window_token_deviation": 0.05,
+  "max_request_index": 293,
+  "measurement_text_chunks": 45056,
+  "min_text_chunks_per_token": 0.5,
+  "offered_requests": 224,
+  "on_time_completed_requests": 192,
+  "output_token_throughput_per_s": 393.6,
+  "output_tokens_in_window": 47232,
+  "passed": true,
+  "point": {
+    "adapt": false,
+    "adapt_ramp": false,
+    "concurrency": 16,
+    "diagnostic": false,
+    "label": "c16",
+    "ramp_s": 8.0,
+    "timeout_s": 600.0,
+    "warmup_s": 25.0,
+    "window_s": 120.0
+  },
+  "process_clock_check": {
+    "passed": true,
+    "results_received_at": 446.158805092,
+    "start_sent_at": 300.899744573,
+    "worker_start_received_at": [
+      300.900036929
+    ]
+  },
+  "prompt_index_range": [
+    69,
+    294
+  ],
+  "raw_results_path": "/results/phase6/hf-static-20260924T013433Z/c16/requests.jsonl.gz",
+  "rejected_requests": 0,
+  "request_rate_edge_error_bound": 0.16666666666666666,
+  "request_rate_ok": false,
+  "request_throughput_per_s": 1.6,
+  "server_after": {
+    "busy": 0,
+    "stats": {
+      "attn_implementation": "sdpa",
+      "batch_size": 128,
+      "batch_wait_s": 0.05,
+      "busy": false,
+      "device": "cuda:0",
+      "dtype": "torch.bfloat16",
+      "generated_batch_sizes": [
+        1,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        1,
+        15,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "mode": "static",
+      "pending": 0,
+      "skipped_cancelled_jobs": 0,
+      "stopped_batches": 2
+    },
+    "status": 200
+  },
+  "server_before": {
+    "busy": 0,
+    "stats": {
+      "attn_implementation": "sdpa",
+      "batch_size": 128,
+      "batch_wait_s": 0.05,
+      "busy": false,
+      "device": "cuda:0",
+      "dtype": "torch.bfloat16",
+      "generated_batch_sizes": [
+        1,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "mode": "static",
+      "pending": 0,
+      "skipped_cancelled_jobs": 0,
+      "stopped_batches": 1
+    },
+    "status": 200
+  },
+  "shard_users": [
+    8,
+    8
+  ],
+  "shard_window_process_cpu_seconds": [
+    2.6599999999999993,
+    2.38
+  ],
+  "steady_state_ok": true,
+  "text_chunk_shortfall_examples": [],
+  "text_chunk_shortfall_requests": 0,
+  "timing_rule": null,
+  "tpot_s": {
+    "p50": 0.03721326857254905,
+    "p90": 0.03729067914705899,
+    "p95": 0.03733015045745095,
+    "p99": 0.03733184155854901
+  },
+  "ttft_s": {
+    "p50": 0.8883496050000304,
+    "p90": 0.8945191988000033,
+    "p95": 0.8951651403500336,
+    "p99": 0.8978321632600119
+  },
+  "warmup_requests_completed": 0,
+  "warnings": [
+    "requests/s edge error bound 0.167 exceeds the limit"
+  ],
+  "window_duration_s": 120.0,
+  "window_end_monotonic_s": 446.149744573,
+  "window_process_cpu_cores_average": 0.041999999999999996,
+  "window_process_cpu_seconds": 5.039999999999999,
+  "window_rule": "steady_state_adr020",
+  "window_start_monotonic_s": 326.149744573,
+  "window_token_bins": [
+    4800,
+    4512,
+    4720,
+    4832,
+    4816,
+    4800,
+    4784,
+    4720,
+    4464,
+    4784
+  ]
+}

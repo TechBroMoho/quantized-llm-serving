@@ -26,3 +26,6 @@ results/**/samples_*.jsonl
 
 # Laptop capacity raw records are ~46 MB; the summary and its sha256 are kept
 results/validation/multiprocess-local/capacity_requests.jsonl.gz
+
+# The in-Modal load tester check is kept under results/validation/phase6/
+results/perf/phase6/loadtest-check-*/

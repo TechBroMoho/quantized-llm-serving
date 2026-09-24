@@ -1,0 +1,1246 @@
+{
+  "checkpoint": "/weights/quantized/Qwen3-8B-gptq-b968826d",
+  "checkpoint_verification": {
+    "bytes_checked": 6087417885,
+    "evidence": "results/quantization/phase4/quantize-gptq-20260923T121835Z/summary.json",
+    "evidence_sha256": "aefd6c0b0495d19a706ede38b9beeab66e13e94c011eee8994288655606986dd",
+    "files_checked": 13,
+    "mismatches": [],
+    "passed": true,
+    "root": "/weights/quantized/Qwen3-8B-gptq-b968826d",
+    "seconds": 10.405628082,
+    "variant": "gptq"
+  },
+  "command": [
+    "vllm",
+    "serve",
+    "/weights/quantized/Qwen3-8B-gptq-b968826d",
+    "--served-model-name",
+    "qwen3-8b-gptq",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8000",
+    "--dtype",
+    "bfloat16",
+    "--max-model-len",
+    "1024",
+    "--gpu-memory-utilization",
+    "0.90",
+    "--max-num-seqs",
+    "256",
+    "--seed",
+    "0",
+    "--no-enable-prefix-caching",
+    "--generation-config",
+    "vllm",
+    "--disable-uvicorn-access-log"
+  ],
+  "config": {
+    "expected_checkpoints": {
+      "awq": "results/quantization/phase4/quantize-awq-20260923T103930Z/summary.json",
+      "bf16": "results/quantization/phase4/download-20260923T102838Z/manifest.json",
+      "gptq": "results/quantization/phase4/quantize-gptq-20260923T121835Z/summary.json"
+    },
+    "gpu": "L40S",
+    "hf": {
+      "attn_implementation": "sdpa",
+      "batch_wait_ms": 50,
+      "dtype": "bfloat16",
+      "health_timeout_s": 600,
+      "oom_candidates": [
+        8,
+        16,
+        32,
+        48,
+        64,
+        96,
+        128
+      ]
+    },
+    "lifetimes": {
+      "awq": {
+        "cross_check": [
+          {
+            "concurrency": 1,
+            "num_prompts": 30
+          },
+          {
+            "concurrency": 64,
+            "num_prompts": 640
+          },
+          {
+            "concurrency": 256,
+            "num_prompts": 2048
+          }
+        ],
+        "points": [
+          "c1",
+          "c4",
+          "c16",
+          "c64",
+          "c128",
+          "c256",
+          "c1-r2",
+          "c256-r2",
+          "c1-r3",
+          "c256-r3"
+        ],
+        "variant": "awq"
+      },
+      "awq-followup": {
+        "e2e_seeds": {
+          "128": 14.87,
+          "256": 35.6
+        },
+        "points": [
+          "c1-r4",
+          "c128-r2",
+          "c128-r3",
+          "c256",
+          "c256-sync"
+        ],
+        "variant": "awq"
+      },
+      "bf16": {
+        "points": [
+          "c1",
+          "c4",
+          "c16",
+          "c64",
+          "c128",
+          "c256",
+          "c1-r2",
+          "c1-r3"
+        ],
+        "repeat_best": 2,
+        "variant": "bf16"
+      },
+      "gptq": {
+        "points": [
+          "c1",
+          "c4",
+          "c16",
+          "c64",
+          "c128",
+          "c256"
+        ],
+        "repeat_best": 2,
+        "variant": "gptq"
+      },
+      "gptq-trimmed": {
+        "points": [
+          "c1",
+          "c4",
+          "c16",
+          "c64",
+          "c128"
+        ],
+        "repeat_best": 2,
+        "variant": "gptq"
+      },
+      "hf-naive": {
+        "engine": "hf",
+        "mode": "naive",
+        "points": [
+          "c1",
+          "hf-c4",
+          "hf-c16"
+        ],
+        "repeat_best": 2,
+        "variant": "bf16"
+      },
+      "hf-static": {
+        "engine": "hf",
+        "mode": "static",
+        "points": [
+          "c4",
+          "c16",
+          "hf-cB",
+          "hf-c2B"
+        ],
+        "repeat_best": 2,
+        "variant": "bf16"
+      },
+      "maxbatch-16": {
+        "e2e_seeds": {
+          "256": 59.8
+        },
+        "extra_engine_args": [
+          "--max-num-seqs",
+          "16"
+        ],
+        "points": [
+          "c256"
+        ],
+        "variant": "awq"
+      },
+      "maxbatch-64": {
+        "e2e_seeds": {
+          "256": 32.8
+        },
+        "extra_engine_args": [
+          "--max-num-seqs",
+          "64"
+        ],
+        "points": [
+          "c256"
+        ],
+        "variant": "awq"
+      },
+      "probe": {
+        "points": [
+          "probe-c1",
+          "probe-c256"
+        ],
+        "variant": "awq"
+      }
+    },
+    "model": {
+      "id": "Qwen/Qwen3-8B",
+      "revision": "b968826d9c46dd6066d109eabc6255188de91218"
+    },
+    "name": "phase6-bench",
+    "points": {
+      "c1": {
+        "concurrency": 1,
+        "ramp_s": 0,
+        "timeout_s": 600,
+        "warmup_s": 15,
+        "window_s": 120
+      },
+      "c128": {
+        "concurrency": 128,
+        "ramp_s": 20,
+        "timeout_s": 600,
+        "warmup_s": 50,
+        "window_s": 180
+      },
+      "c16": {
+        "concurrency": 16,
+        "ramp_s": 8,
+        "timeout_s": 600,
+        "warmup_s": 25,
+        "window_s": 120
+      },
+      "c256": {
+        "concurrency": 256,
+        "ramp_s": 30,
+        "timeout_s": 600,
+        "warmup_s": 80,
+        "window_s": 180
+      },
+      "c256-sync": {
+        "adapt_ramp": false,
+        "concurrency": 256,
+        "diagnostic": true,
+        "ramp_s": 0,
+        "timeout_s": 900,
+        "warmup_s": 80,
+        "window_s": 180
+      },
+      "c4": {
+        "concurrency": 4,
+        "ramp_s": 5,
+        "timeout_s": 600,
+        "warmup_s": 20,
+        "window_s": 120
+      },
+      "c64": {
+        "concurrency": 64,
+        "ramp_s": 15,
+        "timeout_s": 600,
+        "warmup_s": 40,
+        "window_s": 180
+      },
+      "hf-c16": {
+        "concurrency": 16,
+        "ramp_s": 8,
+        "timeout_s": 900,
+        "warmup_s": 125,
+        "window_s": 180
+      },
+      "hf-c2B": {
+        "concurrency": "2B",
+        "ramp_s": 20,
+        "timeout_s": 900,
+        "warmup_s": 90,
+        "window_s": 180
+      },
+      "hf-c4": {
+        "concurrency": 4,
+        "ramp_s": 5,
+        "timeout_s": 900,
+        "warmup_s": 40,
+        "window_s": 120
+      },
+      "hf-cB": {
+        "concurrency": "B",
+        "ramp_s": 10,
+        "timeout_s": 900,
+        "warmup_s": 60,
+        "window_s": 180
+      },
+      "probe-c1": {
+        "concurrency": 1,
+        "ramp_s": 0,
+        "timeout_s": 600,
+        "warmup_s": 10,
+        "window_s": 60
+      },
+      "probe-c256": {
+        "concurrency": 256,
+        "ramp_s": 30,
+        "timeout_s": 600,
+        "warmup_s": 60,
+        "window_s": 90
+      }
+    },
+    "prompts": {
+      "count": 50000,
+      "dataset": "Salesforce/wikitext",
+      "files": [
+        "wikitext-103-raw-v1/train-00000-of-00002.parquet",
+        "wikitext-103-raw-v1/train-00001-of-00002.parquet"
+      ],
+      "input_tokens": 512,
+      "oversample": 1.5,
+      "revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+      "seed": 20260923
+    },
+    "quantization_config": "phase4_quantize.yaml",
+    "vllm": {
+      "engine_args": [
+        "--dtype",
+        "bfloat16",
+        "--max-model-len",
+        "1024",
+        "--gpu-memory-utilization",
+        "0.90",
+        "--max-num-seqs",
+        "256",
+        "--seed",
+        "0",
+        "--no-enable-prefix-caching",
+        "--generation-config",
+        "vllm",
+        "--disable-uvicorn-access-log"
+      ],
+      "health_timeout_s": 900
+    },
+    "workload": {
+      "client_processes": 2,
+      "idle_timeout_s": 900,
+      "input_tokens": 512,
+      "output_tokens": 256,
+      "seed": 0,
+      "validated_client_chunks_per_s": 9124.1
+    }
+  },
+  "config_sha256": "6f14cfb3fbd4928067e3c446b1979ab3450e6185c6ae1c64b9a253be6a07ef38",
+  "config_yaml": "# Phase 6 performance benchmarks (ADR-020 windows, ADR-021 prompts).\n# Every run embeds this file and its SHA-256 in its results.\n# Point timings were revised after the AWQ probe (probe-20260923T213438Z):\n# E2E p50 2.42 s at c=1 and 34.4 s at c=256. Rule (ADR-020): warmup_s >=\n# ramp_s + one expected E2E, with the other systems' E2E extrapolated.\nname: phase6-bench\ngpu: L40S\nmodel:\n  id: Qwen/Qwen3-8B\n  revision: b968826d9c46dd6066d109eabc6255188de91218\nquantization_config: phase4_quantize.yaml  # where Phase 4 wrote AWQ/GPTQ\n\n# The checkpoints must match the files Phase 4 produced, and Phase 5 measured\n# accuracy on, byte for byte (sha256), before any GPU time is spent.\nexpected_checkpoints:\n  bf16: results/quantization/phase4/download-20260923T102838Z/manifest.json\n  awq: results/quantization/phase4/quantize-awq-20260923T103930Z/summary.json\n  gptq: results/quantization/phase4/quantize-gptq-20260923T121835Z/summary.json\n\nprompts:  # W1: exact 512-token windows of WikiText-103 (ADR-021)\n  dataset: Salesforce/wikitext\n  revision: b08601e04326c79dfdd32d625aee71d232d685c3\n  files:\n    - wikitext-103-raw-v1/train-00000-of-00002.parquet\n    - wikitext-103-raw-v1/train-00001-of-00002.parquet\n  input_tokens: 512\n  count: 50000  # > the most requests any lifetime can send (~25k planned)\n  oversample: 1.5  # sample from the first 75,000 windows\n  seed: 20260923\n\nworkload:\n  input_tokens: 512\n  output_tokens: 256\n  seed: 0\n  client_processes: 2  # ADR-013\n  # In-Modal capacity (loadtest-check-20260923T205147Z). A point receiving more\n  # than a third of this fails ADR-005's 3x headroom rule and is not accepted.\n  validated_client_chunks_per_s: 9124.1\n  idle_timeout_s: 900\n\nvllm:\n  health_timeout_s: 900\n  engine_args:\n    - --dtype\n    - bfloat16\n    - --max-model-len\n    - \"1024\"  # 512 + 256 = 768 tokens per request\n    - --gpu-memory-utilization\n    - \"0.90\"\n    - --max-num-seqs\n    - \"256\"\n    - --seed\n    - \"0\"\n    - --no-enable-prefix-caching  # unique prompts and no cache reuse (SPEC \u00a76)\n    - --generation-config\n    - vllm  # ignore the checkpoint's sampling defaults\n    - --disable-uvicorn-access-log\n    # No --enforce-eager: performance runs use CUDA graphs.\n\nhf:\n  dtype: bfloat16\n  attn_implementation: sdpa\n  health_timeout_s: 600\n  batch_wait_ms: 50\n  oom_candidates: [8, 16, 32, 48, 64, 96, 128]\n\n# Steady-state points (ADR-020): users start staggered over ramp_s; the\n# window opens at warmup_s (>= ramp_s + one expected E2E).\npoints:\n  c1: {concurrency: 1, ramp_s: 0, warmup_s: 15, window_s: 120, timeout_s: 600}\n  c4: {concurrency: 4, ramp_s: 5, warmup_s: 20, window_s: 120, timeout_s: 600}\n  c16: {concurrency: 16, ramp_s: 8, warmup_s: 25, window_s: 120, timeout_s: 600}\n  c64: {concurrency: 64, ramp_s: 15, warmup_s: 40, window_s: 180, timeout_s: 600}\n  c128: {concurrency: 128, ramp_s: 20, warmup_s: 50, window_s: 180, timeout_s: 600}\n  c256: {concurrency: 256, ramp_s: 30, warmup_s: 80, window_s: 180, timeout_s: 600}\n  # AWQ follow-up (ADR-022): timings adapt at c >= 128; all-at-once start.\n  c256-sync: {concurrency: 256, ramp_s: 0, warmup_s: 80, window_s: 180, timeout_s: 900, diagnostic: true, adapt_ramp: false}\n  probe-c1: {concurrency: 1, ramp_s: 0, warmup_s: 10, window_s: 60, timeout_s: 600}\n  probe-c256: {concurrency: 256, ramp_s: 30, warmup_s: 60, window_s: 90, timeout_s: 600}\n  # HF: naive queues every request behind the others (~7 s each, estimated),\n  # so E2E grows with concurrency; static batches of B.\n  hf-c4: {concurrency: 4, ramp_s: 5, warmup_s: 40, window_s: 120, timeout_s: 900}\n  hf-c16: {concurrency: 16, ramp_s: 8, warmup_s: 125, window_s: 180, timeout_s: 900}\n  hf-cB: {concurrency: B, ramp_s: 10, warmup_s: 60, window_s: 180, timeout_s: 900}\n  hf-c2B: {concurrency: 2B, ramp_s: 20, warmup_s: 90, window_s: 180, timeout_s: 900}\n\n# One server lifetime each. \"-rK\" repeats a point. `repeat_best` repeats the\n# sweep's best passing point that many times (ADR-022). At c >= 128 timings\n# adapt to the expected request duration (ADR-022); `e2e_seeds` are durations\n# measured earlier (seconds, by concurrency).\nlifetimes:\n  probe:\n    variant: awq\n    points: [probe-c1, probe-c256]\n  awq:  # run 2026-09-23 (awq-20260923T220125Z), before ADR-022\n    variant: awq\n    points: [c1, c4, c16, c64, c128, c256, c1-r2, c256-r2, c1-r3, c256-r3]\n    cross_check:  # vllm bench serve at matching settings (random 512/256 prompts)\n      - {concurrency: 1, num_prompts: 30}\n      - {concurrency: 64, num_prompts: 640}\n      - {concurrency: 256, num_prompts: 2048}\n  awq-followup:  # ADR-022: a 4th c=1, the c=128 peak twice, c=256 re-timed\n    variant: awq\n    points: [c1-r4, c128-r2, c128-r3, c256, c256-sync]\n    e2e_seeds: {128: 14.87, 256: 35.60}  # awq-20260923T220125Z medians\n  bf16:\n    variant: bf16\n    points: [c1, c4, c16, c64, c128, c256, c1-r2, c1-r3]\n    repeat_best: 2\n  hf-naive:\n    variant: bf16\n    engine: hf\n    mode: naive\n    points: [c1, hf-c4, hf-c16]\n    repeat_best: 2\n  hf-static:\n    variant: bf16\n    engine: hf\n    mode: static\n    points: [c4, c16, hf-cB, hf-c2B]\n    repeat_best: 2\n  gptq:\n    variant: gptq\n    points: [c1, c4, c16, c64, c128, c256]\n    repeat_best: 2\n  gptq-trimmed:  # the budget cut of ADR-022 \u00a75: GPTQ without c=256\n    variant: gptq\n    points: [c1, c4, c16, c64, c128]\n    repeat_best: 2\n  # Max-batch lifetimes have no sweep, so no repeats (SPEC \u00a76: x1). Seeds from\n  # Little's law on AWQ's measured rates: 256 users / (16 / 3.74 s) = 59.8 s,\n  # 256 / (64 / 8.19 s) = 32.8 s.\n  maxbatch-16:\n    variant: awq\n    extra_engine_args: [--max-num-seqs, \"16\"]\n    points: [c256]\n    e2e_seeds: {256: 59.8}\n  maxbatch-64:\n    variant: awq\n    extra_engine_args: [--max-num-seqs, \"64\"]\n    points: [c256]\n    e2e_seeds: {256: 32.8}\n",
+  "cpu_sampler_enabled": true,
+  "dropped_points": [],
+  "failures": [],
+  "git": {
+    "commit": "7b5ae560331a5f59aa473065bff52d4b636e0fec",
+    "dirty": false
+  },
+  "health_wait_s": 120.24734357999999,
+  "label": "gptq-trimmed",
+  "lifetime": "gptq-trimmed",
+  "log_excerpts": [
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:10:20 [utils.py:328] non-default args: {'model_tag': '/weights/quantized/Qwen3-8B-gptq-b968826d', 'host': '127.0.0.1', 'disable_uvicorn_access_log': True, 'model': '/weights/quantized/Qwen3-8B-gptq-b968826d', 'dtype': 'bfloat16', 'seed': 0, 'max_model_len': 1024, 'served_model_name': ['qwen3-8b-gptq'], 'generation_config': 'vllm', 'enable_prefix_caching': False, 'max_num_seqs': 256}",
+    "\u001b[1;36m(EngineCore_DP0 pid=76)\u001b[0;0m INFO 09-23 18:10:48 [cuda.py:362] Using Flash Attention backend on V1 engine.",
+    "\u001b[1;36m(EngineCore_DP0 pid=76)\u001b[0;0m INFO 09-23 18:10:54 [gpu_model_runner.py:2392] Model loading took 5.6835 GiB and 6.142400 seconds",
+    "\u001b[1;36m(EngineCore_DP0 pid=76)\u001b[0;0m INFO 09-23 18:11:09 [backends.py:539] Using cache directory: /root/.cache/vllm/torch_compile_cache/18a07335e5/rank_0_0/backbone for vLLM's torch.compile",
+    "\u001b[1;36m(EngineCore_DP0 pid=76)\u001b[0;0m INFO 09-23 18:12:00 [monitor.py:34] torch.compile takes 62.37 s in total",
+    "\u001b[1;36m(EngineCore_DP0 pid=76)\u001b[0;0m INFO 09-23 18:12:02 [gpu_worker.py:298] Available KV cache memory: 33.06 GiB",
+    "\u001b[1;36m(EngineCore_DP0 pid=76)\u001b[0;0m INFO 09-23 18:12:02 [kv_cache_utils.py:864] GPU KV cache size: 240,736 tokens",
+    "\u001b[1;36m(EngineCore_DP0 pid=76)\u001b[0;0m INFO 09-23 18:12:02 [kv_cache_utils.py:868] Maximum concurrency for 1,024 tokens per request: 235.09x",
+    "\u001b[1;36m(EngineCore_DP0 pid=76)\u001b[0;0m INFO 09-23 18:12:07 [gpu_model_runner.py:3118] Graph capturing finished in 5 secs, took 0.57 GiB",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:12:19 [loggers.py:123] Engine 000: Avg prompt throughput: 192.2 tokens/s, Avg generation throughput: 84.2 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:12:29 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 101.8 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:12:39 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 101.5 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:12:49 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 101.0 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:12:59 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 101.4 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:13:09 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 102.5 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:13:19 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 102.0 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:13:29 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 103.0 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:13:39 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 101.1 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.2%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:13:49 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 101.6 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.2%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:13:59 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 102.8 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.2%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:14:09 [loggers.py:123] Engine 000: Avg prompt throughput: 204.7 tokens/s, Avg generation throughput: 102.3 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.2%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:14:19 [loggers.py:123] Engine 000: Avg prompt throughput: 204.8 tokens/s, Avg generation throughput: 101.6 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.2%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:14:29 [loggers.py:123] Engine 000: Avg prompt throughput: 153.6 tokens/s, Avg generation throughput: 67.5 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.2%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:14:39 [loggers.py:123] Engine 000: Avg prompt throughput: 665.5 tokens/s, Avg generation throughput: 309.3 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:14:49 [loggers.py:123] Engine 000: Avg prompt throughput: 716.7 tokens/s, Avg generation throughput: 366.5 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:14:59 [loggers.py:123] Engine 000: Avg prompt throughput: 716.7 tokens/s, Avg generation throughput: 367.3 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.2%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:15:09 [loggers.py:123] Engine 000: Avg prompt throughput: 819.1 tokens/s, Avg generation throughput: 365.2 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.0%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:15:19 [loggers.py:123] Engine 000: Avg prompt throughput: 716.7 tokens/s, Avg generation throughput: 366.1 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.0%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:15:29 [loggers.py:123] Engine 000: Avg prompt throughput: 716.7 tokens/s, Avg generation throughput: 364.9 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:15:39 [loggers.py:123] Engine 000: Avg prompt throughput: 716.7 tokens/s, Avg generation throughput: 364.1 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:15:49 [loggers.py:123] Engine 000: Avg prompt throughput: 716.6 tokens/s, Avg generation throughput: 365.3 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:15:59 [loggers.py:123] Engine 000: Avg prompt throughput: 716.6 tokens/s, Avg generation throughput: 365.3 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:16:09 [loggers.py:123] Engine 000: Avg prompt throughput: 716.8 tokens/s, Avg generation throughput: 361.8 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:16:19 [loggers.py:123] Engine 000: Avg prompt throughput: 768.0 tokens/s, Avg generation throughput: 364.9 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:16:29 [loggers.py:123] Engine 000: Avg prompt throughput: 716.7 tokens/s, Avg generation throughput: 363.2 tokens/s, Running: 3 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.8%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:16:39 [loggers.py:123] Engine 000: Avg prompt throughput: 767.9 tokens/s, Avg generation throughput: 367.3 tokens/s, Running: 4 reqs, Waiting: 0 reqs, GPU KV cache usage: 1.0%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:16:49 [loggers.py:123] Engine 000: Avg prompt throughput: 665.5 tokens/s, Avg generation throughput: 347.5 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:16:59 [loggers.py:123] Engine 000: Avg prompt throughput: 1228.6 tokens/s, Avg generation throughput: 399.7 tokens/s, Running: 14 reqs, Waiting: 0 reqs, GPU KV cache usage: 3.6%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:17:09 [loggers.py:123] Engine 000: Avg prompt throughput: 2150.0 tokens/s, Avg generation throughput: 1111.5 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.4%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:17:19 [loggers.py:123] Engine 000: Avg prompt throughput: 2252.5 tokens/s, Avg generation throughput: 1102.6 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:17:29 [loggers.py:123] Engine 000: Avg prompt throughput: 2201.2 tokens/s, Avg generation throughput: 1107.5 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:17:39 [loggers.py:123] Engine 000: Avg prompt throughput: 2201.2 tokens/s, Avg generation throughput: 1113.8 tokens/s, Running: 15 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:17:49 [loggers.py:123] Engine 000: Avg prompt throughput: 2252.2 tokens/s, Avg generation throughput: 1109.0 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:17:59 [loggers.py:123] Engine 000: Avg prompt throughput: 2252.2 tokens/s, Avg generation throughput: 1105.7 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.2%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:18:09 [loggers.py:123] Engine 000: Avg prompt throughput: 2150.0 tokens/s, Avg generation throughput: 1115.6 tokens/s, Running: 15 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:18:19 [loggers.py:123] Engine 000: Avg prompt throughput: 2201.1 tokens/s, Avg generation throughput: 1107.4 tokens/s, Running: 15 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.1%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:18:29 [loggers.py:123] Engine 000: Avg prompt throughput: 2303.4 tokens/s, Avg generation throughput: 1100.9 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.2%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:18:39 [loggers.py:123] Engine 000: Avg prompt throughput: 2201.2 tokens/s, Avg generation throughput: 1109.1 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.3%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:18:49 [loggers.py:123] Engine 000: Avg prompt throughput: 2149.9 tokens/s, Avg generation throughput: 1102.8 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.4%, Prefix cache hit rate: 0.0%",
+    "\u001b[1;36m(APIServer pid=33)\u001b[0;0m INFO 09-23 18:18:59 [loggers.py:123] Engine 000: Avg prompt throughput: 2252.7 tokens/s, Avg generation throughput: 1104.4 tokens/s, Running: 16 reqs, Waiting: 0 reqs, GPU KV cache usage: 4.3%, Prefix cache hit rate: 0.0%"
+  ],
+  "next_prompt_index": 8601,
+  "passed": true,
+  "points": [
+    {
+      "chunks_in_window_per_s": 101.85833333333336,
+      "client_shard_cpu_cores": [
+        0.02641666666666668
+      ],
+      "completed_in_window_requests": 48,
+      "concurrency": 1,
+      "cpu_in_window": {
+        "client_or_other_cores": 0.02656183461293475,
+        "container_busy_cores": 1.9213610304486834,
+        "processes": [
+          {
+            "comm": "VLLM::EngineCor",
+            "cores": 1.7611651210750214,
+            "group": "server",
+            "observed_s": 121.22656612099999,
+            "pid": 76
+          },
+          {
+            "comm": "vllm",
+            "cores": 0.13256170255585753,
+            "group": "server",
+            "observed_s": 121.22656612099999,
+            "pid": 33
+          },
+          {
+            "comm": "python",
+            "cores": 0.02656183461293475,
+            "group": "client_or_other",
+            "observed_s": 121.22656612099999,
+            "pid": 2
+          }
+        ],
+        "sample_span_s": 121.22656612099999,
+        "server_cores": 1.893726823630879
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 2.5180514045000137,
+        "p90": 2.538424268299997,
+        "p95": 2.5442292946000022,
+        "p99": 2.5577990540999864
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.0017998854618342468,
+      "itl_s": {
+        "p50": 0.009688970499993843,
+        "p90": 0.010095393000003127,
+        "p95": 0.010239020500013397,
+        "p99": 0.010647360499991976
+      },
+      "label": "c1",
+      "output_token_throughput_per_s": 101.85833333333336,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 1,
+        "diagnostic": false,
+        "label": "c1",
+        "ramp_s": 0.0,
+        "timeout_s": 600.0,
+        "warmup_s": 15.0,
+        "window_s": 120.0
+      },
+      "request_rate_edge_error_bound": 0.041666666666666664,
+      "request_throughput_per_s": 0.4000000000000001,
+      "timing_rule": null,
+      "tpot_s": {
+        "p50": 0.009724605509803981,
+        "p90": 0.009803930451764711,
+        "p95": 0.009826731775490222,
+        "p99": 0.009881021107568635
+      },
+      "ttft_s": {
+        "p50": 0.03824232350000045,
+        "p90": 0.03887325300000839,
+        "p95": 0.03906685979999338,
+        "p99": 0.03920783384999339
+      },
+      "warnings": [],
+      "window_process_cpu_cores_average": 0.02641666666666668
+    },
+    {
+      "chunks_in_window_per_s": 365.2416666666667,
+      "client_shard_cpu_cores": [
+        0.0057499999999999956,
+        0.0025833333333333337
+      ],
+      "completed_in_window_requests": 171,
+      "concurrency": 4,
+      "cpu_in_window": {
+        "client_or_other_cores": 0,
+        "container_busy_cores": 2.764164685946931,
+        "processes": [
+          {
+            "comm": "VLLM::EngineCor",
+            "cores": 2.7368938558623914,
+            "group": "server",
+            "observed_s": 120.27503342699998,
+            "pid": 76
+          },
+          {
+            "comm": "vllm",
+            "cores": 0.01721055435213303,
+            "group": "server",
+            "observed_s": 120.27503342699998,
+            "pid": 33
+          }
+        ],
+        "sample_span_s": 120.27503342699998,
+        "server_cores": 2.7541044102145245
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 2.8046115739999777,
+        "p90": 2.8239536940000107,
+        "p95": 2.831287472000014,
+        "p99": 2.845783718900003
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.0014145885144539003,
+      "itl_s": {
+        "p50": 0.01044153200001574,
+        "p90": 0.010879431999990174,
+        "p95": 0.011079552999979115,
+        "p99": 0.038436188000017635
+      },
+      "label": "c4",
+      "output_token_throughput_per_s": 365.2416666666667,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 4,
+        "diagnostic": false,
+        "label": "c4",
+        "ramp_s": 5.0,
+        "timeout_s": 600.0,
+        "warmup_s": 20.0,
+        "window_s": 120.0
+      },
+      "request_rate_edge_error_bound": 0.011695906432748537,
+      "request_throughput_per_s": 1.425,
+      "timing_rule": null,
+      "tpot_s": {
+        "p50": 0.010808348278431358,
+        "p90": 0.010882775678431236,
+        "p95": 0.010912348674509745,
+        "p99": 0.010968851739607821
+      },
+      "ttft_s": {
+        "p50": 0.048697301000004245,
+        "p90": 0.04938035899999704,
+        "p95": 0.04955135400001609,
+        "p99": 0.05096265749998565
+      },
+      "warnings": [],
+      "window_process_cpu_cores_average": 0.00833333333333333
+    },
+    {
+      "chunks_in_window_per_s": 1107.8,
+      "client_shard_cpu_cores": [
+        0.057,
+        0.03774999999999999
+      ],
+      "completed_in_window_requests": 520,
+      "concurrency": 16,
+      "cpu_in_window": {
+        "client_or_other_cores": 0.09521922024154403,
+        "container_busy_cores": 2.2465914714631543,
+        "processes": [
+          {
+            "comm": "VLLM::EngineCor",
+            "cores": 2.029125741391855,
+            "group": "server",
+            "observed_s": 120.24883181100006,
+            "pid": 76
+          },
+          {
+            "comm": "vllm",
+            "cores": 0.12158122270142999,
+            "group": "server",
+            "observed_s": 120.24883181100006,
+            "pid": 33
+          },
+          {
+            "comm": "python",
+            "cores": 0.05721469303596706,
+            "group": "client_or_other",
+            "observed_s": 120.24883181100006,
+            "pid": 2
+          },
+          {
+            "comm": "python",
+            "cores": 0.03800452720557696,
+            "group": "client_or_other",
+            "observed_s": 120.24883181100006,
+            "pid": 627
+          }
+        ],
+        "sample_span_s": 120.24883181100006,
+        "server_cores": 2.150706964093285
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 3.6971246155000017,
+        "p90": 3.7189276351000102,
+        "p95": 3.7277032419500076,
+        "p99": 3.746319949629925
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.0021965457062044893,
+      "itl_s": {
+        "p50": 0.012550020499986658,
+        "p90": 0.013338852499998666,
+        "p95": 0.04090321549999487,
+        "p99": 0.042246315749977725
+      },
+      "label": "c16",
+      "output_token_throughput_per_s": 1107.8,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 16,
+        "diagnostic": false,
+        "label": "c16",
+        "ramp_s": 8.0,
+        "timeout_s": 600.0,
+        "warmup_s": 25.0,
+        "window_s": 120.0
+      },
+      "request_rate_edge_error_bound": 0.011538461538461539,
+      "request_throughput_per_s": 4.333333333333333,
+      "timing_rule": null,
+      "tpot_s": {
+        "p50": 0.01427205231568611,
+        "p90": 0.014367708221176305,
+        "p95": 0.014399664460980207,
+        "p99": 0.0144781682643526
+      },
+      "ttft_s": {
+        "p50": 0.05385406949997673,
+        "p90": 0.11632518210001308,
+        "p95": 0.11733471795001264,
+        "p99": 0.11813449130001687
+      },
+      "warnings": [],
+      "window_process_cpu_cores_average": 0.09474999999999999
+    },
+    {
+      "chunks_in_window_per_s": 2000.6833333333334,
+      "client_shard_cpu_cores": [
+        0.07044444444444445,
+        0.07455555555555554
+      ],
+      "completed_in_window_requests": 1408,
+      "concurrency": 64,
+      "cpu_in_window": {
+        "client_or_other_cores": 0.1467370468012014,
+        "container_busy_cores": 2.3899640242534437,
+        "processes": [
+          {
+            "comm": "VLLM::EngineCor",
+            "cores": 2.059960462664774,
+            "group": "server",
+            "observed_s": 181.51319249899996,
+            "pid": 76
+          },
+          {
+            "comm": "vllm",
+            "cores": 0.18152950508091328,
+            "group": "server",
+            "observed_s": 181.51319249899996,
+            "pid": 33
+          },
+          {
+            "comm": "python",
+            "cores": 0.07456598408314483,
+            "group": "client_or_other",
+            "observed_s": 180.51126348699995,
+            "pid": 637
+          },
+          {
+            "comm": "python",
+            "cores": 0.07217106271805657,
+            "group": "client_or_other",
+            "observed_s": 181.51319249899996,
+            "pid": 2
+          }
+        ],
+        "sample_span_s": 181.51319249899996,
+        "server_cores": 2.241489967745687
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 8.117958576499973,
+        "p90": 8.376933993200009,
+        "p95": 8.419523599499962,
+        "p99": 8.488307433199946
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.015553032174953565,
+      "itl_s": {
+        "p50": 0.02335397799998873,
+        "p90": 0.058486177999998286,
+        "p95": 0.05988562700000557,
+        "p99": 0.09227381592000938
+      },
+      "label": "c64",
+      "output_token_throughput_per_s": 2001.0388888888888,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 64,
+        "diagnostic": false,
+        "label": "c64",
+        "ramp_s": 15.0,
+        "timeout_s": 600.0,
+        "warmup_s": 40.0,
+        "window_s": 180.0
+      },
+      "request_rate_edge_error_bound": 0.004261363636363636,
+      "request_throughput_per_s": 7.822222222222222,
+      "timing_rule": null,
+      "tpot_s": {
+        "p50": 0.0315014663529409,
+        "p90": 0.03247977626392149,
+        "p95": 0.0326691637803923,
+        "p99": 0.032944917717686324
+      },
+      "ttft_s": {
+        "p50": 0.08160117099998843,
+        "p90": 0.11813699360004648,
+        "p95": 0.12047541434994856,
+        "p99": 0.15262843819001887
+      },
+      "warnings": [],
+      "window_process_cpu_cores_average": 0.145
+    },
+    {
+      "chunks_in_window_per_s": 2206.488888888889,
+      "client_shard_cpu_cores": [
+        0.07516666666666667,
+        0.06572222222222222
+      ],
+      "completed_in_window_requests": 1549,
+      "concurrency": 128,
+      "cpu_in_window": {
+        "client_or_other_cores": 0.14137839994038032,
+        "container_busy_cores": 2.3316074731053456,
+        "processes": [
+          {
+            "comm": "VLLM::EngineCor",
+            "cores": 1.996200935888889,
+            "group": "server",
+            "observed_s": 180.437747285,
+            "pid": 76
+          },
+          {
+            "comm": "vllm",
+            "cores": 0.19275345942479133,
+            "group": "server",
+            "observed_s": 180.437747285,
+            "pid": 33
+          },
+          {
+            "comm": "python",
+            "cores": 0.07520599322583146,
+            "group": "client_or_other",
+            "observed_s": 180.437747285,
+            "pid": 2
+          },
+          {
+            "comm": "python",
+            "cores": 0.06617240671454884,
+            "group": "client_or_other",
+            "observed_s": 180.437747285,
+            "pid": 647
+          }
+        ],
+        "sample_span_s": 180.437747285,
+        "server_cores": 2.1889543953136803
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 14.834050342999944,
+        "p90": 15.008244217399943,
+        "p95": 15.098062789000005,
+        "p99": 15.167621722999929
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.015404131931859369,
+      "itl_s": {
+        "p50": 0.0372537214999511,
+        "p90": 0.08369142569996485,
+        "p95": 0.11528392845004305,
+        "p99": 0.12001652513999943
+      },
+      "label": "c128",
+      "output_token_throughput_per_s": 2207.2,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 128,
+        "diagnostic": false,
+        "label": "c128",
+        "ramp_s": 17.0,
+        "timeout_s": 600.0,
+        "warmup_s": 50.0,
+        "window_s": 180.0
+      },
+      "request_rate_edge_error_bound": 0.005164622336991607,
+      "request_throughput_per_s": 8.605555555555556,
+      "timing_rule": {
+        "expected_e2e_s": 16.235917152999946,
+        "rule": "ADR-022",
+        "source": "x2 of c64"
+      },
+      "tpot_s": {
+        "p50": 0.057599029776470696,
+        "p90": 0.058342693318431435,
+        "p95": 0.058636423025098465,
+        "p99": 0.059005815010039264
+      },
+      "ttft_s": {
+        "p50": 0.14872328499996001,
+        "p90": 0.16573620959998153,
+        "p95": 0.1931626717999279,
+        "p99": 0.23733943543996702
+      },
+      "warnings": [],
+      "window_process_cpu_cores_average": 0.1408888888888889
+    },
+    {
+      "chunks_in_window_per_s": 2195.161111111111,
+      "client_shard_cpu_cores": [
+        0.07238888888888889,
+        0.06516666666666666
+      ],
+      "completed_in_window_requests": 1543,
+      "concurrency": 128,
+      "cpu_in_window": {
+        "client_or_other_cores": 0.14009817820055004,
+        "container_busy_cores": 2.4607166307502766,
+        "processes": [
+          {
+            "comm": "VLLM::EngineCor",
+            "cores": 2.141420633798796,
+            "group": "server",
+            "observed_s": 181.52435531100014,
+            "pid": 76
+          },
+          {
+            "comm": "vllm",
+            "cores": 0.1779375552369345,
+            "group": "server",
+            "observed_s": 181.52435531100014,
+            "pid": 33
+          },
+          {
+            "comm": "python",
+            "cores": 0.07486598686284639,
+            "group": "client_or_other",
+            "observed_s": 181.52435531100014,
+            "pid": 2
+          },
+          {
+            "comm": "python",
+            "cores": 0.06523219133770364,
+            "group": "client_or_other",
+            "observed_s": 180.43238711800018,
+            "pid": 657
+          }
+        ],
+        "sample_span_s": 181.52435531100014,
+        "server_cores": 2.319358189035731
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 14.894594019999886,
+        "p90": 15.094829005000019,
+        "p95": 15.102156800499893,
+        "p99": 15.109518813739996
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.013560128464374925,
+      "itl_s": {
+        "p50": 0.037241394500028946,
+        "p90": 0.08364889649999441,
+        "p95": 0.08532153249984731,
+        "p99": 0.11848807799993893
+      },
+      "label": "c128-r2",
+      "output_token_throughput_per_s": 2195.161111111111,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 128,
+        "diagnostic": false,
+        "label": "c128-r2",
+        "ramp_s": 15.0,
+        "timeout_s": 600.0,
+        "warmup_s": 50.0,
+        "window_s": 180.0
+      },
+      "request_rate_edge_error_bound": 0.0038885288399222295,
+      "request_throughput_per_s": 8.572222222222223,
+      "timing_rule": {
+        "expected_e2e_s": 14.834050342999944,
+        "rule": "ADR-022",
+        "source": "measured here (c128)"
+      },
+      "tpot_s": {
+        "p50": 0.05788773685882345,
+        "p90": 0.0586013527427447,
+        "p95": 0.058731604370588476,
+        "p99": 0.05878150290988205
+      },
+      "ttft_s": {
+        "p50": 0.14974561300005007,
+        "p90": 0.16583554920007373,
+        "p95": 0.16750399279990233,
+        "p99": 0.20171991757998056
+      },
+      "warnings": [],
+      "window_process_cpu_cores_average": 0.13755555555555554
+    },
+    {
+      "chunks_in_window_per_s": 2209.95,
+      "client_shard_cpu_cores": [
+        0.06733333333333327,
+        0.06827777777777777
+      ],
+      "completed_in_window_requests": 1554,
+      "concurrency": 128,
+      "cpu_in_window": {
+        "client_or_other_cores": 0.13594979790846404,
+        "container_busy_cores": 2.5136025822831134,
+        "processes": [
+          {
+            "comm": "VLLM::EngineCor",
+            "cores": 2.1995269586600936,
+            "group": "server",
+            "observed_s": 180.43425129999991,
+            "pid": 76
+          },
+          {
+            "comm": "vllm",
+            "cores": 0.17718365426553587,
+            "group": "server",
+            "observed_s": 180.43425129999991,
+            "pid": 33
+          },
+          {
+            "comm": "python",
+            "cores": 0.06850140652868388,
+            "group": "client_or_other",
+            "observed_s": 180.43425129999991,
+            "pid": 667
+          },
+          {
+            "comm": "python",
+            "cores": 0.06744839137978016,
+            "group": "client_or_other",
+            "observed_s": 180.43425129999991,
+            "pid": 2
+          }
+        ],
+        "sample_span_s": 180.43425129999991,
+        "server_cores": 2.3767106129256295
+      },
+      "diagnostic": false,
+      "diagnostic_findings": null,
+      "e2e_s": {
+        "p50": 14.792714101499996,
+        "p90": 14.987255221600027,
+        "p95": 15.043125267850007,
+        "p99": 15.063048801609908
+      },
+      "failures": [],
+      "half_window_token_deviation": 0.006329957188573899,
+      "itl_s": {
+        "p50": 0.036949641000092015,
+        "p90": 0.08325807100009115,
+        "p95": 0.11217191599994296,
+        "p99": 0.11808707237997623
+      },
+      "label": "c128-r3",
+      "output_token_throughput_per_s": 2209.95,
+      "passed": true,
+      "point": {
+        "adapt": true,
+        "adapt_ramp": true,
+        "concurrency": 128,
+        "diagnostic": false,
+        "label": "c128-r3",
+        "ramp_s": 15.0,
+        "timeout_s": 600.0,
+        "warmup_s": 50.0,
+        "window_s": 180.0
+      },
+      "request_rate_edge_error_bound": 0.005148005148005148,
+      "request_throughput_per_s": 8.633333333333333,
+      "timing_rule": {
+        "expected_e2e_s": 14.894594019999886,
+        "rule": "ADR-022",
+        "source": "measured here (c128-r2)"
+      },
+      "tpot_s": {
+        "p50": 0.05746775491176474,
+        "p90": 0.05824006581333334,
+        "p95": 0.05841942126450971,
+        "p99": 0.05860441657839247
+      },
+      "ttft_s": {
+        "p50": 0.14701767949998157,
+        "p90": 0.1648420680000072,
+        "p95": 0.16851956905005636,
+        "p99": 0.20257099897995887
+      },
+      "warnings": [],
+      "window_process_cpu_cores_average": 0.13561111111111104
+    }
+  ],
+  "points_planned": [
+    {
+      "adapt": true,
+      "adapt_ramp": true,
+      "concurrency": 1,
+      "diagnostic": false,
+      "label": "c1",
+      "ramp_s": 0.0,
+      "timeout_s": 600.0,
+      "warmup_s": 15.0,
+      "window_s": 120.0
+    },
+    {
+      "adapt": true,
+      "adapt_ramp": true,
+      "concurrency": 4,
+      "diagnostic": false,
+      "label": "c4",
+      "ramp_s": 5.0,
+      "timeout_s": 600.0,
+      "warmup_s": 20.0,
+      "window_s": 120.0
+    },
+    {
+      "adapt": true,
+      "adapt_ramp": true,
+      "concurrency": 16,
+      "diagnostic": false,
+      "label": "c16",
+      "ramp_s": 8.0,
+      "timeout_s": 600.0,
+      "warmup_s": 25.0,
+      "window_s": 120.0
+    },
+    {
+      "adapt": true,
+      "adapt_ramp": true,
+      "concurrency": 64,
+      "diagnostic": false,
+      "label": "c64",
+      "ramp_s": 15.0,
+      "timeout_s": 600.0,
+      "warmup_s": 40.0,
+      "window_s": 180.0
+    },
+    {
+      "adapt": true,
+      "adapt_ramp": true,
+      "concurrency": 128,
+      "diagnostic": false,
+      "label": "c128",
+      "ramp_s": 20.0,
+      "timeout_s": 600.0,
+      "warmup_s": 50.0,
+      "window_s": 180.0
+    }
+  ],
+  "prompt_pool": {
+    "articles_read": 9900,
+    "dataset": "Salesforce/wikitext",
+    "dataset_revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+    "duplicate_windows": 223,
+    "files": [
+      {
+        "bytes": 156987808,
+        "file": "wikitext-103-raw-v1/train-00000-of-00002.parquet"
+      },
+      {
+        "bytes": 157088770,
+        "file": "wikitext-103-raw-v1/train-00001-of-00002.parquet"
+      }
+    ],
+    "license": "CC BY-SA 3.0 / GFDL (text is not redistributed; IDs only)",
+    "lines": 1801350,
+    "path": "/weights/phase6/prompts/wikitext103-b08601e0-50000x512-seed20260923.npy",
+    "pool_sha256": "155f08a3849a11f6c676028635c60075bbb91685684fdabf177e8277776eb07e",
+    "prompt_count": 50000,
+    "prompt_tokens": 512,
+    "sample_decoded": "ok tunnels are not only the largest individual structures on the motorway but they are also the longest tunnels in Croatia . The tunnels separate three distinct climate zones . The Mala Kapela Tunnel spans between the continental climate of the central Croatia and the mountain climate of Lika , while the Sveti Rok Tunnel provides a",
+    "seed": 20260923,
+    "tokenizer": "/weights/Qwen/Qwen3-8B/b968826d9c46dd6066d109eabc6255188de91218",
+    "windows_available": 75000,
+    "windows_needed": 75000
+  },
+  "resources": {
+    "cpu_cores": 8,
+    "gpu": "L40S",
+    "memory_mib": 32768,
+    "startup_timeout_s": 300,
+    "timeout_s": 2120
+  },
+  "runtime": {
+    "gpu": {
+      "nvidia_smi": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "NVIDIA L40S, 580.95.05, 46068 MiB, 8.9"
+      },
+      "torch_cuda": {
+        "available": true,
+        "device_name": "NVIDIA L40S",
+        "torch_cuda_version": "12.8"
+      }
+    },
+    "logical_cpu_count": 8,
+    "modal_image_id": "im-CQOVPtJFt7CaCdSvPI0Gx5",
+    "modal_task_id": "ta-01M38FC11HZDQ07JGHP3EFQZQR",
+    "packages": {
+      "aiohttp": "3.12.15",
+      "fastapi": "0.116.1",
+      "huggingface-hub": "0.34.4",
+      "tokenizers": "0.22.0",
+      "torch": "2.8.0+cu128",
+      "transformers": "4.56.1",
+      "uvicorn": "0.35.0",
+      "vllm": "0.10.2"
+    },
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.35",
+    "python": "3.12.11",
+    "timestamp_utc": "2026-09-24T01:10:07.146019+00:00"
+  },
+  "server_at_health": {
+    "busy": 0.0,
+    "counters": {
+      "vllm:cache_config_info": 1.0,
+      "vllm:generation_tokens_created": 1790212328.525611,
+      "vllm:generation_tokens_total": 0.0,
+      "vllm:gpu_cache_usage_perc": 0.0,
+      "vllm:gpu_prefix_cache_hits_created": 1790212328.5255065,
+      "vllm:gpu_prefix_cache_hits_total": 0.0,
+      "vllm:gpu_prefix_cache_queries_created": 1790212328.5254908,
+      "vllm:gpu_prefix_cache_queries_total": 0.0,
+      "vllm:inter_token_latency_seconds_bucket": 0.0,
+      "vllm:inter_token_latency_seconds_count": 0.0,
+      "vllm:inter_token_latency_seconds_created": 1790212328.5262196,
+      "vllm:inter_token_latency_seconds_sum": 0.0,
+      "vllm:iteration_tokens_total_bucket": 0.0,
+      "vllm:iteration_tokens_total_count": 0.0,
+      "vllm:iteration_tokens_total_created": 1790212328.5258112,
+      "vllm:iteration_tokens_total_sum": 0.0,
+      "vllm:kv_cache_usage_perc": 0.0,
+      "vllm:num_preemptions_created": 1790212328.5255706,
+      "vllm:num_preemptions_total": 0.0,
+      "vllm:num_requests_running": 0.0,
+      "vllm:num_requests_waiting": 0.0,
+      "vllm:prefix_cache_hits_created": 1790212328.5255547,
+      "vllm:prefix_cache_hits_total": 0.0,
+      "vllm:prefix_cache_queries_created": 1790212328.52554,
+      "vllm:prefix_cache_queries_total": 0.0,
+      "vllm:prompt_tokens_created": 1790212328.5255969,
+      "vllm:prompt_tokens_total": 0.0,
+      "vllm:request_decode_time_seconds_bucket": 0.0,
+      "vllm:request_decode_time_seconds_count": 0.0,
+      "vllm:request_decode_time_seconds_created": 1790212328.52647,
+      "vllm:request_decode_time_seconds_sum": 0.0,
+      "vllm:request_generation_tokens_bucket": 0.0,
+      "vllm:request_generation_tokens_count": 0.0,
+      "vllm:request_generation_tokens_created": 1790212328.5257611,
+      "vllm:request_generation_tokens_sum": 0.0,
+      "vllm:request_inference_time_seconds_bucket": 0.0,
+      "vllm:request_inference_time_seconds_count": 0.0,
+      "vllm:request_inference_time_seconds_created": 1790212328.5263538,
+      "vllm:request_inference_time_seconds_sum": 0.0,
+      "vllm:request_max_num_generation_tokens_bucket": 0.0,
+      "vllm:request_max_num_generation_tokens_count": 0.0,
+      "vllm:request_max_num_generation_tokens_created": 1790212328.5258493,
+      "vllm:request_max_num_generation_tokens_sum": 0.0,
+      "vllm:request_params_max_tokens_bucket": 0.0,
+      "vllm:request_params_max_tokens_count": 0.0,
+      "vllm:request_params_max_tokens_created": 1790212328.5259328,
+      "vllm:request_params_max_tokens_sum": 0.0,
+      "vllm:request_params_n_bucket": 0.0,
+      "vllm:request_params_n_count": 0.0,
+      "vllm:request_params_n_created": 1790212328.525881,
+      "vllm:request_params_n_sum": 0.0,
+      "vllm:request_prefill_time_seconds_bucket": 0.0,
+      "vllm:request_prefill_time_seconds_count": 0.0,
+      "vllm:request_prefill_time_seconds_created": 1790212328.5263956,
+      "vllm:request_prefill_time_seconds_sum": 0.0,
+      "vllm:request_prompt_tokens_bucket": 0.0,
+      "vllm:request_prompt_tokens_count": 0.0,
+      "vllm:request_prompt_tokens_created": 1790212328.5257092,
+      "vllm:request_prompt_tokens_sum": 0.0,
+      "vllm:request_queue_time_seconds_bucket": 0.0,
+      "vllm:request_queue_time_seconds_count": 0.0,
+      "vllm:request_queue_time_seconds_created": 1790212328.526308,
+      "vllm:request_queue_time_seconds_sum": 0.0,
+      "vllm:request_success_created": 5370636985.576968,
+      "vllm:request_success_total": 0.0,
+      "vllm:time_per_output_token_seconds_bucket": 0.0,
+      "vllm:time_per_output_token_seconds_count": 0.0,
+      "vllm:time_per_output_token_seconds_created": 1790212328.526169,
+      "vllm:time_per_output_token_seconds_sum": 0.0,
+      "vllm:time_to_first_token_seconds_bucket": 0.0,
+      "vllm:time_to_first_token_seconds_count": 0.0,
+      "vllm:time_to_first_token_seconds_created": 1790212328.5261173,
+      "vllm:time_to_first_token_seconds_sum": 0.0
+    },
+    "status": 200
+  },
+  "server_lifetime_s": 1492.134045465,
+  "server_returncode_after_stop": 0,
+  "state": "finished",
+  "variant": "gptq"
+}

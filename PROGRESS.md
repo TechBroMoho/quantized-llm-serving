@@ -2,14 +2,20 @@
 
 ## Status
 
-Phase 6 paused for a decision (2026-09-23). The AWQ sweep ran
-(`awq-20260923T220125Z`, $1.8688). **4 of its 10 points failed the 5%
-steady-state check** (c=1 once; all three c=256 runs). BF16, GPTQ,
-max-batch and HF were not launched, per the stop rule. The c=256 failures
-come from a two-wave oscillation (period ≈ one E2E), not drift. AWQ peaks at
-c=128 (2,196.8 tokens/s), not c=256. `vllm bench serve` agrees within
-~3% at c=1 and c=64 but reports 23% more throughput at c=256. Cumulative
-spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
+**Phase 6 complete (2026-09-24), stopped at the phase gate.** All
+lifetimes ran on NVIDIA L40S, vLLM 0.10.2, one 512/256-token WikiText-103
+workload. Phase 6 actual **$8.3009** (cap $11, first reads for the last
+runs); cumulative **$20.3659**; nothing running.
+- **Single-user decode:** AWQ **2.35×** BF16 (102.6 vs 43.7 tokens/s;
+  median TPOT 9.75 vs 22.86 ms, 3 runs each).
+- **Peak output tokens/s** (medians of 3):
+  - AWQ 2,196.8 (c=128); GPTQ 2,207.2 (c=128); vLLM BF16 1,957.2 (c=128);
+    HF static 977.0 (c=256, B=128); HF naive 40.1.
+  - **AWQ vs HF naive 54.8×**, vs HF static **2.25×**.
+  - Engine alone (vLLM BF16 vs HF): 48.8× naive, 2.0× static.
+  - Quantization alone at peak (AWQ vs vLLM BF16): 1.12×.
+- Table: `results/perf/phase6/results_table.md`. Max-batch lifetimes and
+  GPTQ c=256 were skipped (budget and time, ADR-022 addendum).
 
 ## Phase log
 
@@ -528,6 +534,51 @@ spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
   1,107.8; c64 2,001.0; c128 2,207.2 / 2,195.2 / 2,209.9 (median
   **2,207.2**). No c=256 (budget cut, ADR-022 addendum).
 
+- **Phase 6, HF static relaunch (run `hf-static-20260924T013433Z`, L40S,
+  $1.438650 first read; 1,922 s lifetime): all 6 points passed.**
+  - OOM probe (`generate()` of 512 + 256 tokens): every candidate fit up to
+    128 (8: 10.0 s, 205 tokens/s … 96: 24.4 s, 1,007 tokens/s; 128: 30.2 s,
+    1,084 tokens/s). **No candidate hit OOM, so B = 128 is the largest
+    *tested* size, not the proven maximum** (SPEC §4 asks for the largest that
+    fits). A larger B might raise HF static's peak somewhat; its probe
+    throughput was still rising slowly.
+  - Plan (ADR-022, T = 30.2 s): cB warmup 60 s / window 305 s; c2B warmup
+    100 s / window 305 s (≈ 10 batch cycles).
+  - Results: c4 125.7, c16 393.6, cB (c=128) 906.5, c2B (c=256) 974.5 /
+    993.8 / 977.0 tokens/s (median **977.0**).
+  - Every point warns on requests/s (edge bound 13–23%), because whole
+    batches of up to 128 complete together. Tokens/s, the primary metric, is
+    unaffected.
+- **Phase 6 acceptance (SPEC §7): met.** All raw results are in
+  `results/perf/phase6/` (per-request `requests.jsonl.gz` per point,
+  summaries, server logs, `nvidia-smi` and `/proc` samples). The cross-check
+  is documented (below). Spend is logged.
+  - Every accepted point passed the 5% steady-state check, the 3× client
+    headroom (worst 4.1×), exact 512/256 usage, the chunk check, zero
+    prefix-cache hits and zero errors.
+  - Failed points stay in the table, marked (AWQ c1 and the first three
+    c256).
+  - **Headline table (medians of passing runs):**
+
+    | | vLLM AWQ | vLLM GPTQ | vLLM BF16 | HF static | HF naive |
+    | --- | ---: | ---: | ---: | ---: | ---: |
+    | Single-user tokens/s (1 / median TPOT, c=1) | 102.6 (3 runs) | 102.8 (1) | 43.7 (3) | — | — |
+    | Peak output tokens/s | 2,196.8 @ c128 | 2,207.2 @ c128 | 1,957.2 @ c128 | 977.0 @ c256 | 40.1 @ c4 |
+    | Peak requests/s | 8.572 | 8.606 | 7.556 | 3.777 | 0.158 |
+    | Weight memory (vLLM log) | 5.7088 GiB | 5.6835 GiB | 15.2683 GiB | — | — |
+    | KV cache (tokens, 1,024 max len) | 240,544 | 240,736 | 170,944 | — | — |
+
+  - **Ratios:**
+    - AWQ decode 2.35× BF16.
+    - Peak tokens/s: AWQ vs HF naive 54.8×, vs HF static 2.25×; BF16 vs HF
+      naive 48.8×, vs static 2.00×.
+    - Requests/s: 54.1× / 2.27× (HF requests/s carries the edge-bound
+      warning).
+    - Quantization at peak: 1.12× (AWQ), 1.13× (GPTQ).
+  - **Cross-check** (`vllm bench serve`, AWQ): c1 +2.1% tokens/s, c64 −0.1%,
+    c256 +23.0%. The c256 gap is explained by arrival pattern: our
+    all-at-once diagnostic gave 2,223.8 tokens/s, within 2.4% of its 2,277.1.
+
 ## Spend log
 
 | Date | Phase | Activity | GPU | Seconds | Cost (Phase 3+: actual) | Running total |
@@ -561,6 +612,12 @@ spend **$14.2542**; Phase 6 $2.189 of its $10 cap; nothing running.
 | 2026-09-24 | 6 | BF16 sweep + c1 and c128 repeats, all passed (`ap-M0EH6Yb26rksfXcKxtsv9v`) | L40S | ≈2,240 | $1.608071 | $17.066435 |
 | 2026-09-24 | 6 | HF naive, all passed (`ap-rZcEliswiLDYYgL0RuUx2L`) | L40S | ≈975 | $0.700659 | $17.767094 |
 | 2026-09-24 | 6 | HF static, failed at startup (point resolution bug) (`ap-YfAYWf7dsuIWowYM1twSeK`) | L40S | ≈38 | $0.027280 | $17.794374 |
+| 2026-09-24 | 6 | GPTQ trimmed (no c256), all passed (`ap-FDnqJCa4CQ7vKLxYKIVg75`) | L40S | ≈1,560 | $1.121412 | $18.915786 |
+| 2026-09-24 | 6 | HF static relaunch, all passed (`ap-FSNm8dgmEFBGmIAphj1loj`) | L40S | ≈2,000 | $1.438650 | $20.354436 |
+
+**Phase 6 actual: $8.3009** (first reads for the last runs; the running
+total above differs by $0.0115 from settling updates to earlier rows) against
+its $11 cap (raised from $10 by Mohammed, ADR-022).
 
 **Phase 5 actual: $10.7004** against its $11.63 cap ($6 plus Phase 4's
 unused $4.73 and Phase 3's unused $0.90, both reallocated by Mohammed;
@@ -664,3 +721,8 @@ the 1 TiB/month included.
   reproduced in 15 reruns (14 alone, 1 full suite), and its message was lost
   to the `tail`. It stays an open flake; the test prints its failure list if
   it recurs. Commits now check make's real exit status.
+- Phase 6: the HF static OOM probe's candidate list stopped at 128, and
+  all candidates fit, so the probe established "fits at 128", not the
+  maximum. A larger B might raise HF static's peak (probe throughput was
+  still rising: 1,007 → 1,084 tokens/s from 96 to 128). The comparison vs
+  HF static is reported with that caveat.
